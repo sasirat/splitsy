@@ -24,9 +24,9 @@ Core total: ~13–18 focused dev-days.
 
 ## Week 1 — Foundations + Design System (M0 + M1)
 
-- [ ] **S1** Monorepo (pnpm + Turbo) + Next.js 16 + Tailwind v4 + lint/format; Git + GitHub
-- [ ] **S2** Deploy empty app → Vercel + create Postgres (Neon) + env wiring
-- [ ] **S3** `design-system` package: Figma tokens (colors, fonts, spacing, radii) + export image assets
+- [x] **S1** Monorepo (pnpm + Turbo) + Next.js 16 + Tailwind v4 + lint/format; Git + GitHub
+- [ ] **S2** Deploy empty app → Vercel + create Postgres (Neon) + env wiring _(skipped for now — deploy later)_
+- [x] **S3** `design-system` package: Figma tokens (colors, fonts, radii) + `/playground` _(image assets deferred to S4–S5)_
 - [ ] **S4** Components pt.1: Button, Avatar/AvatarStack, Pill, Input, Checkbox + MemberRow → `/playground`
 - [ ] **S5** Components pt.2: ReceiptCard (torn edge), ItemRow, TotalDisplay, BottomSheet, DebtorRow, PhoneFrame
 - **Done when:** every component themed and visible at `/playground`; app deploys.
