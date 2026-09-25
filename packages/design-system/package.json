@@ -1,0 +1,14 @@
+{
+  "name": "@splitsy/design-system",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./tokens.css": "./styles/tokens.css"
+  },
+  "files": ["styles", "configs"],
+  "scripts": {
+    "generate": "echo \"[design-system] token generation added in S3\"",
+    "lint": "echo \"[design-system] no lint yet\""
+  }
+}

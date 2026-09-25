@@ -1,0 +1,8 @@
+packages:
+  - apps/*
+  - packages/*
+
+# Skip native postinstall builds we don't need (merged from create-next-app).
+allowBuilds:
+  sharp: false
+  unrs-resolver: false
