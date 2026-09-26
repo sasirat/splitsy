@@ -51,7 +51,7 @@ const radii = [
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className="flex flex-col gap-4">
-      <h2 className="font-mono text-xs uppercase tracking-wide text-muted">{title}</h2>
+      <h2 className="font-mono text-xs uppercase tracking-wide text-muted-foreground">{title}</h2>
       {children}
     </section>
   );
@@ -62,7 +62,7 @@ export default function Playground() {
     <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-12 px-6 py-12">
       <header className="flex flex-col gap-1">
         <h1 className="font-display text-4xl font-black text-primary">Splitsy design system</h1>
-        <p className="font-body text-md text-muted">
+        <p className="font-body text-md text-muted-foreground">
           Tokens generated from Figma · S3.{" "}
           <Link href="/playground/components" className="text-primary underline">
             components
@@ -103,7 +103,7 @@ export default function Playground() {
           <p className="font-body text-lg text-ink">
             Judson — the app-wide font. <span className="font-bold">Bold works too.</span> ฿1,350
           </p>
-          <p className="font-mono text-2xs uppercase tracking-wide text-muted">
+          <p className="font-mono text-2xs uppercase tracking-wide text-muted-foreground">
             IBM Plex Mono — terms, privacy, the usual
           </p>
         </div>
@@ -114,7 +114,7 @@ export default function Playground() {
           {typeScale.map((t) => (
             <div key={t.cls} className="flex items-baseline justify-between gap-4">
               <span className={`${t.cls} font-body text-ink`}>Aa ฿1,350</span>
-              <span className="font-mono text-2xs text-muted">{t.name}</span>
+              <span className="font-mono text-2xs text-muted-foreground">{t.name}</span>
             </div>
           ))}
         </div>
@@ -125,7 +125,7 @@ export default function Playground() {
           {radii.map((r) => (
             <div key={r.cls} className="flex flex-col items-center gap-2">
               <div className={`${r.cls} size-16 bg-primary`} />
-              <span className="font-mono text-2xs text-muted">{r.name}</span>
+              <span className="font-mono text-2xs text-muted-foreground">{r.name}</span>
             </div>
           ))}
         </div>

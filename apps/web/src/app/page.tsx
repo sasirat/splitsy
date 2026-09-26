@@ -6,7 +6,7 @@ export default function Home() {
       <div className="flex flex-col items-center gap-1 rounded-2xl bg-paper px-10 py-8 shadow-card">
         <h1 className="font-display text-6xl font-black text-primary">Splitsy</h1>
         <p className="font-script text-2xl text-primary">Split the bill, keep the vibe.</p>
-        <p className="font-body text-sm text-muted">Nobody does mental math.</p>
+        <p className="font-body text-sm text-muted-foreground">Nobody does mental math.</p>
       </div>
 
       <Link

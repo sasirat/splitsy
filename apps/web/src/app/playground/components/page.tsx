@@ -14,7 +14,7 @@ import { Pill } from "@/components/ui/pill";
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className="flex flex-col gap-4">
-      <h2 className="font-mono text-xs uppercase tracking-wide text-muted">{title}</h2>
+      <h2 className="font-mono text-xs uppercase tracking-wide text-muted-foreground">{title}</h2>
       <div className="flex flex-wrap items-center gap-4 rounded-xl bg-paper p-6 shadow-card">
         {children}
       </div>
@@ -24,6 +24,21 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 
 const MEMBERS = ["Nan", "Tee", "Mook", "Ploy"] as const;
 
+/** Split a whole-baht total evenly, distributing the remainder so shares sum
+ *  exactly to the total (the first members get the extra ฿1). */
+function splitEvenly(total: number, names: readonly string[]): Record<string, number> {
+  const out: Record<string, number> = {};
+  const n = names.length;
+  if (n === 0) return out;
+  const base = Math.floor(total / n);
+  let remainder = total - base * n;
+  for (const name of names) {
+    out[name] = base + (remainder > 0 ? 1 : 0);
+    if (remainder > 0) remainder -= 1;
+  }
+  return out;
+}
+
 export default function ComponentsPlayground() {
   const [checked, setChecked] = React.useState(true);
   const [split, setSplit] = React.useState<Record<string, boolean>>({
@@ -32,14 +47,14 @@ export default function ComponentsPlayground() {
     Mook: false,
     Ploy: false,
   });
-  const count = MEMBERS.filter((m) => split[m]).length;
-  const perHead = count > 0 ? Math.round(390 / count) : 0;
+  const sharers = MEMBERS.filter((m) => split[m]);
+  const shares = splitEvenly(390, sharers);
 
   return (
     <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-12 px-6 py-12">
       <header className="flex flex-col gap-1">
         <h1 className="font-display text-4xl font-black text-primary">Components</h1>
-        <p className="font-body text-md text-muted">
+        <p className="font-body text-md text-muted-foreground">
           shadcn/ui + Splitsy tokens · S4.{" "}
           <Link href="/playground" className="text-primary underline">
             tokens
@@ -109,8 +124,8 @@ export default function ComponentsPlayground() {
       </Section>
 
       <section className="flex flex-col gap-4">
-        <h2 className="font-mono text-xs uppercase tracking-wide text-muted">
-          Member rows · ฿390 split {count} way{count === 1 ? "" : "s"}
+        <h2 className="font-mono text-xs uppercase tracking-wide text-muted-foreground">
+          Member rows · ฿390 split {sharers.length} way{sharers.length === 1 ? "" : "s"}
         </h2>
         <div className="overflow-hidden rounded-xl border border-primary bg-white">
           {MEMBERS.map((m) => (
@@ -118,7 +133,7 @@ export default function ComponentsPlayground() {
               key={m}
               name={m}
               initials={m.charAt(0)}
-              amount={split[m] ? perHead : 0}
+              amount={split[m] ? (shares[m] ?? 0) : 0}
               checked={Boolean(split[m])}
               onCheckedChange={(c) => setSplit((s) => ({ ...s, [m]: Boolean(c) }))}
             />

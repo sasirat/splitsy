@@ -5,7 +5,8 @@ import { cn } from "cn";
 import { Avatar } from "./avatar";
 import { Checkbox } from "./checkbox";
 
-/** A "who's splitting this?" row: checkbox + avatar + name + per-head amount. */
+/** A "who's splitting this?" row: checkbox + avatar + name + per-head amount.
+ *  The whole row is a <label>, so tapping anywhere toggles the checkbox. */
 function MemberRow({
   name,
   initials,
@@ -22,23 +23,28 @@ function MemberRow({
   className?: string;
 }) {
   return (
-    <div
+    <label
       className={cn(
-        "flex items-center justify-between border-b border-divider p-4 last:border-b-0",
+        "flex cursor-pointer items-center justify-between border-b border-divider p-4 last:border-b-0",
         className,
       )}
     >
-      <div className="flex items-center gap-3">
+      <span className="flex items-center gap-3">
         <Checkbox checked={checked} onCheckedChange={onCheckedChange} />
         <Avatar size="lg" tone="pink">
           {initials}
         </Avatar>
         <span className="font-body text-base text-ink">{name}</span>
-      </div>
-      <span className={cn("font-body text-base font-bold", amount > 0 ? "text-ink" : "text-muted")}>
+      </span>
+      <span
+        className={cn(
+          "font-body text-base font-bold",
+          amount > 0 ? "text-ink" : "text-muted-foreground",
+        )}
+      >
         ฿{amount}
       </span>
-    </div>
+    </label>
   );
 }
 

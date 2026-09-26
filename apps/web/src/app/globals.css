@@ -9,9 +9,9 @@
 /*
  * Map shadcn/ui's semantic tokens onto the Splitsy palette.
  * Splitsy is light-only — there is no dark theme.
- * `--color-primary`, `--color-border`, `--color-muted` are already provided by
- * the design-system theme, so we don't remap them here (only the raw vars that
- * shadcn components reference directly via var()).
+ * `--color-primary`, `--color-border`, `--color-muted`, `--color-muted-foreground`
+ * are already provided by the design-system theme, so we don't remap those here —
+ * only the raw vars that shadcn components reference directly via var().
  */
 :root {
   --background: var(--color-cream);
@@ -25,7 +25,7 @@
   --secondary: var(--color-blush);
   --secondary-foreground: var(--color-primary);
   --muted: var(--color-muted);
-  --muted-foreground: var(--color-muted);
+  --muted-foreground: var(--color-muted-foreground);
   --accent: var(--color-pink);
   --accent-foreground: var(--color-primary);
   --destructive: var(--color-primary);
@@ -46,7 +46,6 @@
   --color-primary-foreground: var(--primary-foreground);
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
-  --color-muted-foreground: var(--muted-foreground);
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);

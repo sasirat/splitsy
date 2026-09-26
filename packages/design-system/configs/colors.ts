@@ -3,6 +3,9 @@
  * Single source of truth. After editing, run:
  *   pnpm --filter @splitsy/design-system generate
  * to regenerate styles/theme.css.
+ *
+ * Token names follow shadcn/ui semantics where they overlap:
+ *   `muted` = a subtle surface, `muted-foreground` = secondary text.
  */
 export const colors = {
   /** berry red — primary buttons, key text, borders, wordmark, checkbox fill */
@@ -16,10 +19,11 @@ export const colors = {
   paper: "#faf9f0", // cards, sheets
   cream: "#fdfbf2", // lighter off-white / page base
   white: "#ffffff",
+  muted: "#efe9dd", // subtle surface (shadcn `bg-muted`)
 
   /* text */
   ink: "#1c1b18", // primary text
-  muted: "#8c8370", // secondary text
+  "muted-foreground": "#8c8370", // secondary text (shadcn `text-muted-foreground`)
   sky: "#bae2ff", // uppercase labels on dark scenes
 
   /* lines */
