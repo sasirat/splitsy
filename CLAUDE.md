@@ -26,6 +26,24 @@ See [ROADMAP.md](./ROADMAP.md) for the build plan (currently in **S4**).
 - Settlement: display a **PromptPay** bank/mobile number (no QR).
 - Do **not** modify or copy from `~/source/larngear/cu-cpmo` (former employer's code — reference only).
 
+## File structure (feature modules)
+
+Organize by **feature, not by kind**:
+
+- `app/` — routes only; keep pages thin and compose them from modules.
+- `modules/<feature>/` — self-contained feature code:
+  - `components/` — feature UI (built from shared primitives)
+  - `hooks/` — feature hooks
+  - `actions.ts` — server actions / mutations
+  - `types.ts` — feature types
+  - `index.ts` — optional barrel
+  - Planned modules: `bills`, `items`, `groups`, `settlement`, `auth`.
+- `components/ui/` — shared, generic primitives (Button, Avatar, BottomSheet, PhoneFrame…).
+- `lib/` — framework-agnostic helpers (`cn`, utils).
+
+Rule of thumb: if it's specific to one feature it lives in that module; if it's
+reused across features and carries no domain logic, it's a `components/ui` primitive.
+
 ## Backend (later phases)
 
 Next.js Route Handlers / Server Actions + Prisma + PostgreSQL; Clerk (Google) auth.
