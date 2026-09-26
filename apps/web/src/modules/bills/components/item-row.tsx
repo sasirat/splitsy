@@ -1,0 +1,43 @@
+import type * as React from "react";
+import { cn } from "cn";
+import { Avatar } from "@/components/ui/avatar";
+import { AvatarStack } from "@/components/ui/avatar-stack";
+
+type Sharer = { initials: string };
+
+/** One line on the receipt: name + price, plus who split it and the per-head hint. */
+function ItemRow({
+  name,
+  price,
+  sharers = [],
+  className,
+}: {
+  name: string;
+  price: number;
+  sharers?: Sharer[];
+  className?: string;
+}) {
+  const each = sharers.length > 0 ? Math.round(price / sharers.length) : price;
+  return (
+    <div className={cn("flex flex-col gap-2 px-5 py-4", className)}>
+      <div className="flex items-center justify-between font-body text-md font-bold text-ink">
+        <span>{name}</span>
+        <span>฿{price.toLocaleString()}</span>
+      </div>
+      {sharers.length > 0 ? (
+        <div className="flex items-center gap-1.5">
+          <AvatarStack>
+            {sharers.map((s, i) => (
+              <Avatar key={`${s.initials}-${i}`} size="sm" tone="pink">
+                {s.initials}
+              </Avatar>
+            ))}
+          </AvatarStack>
+          <span className="font-body text-2xs text-primary">฿{each.toLocaleString()} EACH</span>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+export { ItemRow };

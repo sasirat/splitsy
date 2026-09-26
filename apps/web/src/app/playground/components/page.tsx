@@ -10,6 +10,9 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { MemberRow } from "@/components/ui/member-row";
 import { Pill } from "@/components/ui/pill";
+import { ItemRow } from "@/modules/bills/components/item-row";
+import { ReceiptCard } from "@/modules/bills/components/receipt-card";
+import { TotalDisplay } from "@/modules/bills/components/total-display";
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -138,6 +141,33 @@ export default function ComponentsPlayground() {
               onCheckedChange={(c) => setSplit((s) => ({ ...s, [m]: Boolean(c) }))}
             />
           ))}
+        </div>
+      </section>
+
+      <section className="flex flex-col gap-4">
+        <h2 className="font-mono text-xs uppercase tracking-wide text-muted-foreground">
+          Receipt · modules/bills
+        </h2>
+        <div className="rounded-2xl bg-scene-green p-6 pt-8">
+          <ReceiptCard title="Ramen night" date="16/09/2569 · THONGLOR" subtotal={1170}>
+            <ItemRow
+              name="Tonkotsu ramen ×2"
+              price={640}
+              sharers={[{ initials: "SC" }, { initials: "KK" }]}
+            />
+            <ItemRow name="Gyoza" price={120} sharers={[{ initials: "SC" }, { initials: "KK" }]} />
+            <ItemRow
+              name="Hoegaarden ×2"
+              price={260}
+              sharers={[{ initials: "SC" }, { initials: "KK" }]}
+            />
+            <ItemRow
+              name="Matcha soft serve"
+              price={150}
+              sharers={[{ initials: "SC" }, { initials: "KK" }]}
+            />
+          </ReceiptCard>
+          <TotalDisplay amount={1350} className="pt-8" />
         </div>
       </section>
     </main>
