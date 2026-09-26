@@ -4,7 +4,8 @@
   "private": true,
   "type": "module",
   "exports": {
-    "./theme.css": "./styles/theme.css"
+    "./theme.css": "./styles/theme.css",
+    "./typography.css": "./styles/typography.css"
   },
   "files": ["styles", "configs"],
   "scripts": {

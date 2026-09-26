@@ -51,7 +51,7 @@ const radii = [
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className="flex flex-col gap-4">
-      <h2 className="font-mono text-xs uppercase tracking-wide text-muted-foreground">{title}</h2>
+      <h2 className="text-micro text-muted-foreground">{title}</h2>
       {children}
     </section>
   );

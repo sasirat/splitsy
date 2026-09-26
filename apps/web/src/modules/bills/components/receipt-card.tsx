@@ -47,15 +47,15 @@ function ReceiptCard({
       />
       <div className="bg-paper px-4 shadow-card">
         <div className="flex flex-col items-center gap-1 px-5 pt-7 pb-4 text-center text-primary">
-          <p className="font-body text-2xl font-bold leading-none">{title}</p>
-          {date ? <p className="font-body text-2xs">{date}</p> : null}
+          <p className="text-h3 leading-none">{title}</p>
+          {date ? <p className="text-caption">{date}</p> : null}
         </div>
         <ul className="divide-y divide-dashed divide-primary/50 border-y border-dashed border-primary/50">
           {children}
         </ul>
         <div className="flex items-center justify-between px-5 pt-4 pb-5">
-          <span className="font-body text-sm font-bold uppercase text-ink">Subtotal</span>
-          <span className="font-body text-lg font-bold text-ink">{formatBaht(subtotal)}</span>
+          <span className="text-label text-ink">Subtotal</span>
+          <span className="text-amount text-lg text-ink">{formatBaht(subtotal)}</span>
         </div>
       </div>
       <TornEdge className="-mt-px" />

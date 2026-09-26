@@ -17,7 +17,7 @@ import { TotalDisplay } from "@/modules/bills/components/total-display";
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className="flex flex-col gap-4">
-      <h2 className="font-mono text-xs uppercase tracking-wide text-muted-foreground">{title}</h2>
+      <h2 className="text-micro text-muted-foreground">{title}</h2>
       <div className="flex flex-wrap items-center gap-4 rounded-xl bg-paper p-6 shadow-card">
         {children}
       </div>
@@ -127,7 +127,7 @@ export default function ComponentsPlayground() {
       </Section>
 
       <section className="flex flex-col gap-4">
-        <h2 className="font-mono text-xs uppercase tracking-wide text-muted-foreground">
+        <h2 className="text-micro text-muted-foreground">
           Member rows · ฿390 split {sharers.length} way{sharers.length === 1 ? "" : "s"}
         </h2>
         <div className="overflow-hidden rounded-xl border border-primary bg-white">
@@ -145,7 +145,7 @@ export default function ComponentsPlayground() {
       </section>
 
       <section className="flex flex-col gap-4">
-        <h2 className="font-mono text-xs uppercase tracking-wide text-muted-foreground">
+        <h2 className="text-micro text-muted-foreground">
           Receipt · modules/bills
         </h2>
         <div className="rounded-2xl bg-scene-green p-6 pt-8">

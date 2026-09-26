@@ -13,9 +13,9 @@ function TotalDisplay({
   className?: string;
 }) {
   return (
-    <div className={cn("flex items-center justify-between px-5 font-body text-white", className)}>
+    <div className={cn("flex items-center justify-between px-5 text-white", className)}>
       <span className="text-md font-bold uppercase">{label}</span>
-      <span className="text-5xl font-bold">{formatBaht(amount)}</span>
+      <span className="text-amount text-5xl">{formatBaht(amount)}</span>
     </div>
   );
 }

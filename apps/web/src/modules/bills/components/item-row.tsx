@@ -22,7 +22,7 @@ function ItemRow({
   const each = sharers.length > 0 ? Math.round(price / sharers.length) : price;
   return (
     <li className={cn("flex flex-col gap-2 px-5 py-4", className)}>
-      <div className="flex items-center justify-between font-body text-md font-bold text-ink">
+      <div className="flex items-center justify-between text-amount text-md text-ink">
         <span>{name}</span>
         <span>{formatBaht(price)}</span>
       </div>
@@ -35,7 +35,7 @@ function ItemRow({
               </Avatar>
             ))}
           </AvatarStack>
-          <span className="font-body text-2xs text-primary">{formatBaht(each)} EACH</span>
+          <span className="text-caption text-primary">{formatBaht(each)} EACH</span>
         </div>
       ) : null}
     </li>

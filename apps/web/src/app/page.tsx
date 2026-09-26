@@ -4,8 +4,8 @@ export default function Home() {
   return (
     <main className="flex flex-1 flex-col items-center justify-center gap-8 bg-scene-blue px-6">
       <div className="flex flex-col items-center gap-1 rounded-2xl bg-paper px-10 py-8 shadow-card">
-        <h1 className="font-display text-6xl font-black text-primary">Splitsy</h1>
-        <p className="font-script text-2xl text-primary">Split the bill, keep the vibe.</p>
+        <h1 className="text-wordmark text-primary">Splitsy</h1>
+        <p className="text-script text-primary">Split the bill, keep the vibe.</p>
         <p className="font-body text-sm text-muted-foreground">Nobody does mental math.</p>
       </div>
 

@@ -3,6 +3,7 @@
 @import "shadcn/tailwind.css";
 /* Our design system is imported LAST so its tokens win any name collisions. */
 @import "@splitsy/design-system/theme.css";
+@import "@splitsy/design-system/typography.css";
 
 @custom-variant dark (&:is(.dark *));
 
