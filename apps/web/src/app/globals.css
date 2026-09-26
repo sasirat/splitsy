@@ -1,5 +1,65 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+/* Our design system is imported LAST so its tokens win any name collisions. */
 @import "@splitsy/design-system/theme.css";
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * Map shadcn/ui's semantic tokens onto the Splitsy palette.
+ * Splitsy is light-only — there is no dark theme.
+ * `--color-primary`, `--color-border`, `--color-muted` are already provided by
+ * the design-system theme, so we don't remap them here (only the raw vars that
+ * shadcn components reference directly via var()).
+ */
+:root {
+  --background: var(--color-cream);
+  --foreground: var(--color-ink);
+  --card: var(--color-paper);
+  --card-foreground: var(--color-ink);
+  --popover: var(--color-paper);
+  --popover-foreground: var(--color-ink);
+  --primary: var(--color-primary);
+  --primary-foreground: var(--color-white);
+  --secondary: var(--color-blush);
+  --secondary-foreground: var(--color-primary);
+  --muted: var(--color-muted);
+  --muted-foreground: var(--color-muted);
+  --accent: var(--color-pink);
+  --accent-foreground: var(--color-primary);
+  --destructive: var(--color-primary);
+  --destructive-foreground: var(--color-white);
+  --border: var(--color-border);
+  --input: var(--color-border);
+  --ring: var(--color-primary);
+}
+
+@theme inline {
+  --font-sans: var(--font-judson);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+}
 
 html {
   color-scheme: light;

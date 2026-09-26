@@ -64,8 +64,12 @@ export default function Playground() {
         <h1 className="font-display text-4xl font-black text-primary">Splitsy design system</h1>
         <p className="font-body text-md text-muted">
           Tokens generated from Figma · S3.{" "}
+          <Link href="/playground/components" className="text-primary underline">
+            components
+          </Link>
+          {" · "}
           <Link href="/" className="text-primary underline">
-            ← home
+            home
           </Link>
         </p>
       </header>
