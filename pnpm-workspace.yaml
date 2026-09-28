@@ -2,7 +2,11 @@ packages:
   - apps/*
   - packages/*
 
-# Skip native postinstall builds we don't need (merged from create-next-app).
+# Native postinstall builds: skip the ones create-next-app pulled in that we
+# don't need; allow Prisma's schema engine (migrate) and esbuild (tsx seed).
 allowBuilds:
+  "@prisma/engines": true
+  esbuild: true
+  prisma: true
   sharp: false
   unrs-resolver: false

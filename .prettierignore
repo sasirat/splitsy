@@ -4,3 +4,4 @@ dist
 out
 .turbo
 pnpm-lock.yaml
+apps/web/src/generated

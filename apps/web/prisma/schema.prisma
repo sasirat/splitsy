@@ -1,0 +1,178 @@
+// Splitsy data model. Money is stored as integer satang (฿1 = 100 satang) —
+// never floats. Connection URLs live in prisma.config.ts (Prisma 7).
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── Users & groups ─────────────────────────────────────────────────────────
+
+model User {
+  id          String   @id @default(cuid())
+  clerkId     String   @unique
+  email       String   @unique
+  displayName String?
+  /// PromptPay mobile number or national/tax ID shown at settle-up.
+  promptPayId String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  memberships        GroupMember[]
+  groupsCreated      Group[]       @relation("GroupCreatedBy")
+  billsCreated       Bill[]        @relation("BillCreatedBy")
+  billsPaid          Bill[]        @relation("BillPayer")
+  splits             ItemSplit[]
+  settlementsOwed    Settlement[]  @relation("SettlementFrom")
+  settlementsDue     Settlement[]  @relation("SettlementTo")
+  inviteTokensIssued InviteToken[]
+}
+
+/// AD_HOC groups are created implicitly by a quick bill and stay hidden;
+/// PERSISTENT groups are named, reusable, and shown to members (S14).
+enum GroupType {
+  AD_HOC
+  PERSISTENT
+}
+
+model Group {
+  id          String    @id @default(cuid())
+  name        String
+  type        GroupType @default(AD_HOC)
+  createdById String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  createdBy    User          @relation("GroupCreatedBy", fields: [createdById], references: [id])
+  members      GroupMember[]
+  bills        Bill[]
+  inviteTokens InviteToken[]
+}
+
+enum GroupRole {
+  OWNER
+  MEMBER
+}
+
+/// Membership is the single access-control check: you can see a bill iff
+/// you're a member of its group.
+model GroupMember {
+  groupId  String
+  userId   String
+  role     GroupRole @default(MEMBER)
+  joinedAt DateTime  @default(now())
+
+  group Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id])
+
+  @@id([groupId, userId])
+  @@index([userId])
+}
+
+// ─── Bills & items ──────────────────────────────────────────────────────────
+
+enum BillStatus {
+  OPEN
+  SETTLING
+  SETTLED
+}
+
+model Bill {
+  id          String     @id @default(cuid())
+  title       String
+  status      BillStatus @default(OPEN)
+  groupId     String
+  /// Who fronted the money — everyone else settles up with them.
+  payerId     String
+  createdById String
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  group       Group        @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  payer       User         @relation("BillPayer", fields: [payerId], references: [id])
+  createdBy   User         @relation("BillCreatedBy", fields: [createdById], references: [id])
+  items       Item[]
+  settlements Settlement[]
+
+  @@index([groupId])
+}
+
+model Item {
+  id          String   @id @default(cuid())
+  billId      String
+  name        String
+  priceSatang Int
+  /// Display order on the receipt.
+  position    Int
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  bill   Bill        @relation(fields: [billId], references: [id], onDelete: Cascade)
+  splits ItemSplit[]
+
+  @@index([billId, position])
+}
+
+/// A user's self-reported share of an item. `shares` weights uneven splits
+/// (e.g. 2 of 3 beers); an even split is everyone at 1.
+model ItemSplit {
+  itemId String
+  userId String
+  shares Int    @default(1)
+
+  item Item @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id])
+
+  @@id([itemId, userId])
+  @@index([userId])
+}
+
+// ─── Settlement & invites ───────────────────────────────────────────────────
+
+enum SettlementStatus {
+  PENDING
+  PAID
+}
+
+/// A simplified debt: `from` owes `to` for a bill. Not cascaded — a bill
+/// with settlement records can't be deleted by accident.
+model Settlement {
+  id           String           @id @default(cuid())
+  billId       String
+  fromUserId   String
+  toUserId     String
+  amountSatang Int
+  status       SettlementStatus @default(PENDING)
+  paidAt       DateTime?
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+
+  bill     Bill @relation(fields: [billId], references: [id])
+  fromUser User @relation("SettlementFrom", fields: [fromUserId], references: [id])
+  toUser   User @relation("SettlementTo", fields: [toUserId], references: [id])
+
+  @@index([billId])
+  @@index([fromUserId])
+  @@index([toUserId])
+}
+
+/// Share-link invite into a group. `token` is a random, unguessable string
+/// generated server-side.
+model InviteToken {
+  id          String    @id @default(cuid())
+  token       String    @unique
+  groupId     String
+  createdById String
+  expiresAt   DateTime
+  revokedAt   DateTime?
+  createdAt   DateTime  @default(now())
+
+  group     Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  createdBy User  @relation(fields: [createdById], references: [id])
+
+  @@index([groupId])
+}
