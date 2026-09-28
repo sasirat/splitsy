@@ -16,7 +16,8 @@ function BottomSheet({
 }: {
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
-  title?: string;
+  /** Required — provides the dialog's accessible name. */
+  title: string;
   footer?: React.ReactNode;
   children?: React.ReactNode;
   className?: string;
@@ -32,14 +33,12 @@ function BottomSheet({
           )}
         >
           <div aria-hidden className="mx-auto mb-2 h-1 w-10 shrink-0 rounded-full bg-border" />
-          {title ? (
-            <div className="flex shrink-0 items-center justify-between px-6 pt-2 pb-4">
-              <Dialog.Title className="text-h2 text-ink">{title}</Dialog.Title>
-              <Dialog.Close className="font-body text-sm text-muted-foreground uppercase underline outline-none">
-                Cancel
-              </Dialog.Close>
-            </div>
-          ) : null}
+          <div className="flex shrink-0 items-center justify-between px-6 pt-2 pb-4">
+            <Dialog.Title className="text-h2 text-ink">{title}</Dialog.Title>
+            <Dialog.Close className="font-body text-sm text-muted-foreground uppercase underline outline-none">
+              Cancel
+            </Dialog.Close>
+          </div>
           <div className="flex-1 overflow-y-auto px-6">{children}</div>
           {footer ? <div className="shrink-0 px-6 pt-4 pb-6">{footer}</div> : null}
         </Dialog.Popup>
