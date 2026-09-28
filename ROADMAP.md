@@ -28,7 +28,7 @@ Core total: ~13–18 focused dev-days.
 - [ ] **S2** Deploy empty app → Vercel + create Postgres (Neon) + env wiring _(skipped for now — deploy later)_
 - [x] **S3** `design-system` package: Figma tokens (colors, fonts, radii) + `/playground` _(image assets deferred to S4–S5)_
 - [x] **S4** Components pt.1 on shadcn/ui: Button, Avatar/AvatarStack, Pill, Badge, Input, Checkbox + MemberRow → `/playground/components`
-- [ ] **S5** Components pt.2: ReceiptCard (torn edge), ItemRow, TotalDisplay, BottomSheet, DebtorRow, PhoneFrame
+- [x] **S5** Components pt.2: ReceiptCard (torn edge), ItemRow, TotalDisplay, BottomSheet, DebtorRow, PhoneFrame
 - **Done when:** every component themed and visible at `/playground`; app deploys.
 
 ## Week 2 — Data model + backend + start slice (M2 → M3)

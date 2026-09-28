@@ -5,14 +5,17 @@ import * as React from "react";
 import { Avatar } from "@/components/ui/avatar";
 import { AvatarStack } from "@/components/ui/avatar-stack";
 import { Badge } from "@/components/ui/badge";
+import { BottomSheet } from "@/components/ui/bottom-sheet";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { MemberRow } from "@/components/ui/member-row";
+import { PhoneFrame } from "@/components/ui/phone-frame";
 import { Pill } from "@/components/ui/pill";
 import { ItemRow } from "@/modules/bills/components/item-row";
 import { ReceiptCard } from "@/modules/bills/components/receipt-card";
 import { TotalDisplay } from "@/modules/bills/components/total-display";
+import { DebtorRow } from "@/modules/settlement/components/debtor-row";
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -49,6 +52,11 @@ export default function ComponentsPlayground() {
     Tee: true,
     Mook: false,
     Ploy: false,
+  });
+  const [sheetOpen, setSheetOpen] = React.useState(false);
+  const [sheetSplit, setSheetSplit] = React.useState<Record<string, boolean>>({
+    Nan: true,
+    Tee: true,
   });
   const sharers = MEMBERS.filter((m) => split[m]);
   const shares = splitEvenly(390, sharers);
@@ -168,6 +176,59 @@ export default function ComponentsPlayground() {
             />
           </ReceiptCard>
           <TotalDisplay amount={1350} className="pt-8" />
+        </div>
+      </section>
+
+      <Section title="Phone frame · components/ui">
+        <PhoneFrame
+          scene="green"
+          className="h-[260px] min-h-0 items-center justify-center gap-2 rounded-2xl"
+        >
+          <span className="text-h3 text-white">Scene: green</span>
+          <span className="text-caption text-white/80">430px centered · full-bleed on phones</span>
+        </PhoneFrame>
+      </Section>
+
+      <Section title="Bottom sheet · components/ui">
+        <Button onClick={() => setSheetOpen(true)}>Open sheet</Button>
+        <BottomSheet
+          open={sheetOpen}
+          onOpenChange={setSheetOpen}
+          title="Add item"
+          footer={
+            <Button variant="solid" size="lg" className="w-full" onClick={() => setSheetOpen(false)}>
+              Add item
+            </Button>
+          }
+        >
+          <div className="flex flex-col gap-4 pb-2">
+            <div className="flex gap-3">
+              <Input placeholder="Item name" className="flex-1" />
+              <Input placeholder="0" inputMode="numeric" className="w-24 text-center" />
+            </div>
+            <span className="text-label text-ink">Who&apos;s splitting this?</span>
+            <div className="overflow-hidden rounded-xl border border-primary bg-white">
+              {(["Nan", "Tee"] as const).map((m) => (
+                <MemberRow
+                  key={m}
+                  name={m}
+                  initials={m.charAt(0)}
+                  amount={sheetSplit[m] ? 195 : 0}
+                  checked={Boolean(sheetSplit[m])}
+                  onCheckedChange={(c) => setSheetSplit((s) => ({ ...s, [m]: Boolean(c) }))}
+                />
+              ))}
+            </div>
+          </div>
+        </BottomSheet>
+      </Section>
+
+      <section className="flex flex-col gap-4">
+        <h2 className="text-micro text-muted-foreground">Debtor rows · modules/settlement</h2>
+        <div className="overflow-hidden rounded-xl border border-primary bg-white">
+          <DebtorRow name="Tee" initials="T" amount={235} status="Waiting for slip" state="owe" />
+          <DebtorRow name="Mook" initials="M" amount={200} status="Settle verified" state="paid" />
+          <DebtorRow name="Ploy" initials="P" amount={160} status="Waiting for slip" state="owe" />
         </div>
       </section>
     </main>
