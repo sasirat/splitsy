@@ -6,6 +6,7 @@ import { useState, useTransition, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PhoneFrame } from "@/components/ui/phone-frame";
+import { callAction } from "@/lib/call-action";
 import { updateDisplayName } from "../actions";
 
 /** "Who's at the table?" — pick the name friends see on every item you claim.
@@ -19,7 +20,7 @@ function OnboardingScreen({ currentName }: { currentName: string | null }) {
     event.preventDefault();
     const displayName = String(new FormData(event.currentTarget).get("displayName") ?? "");
     startTransition(async () => {
-      const result = await updateDisplayName({ displayName });
+      const result = await callAction(() => updateDisplayName({ displayName }));
       if (!result.ok) return setError(result.error);
       router.push("/");
     });

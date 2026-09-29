@@ -6,6 +6,7 @@ import { useState, useTransition, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Pill } from "@/components/ui/pill";
+import { callAction } from "@/lib/call-action";
 import { createBill } from "../actions";
 
 const QUICK_PICKS = [
@@ -25,7 +26,7 @@ function CreateBillForm({ date, time }: { date: string; time: string }) {
   function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     startTransition(async () => {
-      const result = await createBill({ title });
+      const result = await callAction(() => createBill({ title }));
       if (!result.ok) return setError(result.error);
       router.push(`/bills/${result.billId}`);
     });

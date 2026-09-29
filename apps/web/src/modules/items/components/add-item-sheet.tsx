@@ -5,6 +5,7 @@ import { BottomSheet } from "@/components/ui/bottom-sheet";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { firstIssue } from "@/lib/action-result";
+import { callAction } from "@/lib/call-action";
 import { addItem } from "../actions";
 import { addItemInput } from "../schema";
 
@@ -52,7 +53,7 @@ function AddItemSheet({
     nameRef.current?.focus();
     startTransition(async () => {
       onOptimisticAdd({ name: parsed.data.name, priceSatang: parsed.data.price });
-      const result = await addItem(input);
+      const result = await callAction(() => addItem(input));
       if (!result.ok) onError(`Couldn't add "${parsed.data.name}": ${result.error}`);
     });
   }
