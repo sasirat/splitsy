@@ -7,8 +7,8 @@ import { requireUser } from "@/server/auth";
 import { getDb } from "@/server/db";
 import { addItemInput, type AddItemInput } from "./schema";
 
-/** Append an item to a bill the current user can access. It starts unclaimed —
- *  people tick what they had in S11. */
+/** Append an item to an open bill the current user can access. It starts
+ *  unclaimed — people tick what they had in S11. */
 export async function addItem(input: AddItemInput): Promise<ActionResult<{ itemId: string }>> {
   const user = await requireUser();
   const parsed = addItemInput.safeParse(input);
@@ -17,6 +17,10 @@ export async function addItem(input: AddItemInput): Promise<ActionResult<{ itemI
 
   const bill = await findAccessibleBill(billId, user.id);
   if (!bill) return { ok: false, error: "Bill not found" };
+  // Once settling starts, amounts are final — no new items.
+  if (bill.status !== "OPEN") {
+    return { ok: false, error: "This bill is settling up — items are locked" };
+  }
 
   const db = getDb();
   const last = await db.item.findFirst({

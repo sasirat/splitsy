@@ -10,6 +10,7 @@ function BottomSheet({
   open,
   onOpenChange,
   title,
+  closeLabel = "Cancel",
   footer,
   children,
   className,
@@ -18,6 +19,8 @@ function BottomSheet({
   onOpenChange?: (open: boolean) => void;
   /** Required — provides the dialog's accessible name. */
   title: string;
+  /** Text of the top-right close link, e.g. "Done" for repeat-entry sheets. */
+  closeLabel?: string;
   footer?: React.ReactNode;
   children?: React.ReactNode;
   className?: string;
@@ -36,7 +39,7 @@ function BottomSheet({
           <div className="flex shrink-0 items-center justify-between px-6 pt-2 pb-4">
             <Dialog.Title className="text-h2 text-ink">{title}</Dialog.Title>
             <Dialog.Close className="font-body text-sm text-muted-foreground uppercase underline outline-none">
-              Cancel
+              {closeLabel}
             </Dialog.Close>
           </div>
           <div className="flex-1 overflow-y-auto px-6">{children}</div>

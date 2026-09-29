@@ -111,6 +111,17 @@ describe("addItem + getBill", () => {
     });
   });
 
+  it("refuses new items once the bill is no longer open", async () => {
+    const billId = await newBill();
+    await getDb().bill.update({ where: { id: billId }, data: { status: "SETTLING" } });
+
+    expect(await addItem({ billId, name: "Late snack", price: "40" })).toEqual({
+      ok: false,
+      error: "This bill is settling up — items are locked",
+    });
+    expect(await getDb().item.count({ where: { billId } })).toBe(0);
+  });
+
   it("rejects a bad price with a message", async () => {
     const billId = await newBill();
     expect(await addItem({ billId, name: "Som tam", price: "abc" })).toEqual({

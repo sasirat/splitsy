@@ -37,7 +37,7 @@ Core total: ~13–18 focused dev-days.
 - [x] **S7** Dev sign-in (tap a seeded user, dev-only) + protected routes; login screen from Figma _(Clerk moved to S14b)_
 - [x] **S8** Server Actions: create bill, fetch bill, add item (+ split math, Vitest unit + DB tests)
 - [x] **S9** Onboarding "name" + bills list + create-bill wired to DB; bill number + Thai date; read-only bill page
-- [ ] **S10** Add-items screen wired (list + add, persisted)
+- [x] **S10** Add-items wired: rapid-entry sheet, optimistic items, running total; items locked once settling
 - **Done when:** log in → create a bill → add items, all persisted.
 
 ## Week 3 — Vertical slice complete (finish M3 → start M4)

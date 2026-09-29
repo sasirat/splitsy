@@ -13,6 +13,6 @@ export function billAccessWhere(userId: string): Prisma.BillWhereInput {
 export function findAccessibleBill(billId: string, userId: string) {
   return getDb().bill.findFirst({
     where: { id: billId, ...billAccessWhere(userId) },
-    select: { id: true, groupId: true },
+    select: { id: true, groupId: true, status: true },
   });
 }
