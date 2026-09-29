@@ -34,7 +34,7 @@ Core total: ~13–18 focused dev-days.
 ## Week 2 — Data model + backend + start slice (M2 → M3)
 
 - [x] **S6** Prisma schema (User, Group, GroupMember, Bill, Item, ItemSplit, Settlement, InviteToken) + migration + seed
-- [ ] **S7** Clerk Google auth; protected routes; login screen from components
+- [x] **S7** Dev sign-in (tap a seeded user, dev-only) + protected routes; login screen from Figma _(Clerk moved to S14b)_
 - [ ] **S8** Server Actions: create bill, fetch bill, add item
 - [ ] **S9** Onboarding "name" + minimal create-bill wired to DB
 - [ ] **S10** Add-items screen wired (list + add, persisted)
@@ -46,6 +46,7 @@ Core total: ~13–18 focused dev-days.
 - [ ] **S12** Bill summary (itemized, "shared by", subtotal/total) from DB
 - [ ] **S13** End-to-end pass of the slice; fix breakage; loading/error/empty states
 - [ ] **S14** Persistent groups + membership; attach bills to a group
+- [ ] **S14b** Clerk Google auth replaces dev sign-in (invitees need real accounts); swap only `src/server/auth.ts` + login footer
 - [ ] **S15** Invite via share link (token) + join flow
 - **Done when:** full core loop works for a real multi-person bill.
 

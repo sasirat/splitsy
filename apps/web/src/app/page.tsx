@@ -1,12 +1,19 @@
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { PhoneFrame } from "@/components/ui/phone-frame";
+import { signOut } from "@/modules/auth/actions";
+import { requireUser } from "@/server/auth";
 
-export default function Home() {
+// Placeholder signed-in home; M3 replaces it with the bills list.
+export default async function Home() {
+  const user = await requireUser();
+  const name = user.displayName ?? user.email;
+
   return (
-    <main className="flex flex-1 flex-col items-center justify-center gap-8 bg-scene-blue px-6">
-      <div className="flex flex-col items-center gap-1 rounded-2xl bg-paper px-10 py-8 shadow-card">
-        <h1 className="text-wordmark text-primary">Splitsy</h1>
+    <PhoneFrame scene="blue" className="items-center justify-center gap-8 px-6">
+      <div className="flex flex-col items-center gap-1 rounded-2xl bg-paper px-10 py-8 text-center shadow-card">
+        <h1 className="text-h2 text-primary">Hi, {name} 👋</h1>
         <p className="text-script text-primary">Split the bill, keep the vibe.</p>
-        <p className="font-body text-sm text-muted-foreground">Nobody does mental math.</p>
       </div>
 
       <Link
@@ -16,9 +23,11 @@ export default function Home() {
         View the design system →
       </Link>
 
-      <p className="font-mono text-2xs uppercase tracking-wide text-cream/70">
-        Splitsy · design system · S3
-      </p>
-    </main>
+      <form action={signOut}>
+        <Button type="submit" variant="link" className="text-cream">
+          Sign out
+        </Button>
+      </form>
+    </PhoneFrame>
   );
 }

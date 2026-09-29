@@ -5,3 +5,13 @@ const bahtFormatter = new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 
 export function formatBaht(amount: number): string {
   return `฿${bahtFormatter.format(amount)}`;
 }
+
+/** Up to two initials for an avatar: "Mint" → "M", "Ploy Sae" → "PS". */
+export function initialsOf(name: string): string {
+  return name
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((word) => word[0]?.toUpperCase() ?? "")
+    .join("");
+}
