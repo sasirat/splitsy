@@ -35,6 +35,7 @@ export async function listMyBills() {
     orderBy: { createdAt: "desc" },
     select: {
       id: true,
+      number: true,
       title: true,
       status: true,
       createdAt: true,

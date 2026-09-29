@@ -36,7 +36,7 @@ Core total: ~13–18 focused dev-days.
 - [x] **S6** Prisma schema (User, Group, GroupMember, Bill, Item, ItemSplit, Settlement, InviteToken) + migration + seed
 - [x] **S7** Dev sign-in (tap a seeded user, dev-only) + protected routes; login screen from Figma _(Clerk moved to S14b)_
 - [x] **S8** Server Actions: create bill, fetch bill, add item (+ split math, Vitest unit + DB tests)
-- [ ] **S9** Onboarding "name" + minimal create-bill wired to DB
+- [x] **S9** Onboarding "name" + bills list + create-bill wired to DB; bill number + Thai date; read-only bill page
 - [ ] **S10** Add-items screen wired (list + add, persisted)
 - **Done when:** log in → create a bill → add items, all persisted.
 

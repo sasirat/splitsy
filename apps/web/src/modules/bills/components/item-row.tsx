@@ -3,11 +3,11 @@ import { cn } from "cn";
 import { Avatar } from "@/components/ui/avatar";
 import { AvatarStack } from "@/components/ui/avatar-stack";
 import { formatBaht } from "@/lib/format";
+import { splitHint, type Sharer } from "../split-hint";
 
-type Sharer = { initials: string };
-
-/** One line on the receipt: name + price, plus who split it and the per-head hint.
- *  Renders as an <li> — use inside ReceiptCard's list. */
+/** One line on the receipt: name + price (satang), plus who split it and the per-head hint.
+ *  `shares` on a sharer weights uneven splits. Renders as an <li> — use inside
+ *  ReceiptCard's list. */
 function ItemRow({
   name,
   price,
@@ -19,7 +19,6 @@ function ItemRow({
   sharers?: Sharer[];
   className?: string;
 }) {
-  const each = sharers.length > 0 ? Math.round(price / sharers.length) : price;
   return (
     <li className={cn("flex flex-col gap-2 px-5 py-4", className)}>
       <div className="flex items-center justify-between text-amount text-md text-ink">
@@ -35,7 +34,7 @@ function ItemRow({
               </Avatar>
             ))}
           </AvatarStack>
-          <span className="text-caption text-primary">{formatBaht(each)} EACH</span>
+          <span className="text-caption text-primary">{splitHint(price, sharers)}</span>
         </div>
       ) : null}
     </li>

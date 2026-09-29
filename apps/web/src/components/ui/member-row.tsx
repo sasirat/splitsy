@@ -2,10 +2,11 @@
 
 import type * as React from "react";
 import { cn } from "cn";
+import { formatBaht } from "@/lib/format";
 import { Avatar } from "./avatar";
 import { Checkbox } from "./checkbox";
 
-/** A "who's splitting this?" row: checkbox + avatar + name + per-head amount.
+/** A "who's splitting this?" row: checkbox + avatar + name + per-head amount (satang).
  *  The whole row is a <label>, so tapping anywhere toggles the checkbox. */
 function MemberRow({
   name,
@@ -42,7 +43,7 @@ function MemberRow({
           amount > 0 ? "text-ink" : "text-muted-foreground",
         )}
       >
-        ฿{amount}
+        {formatBaht(amount)}
       </span>
     </label>
   );

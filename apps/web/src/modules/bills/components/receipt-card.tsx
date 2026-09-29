@@ -43,7 +43,7 @@ function ReceiptCard({
         aria-hidden
         width={150}
         height={40}
-        className="pointer-events-none absolute -top-4 left-1/2 z-10 -translate-x-1/2 -rotate-2 select-none"
+        className="pointer-events-none absolute -top-4 left-1/2 z-10 h-auto w-[150px] -translate-x-1/2 -rotate-2 select-none"
       />
       <div className="bg-paper px-4 shadow-card">
         <div className="flex flex-col items-center gap-1 px-5 pt-7 pb-4 text-center text-primary">

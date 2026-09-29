@@ -15,6 +15,7 @@ import { Pill } from "@/components/ui/pill";
 import { ItemRow } from "@/modules/bills/components/item-row";
 import { ReceiptCard } from "@/modules/bills/components/receipt-card";
 import { TotalDisplay } from "@/modules/bills/components/total-display";
+import { splitItem } from "@/modules/items/service";
 import { DebtorRow } from "@/modules/settlement/components/debtor-row";
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
@@ -30,21 +31,6 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 
 const MEMBERS = ["Nan", "Tee", "Mook", "Ploy"] as const;
 
-/** Split a whole-baht total evenly, distributing the remainder so shares sum
- *  exactly to the total (the first members get the extra ฿1). */
-function splitEvenly(total: number, names: readonly string[]): Record<string, number> {
-  const out: Record<string, number> = {};
-  const n = names.length;
-  if (n === 0) return out;
-  const base = Math.floor(total / n);
-  let remainder = total - base * n;
-  for (const name of names) {
-    out[name] = base + (remainder > 0 ? 1 : 0);
-    if (remainder > 0) remainder -= 1;
-  }
-  return out;
-}
-
 export default function ComponentsPlayground() {
   const [checked, setChecked] = React.useState(true);
   const [split, setSplit] = React.useState<Record<string, boolean>>({
@@ -59,7 +45,11 @@ export default function ComponentsPlayground() {
     Tee: true,
   });
   const sharers = MEMBERS.filter((m) => split[m]);
-  const shares = splitEvenly(390, sharers);
+  // Amounts are satang: ฿390 split evenly, exact to the satang.
+  const shares = splitItem(
+    39000,
+    sharers.map((userId) => ({ userId, shares: 1 })),
+  );
 
   return (
     <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-12 px-6 py-12">
@@ -153,29 +143,31 @@ export default function ComponentsPlayground() {
       </section>
 
       <section className="flex flex-col gap-4">
-        <h2 className="text-micro text-muted-foreground">
-          Receipt · modules/bills
-        </h2>
+        <h2 className="text-micro text-muted-foreground">Receipt · modules/bills</h2>
         <div className="rounded-2xl bg-scene-green p-6 pt-8">
-          <ReceiptCard title="Ramen night" date="16/09/2569 · THONGLOR" subtotal={1170}>
+          <ReceiptCard title="Ramen night" date="16/09/2569 · THONGLOR" subtotal={117000}>
             <ItemRow
               name="Tonkotsu ramen ×2"
-              price={640}
+              price={64000}
               sharers={[{ initials: "SC" }, { initials: "KK" }]}
             />
-            <ItemRow name="Gyoza" price={120} sharers={[{ initials: "SC" }, { initials: "KK" }]} />
+            <ItemRow
+              name="Gyoza"
+              price={12000}
+              sharers={[{ initials: "SC" }, { initials: "KK" }]}
+            />
             <ItemRow
               name="Hoegaarden ×2"
-              price={260}
+              price={26000}
               sharers={[{ initials: "SC" }, { initials: "KK" }]}
             />
             <ItemRow
               name="Matcha soft serve"
-              price={150}
+              price={15000}
               sharers={[{ initials: "SC" }, { initials: "KK" }]}
             />
           </ReceiptCard>
-          <TotalDisplay amount={1350} className="pt-8" />
+          <TotalDisplay amount={135000} className="pt-8" />
         </div>
       </section>
 
@@ -196,7 +188,12 @@ export default function ComponentsPlayground() {
           onOpenChange={setSheetOpen}
           title="Add item"
           footer={
-            <Button variant="solid" size="lg" className="w-full" onClick={() => setSheetOpen(false)}>
+            <Button
+              variant="solid"
+              size="lg"
+              className="w-full"
+              onClick={() => setSheetOpen(false)}
+            >
               Add item
             </Button>
           }
@@ -213,7 +210,7 @@ export default function ComponentsPlayground() {
                   key={m}
                   name={m}
                   initials={m.charAt(0)}
-                  amount={sheetSplit[m] ? 195 : 0}
+                  amount={sheetSplit[m] ? 19500 : 0}
                   checked={Boolean(sheetSplit[m])}
                   onCheckedChange={(c) => setSheetSplit((s) => ({ ...s, [m]: Boolean(c) }))}
                 />
@@ -226,9 +223,21 @@ export default function ComponentsPlayground() {
       <section className="flex flex-col gap-4">
         <h2 className="text-micro text-muted-foreground">Debtor rows · modules/settlement</h2>
         <div className="overflow-hidden rounded-xl border border-primary bg-white">
-          <DebtorRow name="Tee" initials="T" amount={235} status="Waiting for slip" state="owe" />
-          <DebtorRow name="Mook" initials="M" amount={200} status="Settle verified" state="paid" />
-          <DebtorRow name="Ploy" initials="P" amount={160} status="Waiting for slip" state="owe" />
+          <DebtorRow name="Tee" initials="T" amount={23500} status="Waiting for slip" state="owe" />
+          <DebtorRow
+            name="Mook"
+            initials="M"
+            amount={20000}
+            status="Settle verified"
+            state="paid"
+          />
+          <DebtorRow
+            name="Ploy"
+            initials="P"
+            amount={16000}
+            status="Waiting for slip"
+            state="owe"
+          />
         </div>
       </section>
     </main>

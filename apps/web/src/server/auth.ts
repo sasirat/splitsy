@@ -20,3 +20,11 @@ export async function requireUser() {
   if (!user) redirect("/login");
   return user;
 }
+
+/** A signed-in user who has picked a display name; sends everyone else to
+ *  onboarding first. Use on app pages (not on /onboarding itself). */
+export async function requireOnboardedUser() {
+  const user = await requireUser();
+  if (!user.displayName) redirect("/onboarding");
+  return { ...user, displayName: user.displayName };
+}

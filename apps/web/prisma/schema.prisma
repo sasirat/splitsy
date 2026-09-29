@@ -85,6 +85,8 @@ enum BillStatus {
 
 model Bill {
   id          String     @id @default(cuid())
+  /// Human-friendly receipt number ("NO.0042"), assigned by the database.
+  number      Int        @unique @default(autoincrement())
   title       String
   status      BillStatus @default(OPEN)
   groupId     String

@@ -52,6 +52,7 @@ describe("createBill", () => {
       include: { group: { include: { members: true } } },
     });
     expect(bill.title).toBe("Som Tam Nua");
+    expect(bill.number).toBeGreaterThan(0);
     expect(bill.payerId).toBe(MINT);
     expect(bill.createdById).toBe(MINT);
     expect(bill.group.type).toBe("AD_HOC");
@@ -151,5 +152,6 @@ describe("listMyBills", () => {
       ["Newer", 2, 18500],
       ["Older", 0, 0],
     ]);
+    expect(mine[0].number).toBeGreaterThan(mine[1].number);
   });
 });

@@ -2,7 +2,7 @@ import "dotenv/config";
 import { PrismaNeon } from "@prisma/adapter-neon";
 import { PrismaClient } from "../src/generated/prisma/client";
 
-// Dev seed: three friends, one dinner bill with mixed splits. Idempotent and
+// Dev seed: three friends (+ one not onboarded), one dinner bill with mixed splits. Idempotent and
 // scoped — it only replaces its own fixed-id rows, never other data.
 
 const connectionString = process.env.DATABASE_URL;
@@ -16,7 +16,9 @@ const users = {
   mint: { id: "seed_user_mint", displayName: "Mint", promptPayId: "0812345678" },
   ploy: { id: "seed_user_ploy", displayName: "Ploy", promptPayId: null },
   beam: { id: "seed_user_beam", displayName: "Beam", promptPayId: null },
-};
+  // No name yet (reset on every seed) — sign in as them to see onboarding.
+  newbie: { id: "seed_user_newbie", displayName: null, promptPayId: null },
+} satisfies Record<string, { id: string; displayName: string | null; promptPayId: string | null }>;
 
 type Friend = keyof typeof users;
 
@@ -76,7 +78,9 @@ async function main() {
     },
   });
 
-  console.log(`Seeded 3 users, 1 group, 1 bill with ${items.length} items.`);
+  console.log(
+    `Seeded ${Object.keys(users).length} users, 1 group, 1 bill with ${items.length} items.`,
+  );
 }
 
 main()
