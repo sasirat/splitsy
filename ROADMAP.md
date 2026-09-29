@@ -33,7 +33,7 @@ Core total: ~13–18 focused dev-days.
 
 ## Week 2 — Data model + backend + start slice (M2 → M3)
 
-- [ ] **S6** Prisma schema (User, Group, Bill, Item, ItemSplit, Settlement, inviteToken) + migration + seed
+- [x] **S6** Prisma schema (User, Group, GroupMember, Bill, Item, ItemSplit, Settlement, InviteToken) + migration + seed
 - [ ] **S7** Clerk Google auth; protected routes; login screen from components
 - [ ] **S8** Server Actions: create bill, fetch bill, add item
 - [ ] **S9** Onboarding "name" + minimal create-bill wired to DB

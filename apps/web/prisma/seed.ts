@@ -32,7 +32,9 @@ const items: { name: string; price: number; split: Partial<Record<Friend, number
 const GROUP_ID = "seed_group_dinner";
 
 async function main() {
-  // Cascades to members, bills, items and splits.
+  // Settlements restrict bill deletion, so clear them first; deleting the
+  // group then cascades to members, bills, items and splits.
+  await prisma.settlement.deleteMany({ where: { bill: { groupId: GROUP_ID } } });
   await prisma.group.deleteMany({ where: { id: GROUP_ID } });
 
   for (const [key, user] of Object.entries(users)) {
