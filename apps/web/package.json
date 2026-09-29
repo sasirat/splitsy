@@ -12,7 +12,8 @@
     "db:migrate": "prisma migrate dev",
     "db:seed": "prisma db seed",
     "db:studio": "prisma studio",
-    "test": "vitest run"
+    "test": "vitest run --project unit",
+    "test:db": "vitest run --project db"
   },
   "dependencies": {
     "@base-ui/react": "^1.8.0",
