@@ -2,7 +2,7 @@
 
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { db } from "@/server/db";
+import { getDb } from "@/server/db";
 import { devSignInEnabled, safeRedirectPath, SESSION_COOKIE } from "@/server/session";
 import { signInSchema } from "./schema";
 
@@ -16,7 +16,7 @@ export async function signInAs(formData: FormData) {
     userId: formData.get("userId"),
     next: formData.get("next") || undefined,
   });
-  const user = await db.user.findUnique({ where: { id: userId }, select: { id: true } });
+  const user = await getDb().user.findUnique({ where: { id: userId }, select: { id: true } });
   if (!user) throw new Error("Unknown user");
 
   (await cookies()).set(SESSION_COOKIE, user.id, {

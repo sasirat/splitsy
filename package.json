@@ -13,7 +13,8 @@
     "lint": "turbo run lint",
     "generate": "turbo run generate",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "test": "turbo run test"
   },
   "devDependencies": {
     "prettier": "^3.4.2",

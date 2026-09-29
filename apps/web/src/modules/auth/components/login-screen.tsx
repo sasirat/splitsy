@@ -38,13 +38,6 @@ function LoginScreen({
             height={806}
             className="absolute top-0 left-[6%] h-auto w-[31%] -rotate-[18deg]"
           />
-          <Image
-            src="/art/star-blue.png"
-            alt=""
-            width={900}
-            height={873}
-            className="absolute top-[71%] left-[65%] h-auto w-[35%]"
-          />
           <div className="absolute inset-y-[12%] right-[15%] left-[20%] flex flex-col items-center justify-center text-center text-primary">
             <h1 className="text-wordmark leading-none">Splitsy</h1>
             <p className="text-script opacity-90">Split the bill, keep the vibe.</p>

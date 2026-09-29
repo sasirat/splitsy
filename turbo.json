@@ -19,6 +19,9 @@
     "generate": {
       "cache": false,
       "outputs": ["styles/**"]
+    },
+    "test": {
+      "dependsOn": ["^build"]
     }
   }
 }
