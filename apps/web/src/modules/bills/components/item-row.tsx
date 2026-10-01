@@ -7,20 +7,22 @@ import { splitHint, type Sharer } from "../split-hint";
 
 /** One line on the receipt: name + price (satang), plus who split it and the per-head hint.
  *  `shares` on a sharer weights uneven splits. Renders as an <li> — use inside
- *  ReceiptCard's list. */
+ *  ReceiptCard's list. With `onSelect`, the whole line is a button. */
 function ItemRow({
   name,
   price,
   sharers = [],
+  onSelect,
   className,
 }: {
   name: string;
   price: number;
   sharers?: Sharer[];
+  onSelect?: () => void;
   className?: string;
 }) {
-  return (
-    <li className={cn("flex flex-col gap-2 px-5 py-4", className)}>
+  const content = (
+    <>
       <div className="flex items-center justify-between text-amount text-md text-ink">
         <span>{name}</span>
         <span>{formatBaht(price)}</span>
@@ -37,6 +39,26 @@ function ItemRow({
           <span className="text-caption text-primary">{splitHint(price, sharers)}</span>
         </div>
       ) : null}
+    </>
+  );
+  const layout = "flex w-full flex-col gap-2 px-5 py-4";
+
+  return (
+    <li className={className}>
+      {onSelect ? (
+        <button
+          type="button"
+          onClick={onSelect}
+          className={cn(
+            layout,
+            "text-left outline-none focus-visible:bg-primary/5 active:bg-primary/5",
+          )}
+        >
+          {content}
+        </button>
+      ) : (
+        <div className={layout}>{content}</div>
+      )}
     </li>
   );
 }

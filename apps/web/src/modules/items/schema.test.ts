@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { createBillInput } from "@/modules/bills/schema";
-import { addItemInput } from "./schema";
+import { addItemInput, setMyClaimInput } from "./schema";
 
 describe("addItemInput", () => {
   it("trims the name and converts the price to satang", () => {
@@ -35,5 +35,22 @@ describe("createBillInput", () => {
     expect(createBillInput.safeParse({ title: "  " }).error?.issues[0]?.message).toBe(
       "Give the bill a name",
     );
+  });
+});
+
+describe("setMyClaimInput", () => {
+  it("accepts an item id and a claimed flag", () => {
+    expect(setMyClaimInput.parse({ itemId: "i1", claimed: true })).toEqual({
+      itemId: "i1",
+      claimed: true,
+    });
+  });
+
+  it.each([
+    { itemId: "", claimed: true },
+    { itemId: "i1", claimed: "yes" },
+    { itemId: "i1" },
+  ])("rejects %j", (input) => {
+    expect(setMyClaimInput.safeParse(input).success).toBe(false);
   });
 });

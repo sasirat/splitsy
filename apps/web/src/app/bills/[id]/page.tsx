@@ -13,7 +13,7 @@ import { getBill } from "@/modules/bills/queries";
 import { requireOnboardedUser } from "@/server/auth";
 
 export default async function BillPage({ params }: PageProps<"/bills/[id]">) {
-  await requireOnboardedUser();
+  const user = await requireOnboardedUser();
   const { id } = await params;
   const bill = await getBill(id);
   if (!bill) notFound();
@@ -35,12 +35,18 @@ export default async function BillPage({ params }: PageProps<"/bills/[id]">) {
         title={bill.title}
         meta={meta}
         payerName={personName(bill.payer)}
-        canAddItems={bill.status === "OPEN"}
+        canEdit={bill.status === "OPEN"}
+        currentUserId={user.id}
+        members={bill.members.map((member) => {
+          const name = personName(member);
+          return { id: member.id, name, initials: initialsOf(name) };
+        })}
         items={bill.items.map((item) => ({
           id: item.id,
           name: item.name,
           priceSatang: item.priceSatang,
           sharers: item.splits.map((split) => ({
+            userId: split.userId,
             initials: initialsOf(personName(split.user)),
             shares: split.shares,
           })),

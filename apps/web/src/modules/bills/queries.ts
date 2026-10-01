@@ -6,14 +6,16 @@ import { billTotals } from "./service";
 
 const person = { select: { id: true, displayName: true, email: true } } as const;
 
-/** A bill the current user can access — payer, items in receipt order with
- *  who shares each, plus computed totals. null when missing or not a member. */
+/** A bill the current user can access — payer, group members, items in receipt
+ *  order with who shares each, plus computed totals. null when missing or not
+ *  a member. */
 export async function getBill(billId: string) {
   const user = await requireUser();
   const bill = await getDb().bill.findFirst({
     where: { id: billId, ...billAccessWhere(user.id) },
     include: {
       payer: person,
+      group: { select: { members: { orderBy: { joinedAt: "asc" }, select: { user: person } } } },
       items: {
         // Concurrent adds can share a position; createdAt keeps order stable.
         orderBy: [{ position: "asc" }, { createdAt: "asc" }],
@@ -22,7 +24,12 @@ export async function getBill(billId: string) {
     },
   });
   if (!bill) return null;
-  return { ...bill, totals: billTotals(bill.items) };
+  const { group, ...rest } = bill;
+  return {
+    ...rest,
+    members: group.members.map((member) => member.user),
+    totals: billTotals(bill.items),
+  };
 }
 
 export type BillDetail = NonNullable<Awaited<ReturnType<typeof getBill>>>;

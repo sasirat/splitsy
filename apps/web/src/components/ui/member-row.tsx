@@ -7,13 +7,15 @@ import { Avatar } from "./avatar";
 import { Checkbox } from "./checkbox";
 
 /** A "who's splitting this?" row: checkbox + avatar + name + per-head amount (satang).
- *  The whole row is a <label>, so tapping anywhere toggles the checkbox. */
+ *  The whole row is a <label>, so tapping anywhere toggles the checkbox.
+ *  `disabled` shows someone else's claim read-only. */
 function MemberRow({
   name,
   initials,
   amount,
   checked,
   onCheckedChange,
+  disabled,
   className,
 }: {
   name: string;
@@ -21,17 +23,19 @@ function MemberRow({
   amount: number;
   checked?: boolean;
   onCheckedChange?: (checked: boolean) => void;
+  disabled?: boolean;
   className?: string;
 }) {
   return (
     <label
       className={cn(
-        "flex cursor-pointer items-center justify-between border-b border-divider p-4 last:border-b-0",
+        "flex items-center justify-between border-b border-divider p-4 last:border-b-0",
+        disabled ? "cursor-default" : "cursor-pointer",
         className,
       )}
     >
       <span className="flex items-center gap-3">
-        <Checkbox checked={checked} onCheckedChange={onCheckedChange} />
+        <Checkbox checked={checked} onCheckedChange={onCheckedChange} disabled={disabled} />
         <Avatar size="lg" tone="pink">
           {initials}
         </Avatar>

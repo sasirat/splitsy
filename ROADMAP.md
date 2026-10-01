@@ -42,12 +42,12 @@ Core total: ~13–18 focused dev-days.
 
 ## Week 3 — Vertical slice complete (finish M3 → start M4)
 
-- [ ] **S11** Item-detail split (self-report checkboxes) → persist ItemSplit, live per-head amounts
+- [x] **S11** Item-detail split (self-report checkboxes) → persist ItemSplit, live per-head amounts
 - [ ] **S12** Bill summary (itemized, "shared by", subtotal/total) from DB
 - [ ] **S13** End-to-end pass of the slice; fix breakage; loading/error/empty states
 - [ ] **S14** Persistent groups + membership; attach bills to a group
-- [ ] **S14b** Clerk Google auth replaces dev sign-in (invitees need real accounts); swap only `src/server/auth.ts` + login footer
-- [ ] **S15** Invite via share link (token) + join flow
+- [ ] **S15** Invite via share link (token) + join flow _(built on dev sign-in first)_
+- [ ] **S14b** Clerk Google auth replaces dev sign-in (invitees need real accounts); swap only `src/server/auth.ts` + login footer _(after S15 — external setup risk; can spill to S20)_
 - **Done when:** full core loop works for a real multi-person bill.
 
 ## Week 4 — Settlement + debt simplification (finish M4)

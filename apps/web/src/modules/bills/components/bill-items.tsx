@@ -1,10 +1,13 @@
 "use client";
 
 import { cn } from "cn";
-import { useOptimistic, useRef, useState } from "react";
+import { useOptimistic, useRef, useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
+import { callAction } from "@/lib/call-action";
 import { formatBaht } from "@/lib/format";
+import { setMyClaim } from "@/modules/items/actions";
 import { AddItemSheet, type NewItem } from "@/modules/items/components/add-item-sheet";
+import { ItemSplitSheet, type SplitMember } from "@/modules/items/components/item-split-sheet";
 import type { Sharer } from "../split-hint";
 import { ItemRow } from "./item-row";
 import { ReceiptCard } from "./receipt-card";
@@ -14,44 +17,86 @@ export type ReceiptItem = {
   id: string;
   name: string;
   priceSatang: number;
-  sharers: Sharer[];
+  sharers: (Sharer & { userId: string; shares: number })[];
   /** Added on this screen, not yet confirmed by the server. */
   pending?: boolean;
 };
 
+type OptimisticChange =
+  | { type: "add"; item: ReceiptItem }
+  | { type: "claim"; itemId: string; claimed: boolean; me: SplitMember };
+
+function applyChange(items: ReceiptItem[], change: OptimisticChange): ReceiptItem[] {
+  if (change.type === "add") return [...items, change.item];
+  const { itemId, claimed, me } = change;
+  return items.map((item) => {
+    if (item.id !== itemId) return item;
+    const others = item.sharers.filter((sharer) => sharer.userId !== me.id);
+    const sharers = claimed
+      ? [...others, { userId: me.id, initials: me.initials, shares: 1 }]
+      : others;
+    return { ...item, sharers };
+  });
+}
+
 const sum = (items: ReceiptItem[]) => items.reduce((total, item) => total + item.priceSatang, 0);
 
 /** The bill's receipt with rapid add-item entry and a pinned running total.
- *  New items show instantly (faded) and settle once the server confirms. */
+ *  New items show instantly (faded) and settle once the server confirms.
+ *  Tap an item to claim your share; claims also update instantly. */
 function BillItems({
   billId,
   title,
   meta,
   items,
   payerName,
-  canAddItems,
+  canEdit,
+  members,
+  currentUserId,
 }: {
   billId: string;
   title: string;
   meta: string;
   items: ReceiptItem[];
   payerName: string;
-  canAddItems: boolean;
+  /** False once the bill is settling: no new items, no claim changes. */
+  canEdit: boolean;
+  members: SplitMember[];
+  currentUserId: string;
 }) {
-  const [shownItems, addOptimisticItem] = useOptimistic(items, (current, added: ReceiptItem) => [
-    ...current,
-    added,
-  ]);
+  const [shownItems, applyOptimistic] = useOptimistic(items, applyChange);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [splitItemId, setSplitItemId] = useState<string | null>(null);
+  const [splitOpen, setSplitOpen] = useState(false);
+  const [splitError, setSplitError] = useState<string | null>(null);
+  const [, startTransition] = useTransition();
   const nextPendingId = useRef(0);
 
+  const me = members.find((member) => member.id === currentUserId);
+  const splitTarget = shownItems.find((item) => item.id === splitItemId);
+
   function onOptimisticAdd(item: NewItem) {
-    addOptimisticItem({
-      ...item,
-      id: `pending-${nextPendingId.current++}`,
-      sharers: [],
-      pending: true,
+    applyOptimistic({
+      type: "add",
+      item: { ...item, id: `pending-${nextPendingId.current++}`, sharers: [], pending: true },
+    });
+  }
+
+  function openSplit(itemId: string) {
+    setSplitItemId(itemId);
+    setSplitError(null);
+    setSplitOpen(true);
+  }
+
+  function onClaimChange(claimed: boolean) {
+    if (!splitTarget || !me) return;
+    const { id: itemId, name } = splitTarget;
+    setSplitError(null);
+    startTransition(async () => {
+      applyOptimistic({ type: "claim", itemId, claimed, me });
+      const result = await callAction(() => setMyClaim({ itemId, claimed }));
+      if (!result.ok) setSplitError(`Couldn't update "${name}": ${result.error}`);
     });
   }
 
@@ -68,6 +113,7 @@ function BillItems({
               name={item.pending ? `${item.name} · saving…` : item.name}
               price={item.priceSatang}
               sharers={item.sharers}
+              onSelect={item.pending ? undefined : () => openSplit(item.id)}
               className={cn(item.pending && "opacity-50")}
             />
           ))
@@ -78,7 +124,7 @@ function BillItems({
         )}
       </ReceiptCard>
 
-      {canAddItems ? (
+      {canEdit ? (
         <Button
           variant="dashed"
           size="lg"
@@ -113,6 +159,23 @@ function BillItems({
         onOptimisticAdd={onOptimisticAdd}
         error={error}
         onError={setError}
+      />
+
+      <ItemSplitSheet
+        open={splitOpen}
+        item={
+          splitTarget && {
+            name: splitTarget.name,
+            priceSatang: splitTarget.priceSatang,
+            splits: splitTarget.sharers.map(({ userId, shares }) => ({ userId, shares })),
+          }
+        }
+        members={members}
+        currentUserId={currentUserId}
+        canEdit={canEdit && me !== undefined}
+        onClaimChange={onClaimChange}
+        error={splitError}
+        onOpenChange={setSplitOpen}
       />
     </>
   );
