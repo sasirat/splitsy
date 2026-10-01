@@ -16,10 +16,13 @@ type Link = { url: string; expiresAt: Date };
  *  share, or reset. Works for a quick bill's hidden group and named groups. */
 function InviteButton({
   groupId,
+  billId,
   label = "Invite friends",
   className,
 }: {
   groupId: string;
+  /** When sharing from a bill, the joiner lands on it (if it's in the group). */
+  billId?: string;
   label?: string;
   className?: string;
 }) {
@@ -36,7 +39,11 @@ function InviteButton({
       const result = await callAction(action);
       if (!result.ok) return setError(result.error);
       // The server returns a path; our own origin makes it a full link.
-      setLink({ url: `${window.location.origin}${result.path}`, expiresAt: result.expiresAt });
+      const query = billId ? `?bill=${encodeURIComponent(billId)}` : "";
+      setLink({
+        url: `${window.location.origin}${result.path}${query}`,
+        expiresAt: result.expiresAt,
+      });
     });
   }
 

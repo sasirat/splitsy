@@ -40,7 +40,7 @@ export default async function BillPage({ params }: PageProps<"/bills/[id]">) {
         meta={meta}
         payerName={personName(bill.payer)}
         canEdit={bill.status === "OPEN"}
-        invite={<InviteButton groupId={bill.groupId} className="text-cream" />}
+        invite={<InviteButton groupId={bill.groupId} billId={bill.id} className="text-cream" />}
         currentUserId={user.id}
         members={bill.members.map((member) => {
           const name = personName(member);

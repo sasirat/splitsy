@@ -13,6 +13,7 @@ import {
   type CreateInviteInput,
   type JoinGroupInput,
 } from "./schema";
+import { inviteLandingBill } from "./queries";
 import { inviteState, newInviteExpiry, newInviteToken } from "./service";
 
 const NOT_FOUND = "Group not found";
@@ -41,16 +42,6 @@ export async function createGroup(
 
   revalidatePath("/");
   return { ok: true, groupId: group.id };
-}
-
-/** Where a group's invite link lands: a quick bill's only bill, else the group. */
-async function groupDestination(groupId: string) {
-  const group = await getDb().group.findUniqueOrThrow({
-    where: { id: groupId },
-    select: { type: true, bills: { select: { id: true }, take: 1 } },
-  });
-  const bill = group.bills[0];
-  return group.type === "AD_HOC" && bill ? `/bills/${bill.id}` : `/groups/${groupId}`;
 }
 
 async function issueInvite(groupId: string, userId: string): Promise<InviteLink> {
@@ -104,7 +95,8 @@ export async function resetInvite(input: CreateInviteInput): Promise<ActionResul
 }
 
 /** Join the group behind a live invite link. Idempotent: an existing member
- *  just gets sent on. Dead and unknown links fail the same way. */
+ *  just gets sent on. Dead and unknown links fail the same way. Lands on the
+ *  bill the link was shared from when it's in this group. */
 export async function joinGroup(
   input: JoinGroupInput,
 ): Promise<ActionResult<{ redirectTo: string }>> {
@@ -115,20 +107,22 @@ export async function joinGroup(
   const db = getDb();
   const invite = await db.inviteToken.findUnique({
     where: { token: parsed.data.token },
-    select: { groupId: true, expiresAt: true, revokedAt: true },
+    select: { expiresAt: true, revokedAt: true, group: { select: { id: true, type: true } } },
   });
   if (!invite || inviteState(invite, new Date()) !== "valid") {
     return { ok: false, error: DEAD_LINK };
   }
 
-  const { groupId } = invite;
+  const { group } = invite;
+  const groupId = group.id;
   await db.groupMember.upsert({
     where: { groupId_userId: { groupId, userId: user.id } },
     create: { groupId, userId: user.id, role: "MEMBER" },
     update: {},
   });
 
-  const redirectTo = await groupDestination(groupId);
+  const bill = await inviteLandingBill(group, parsed.data.billId);
+  const redirectTo = bill ? `/bills/${bill.id}` : `/groups/${groupId}`;
   revalidatePath("/");
   revalidatePath(redirectTo);
   return { ok: true, redirectTo };

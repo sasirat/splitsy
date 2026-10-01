@@ -197,3 +197,40 @@ describe("getInvitePreview", () => {
     expect(await getInvitePreview("not-a-real-token")).toBeNull();
   });
 });
+
+describe("invites shared from a bill in a named group", () => {
+  it("lands the joiner on that bill and names it in the preview", async () => {
+    const groupId = await newGroup();
+    const bill = await createBill({ title: "Rent October", groupId });
+    if (!bill.ok) throw new Error(bill.error);
+    const token = await inviteToken(groupId);
+
+    auth.currentUserId = PLOY;
+    expect(await getInvitePreview(token, bill.billId)).toMatchObject({
+      kind: "bill",
+      name: "Rent October",
+      groupName: "Invite test",
+      destination: `/bills/${bill.billId}`,
+    });
+    expect(await joinGroup({ token, billId: bill.billId })).toEqual({
+      ok: true,
+      redirectTo: `/bills/${bill.billId}`,
+    });
+  });
+
+  it("ignores a bill from a different group", async () => {
+    const groupId = await newGroup();
+    const { billId: otherBillId } = await newQuickBill();
+    const token = await inviteToken(groupId);
+
+    auth.currentUserId = PLOY;
+    expect(await getInvitePreview(token, otherBillId)).toMatchObject({
+      kind: "group",
+      destination: `/groups/${groupId}`,
+    });
+    expect(await joinGroup({ token, billId: otherBillId })).toEqual({
+      ok: true,
+      redirectTo: `/groups/${groupId}`,
+    });
+  });
+});

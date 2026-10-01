@@ -8,7 +8,7 @@ import { joinGroup } from "../actions";
 
 /** Joins via a button (not on page load), so link-preview bots that fetch
  *  /join/<token> can't add anyone. */
-function JoinButton({ token }: { token: string }) {
+function JoinButton({ token, billId }: { token: string; billId?: string }) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
@@ -16,7 +16,7 @@ function JoinButton({ token }: { token: string }) {
   function join() {
     setError(null);
     startTransition(async () => {
-      const result = await callAction(() => joinGroup({ token }));
+      const result = await callAction(() => joinGroup({ token, billId }));
       if (!result.ok) return setError(result.error);
       router.push(result.redirectTo);
     });

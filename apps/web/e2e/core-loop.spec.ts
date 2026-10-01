@@ -15,15 +15,17 @@ async function signInAs(page: Page, name: string) {
   await expect(page).toHaveURL("/");
 }
 
+const escapeRegExp = (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
 /** Open the invite sheet and read the link out of it. */
 async function inviteLink(page: Page) {
   await page.getByRole("button", { name: "Invite friends" }).click();
   const sheet = page.getByRole("dialog", { name: "Invite friends" });
   const field = sheet.getByLabel("Invite link");
-  await expect(field).toHaveValue(/\/join\/[A-Za-z0-9_-]{43}$/);
-  const url = await field.inputValue();
+  await expect(field).toHaveValue(/\/join\/[A-Za-z0-9_-]{43}\?bill=[^&]+$/);
+  const url = new URL(await field.inputValue());
   await sheet.getByRole("button", { name: "Done" }).click();
-  return new URL(url).pathname;
+  return url.pathname + url.search;
 }
 
 async function claim(page: Page, item: string) {
@@ -183,11 +185,14 @@ test("a brand-new user joins through onboarding without losing the invite", asyn
   // Reset link: the old one dies, the new one works.
   await mint.getByRole("button", { name: "Invite friends" }).click();
   const sheet = mint.getByRole("dialog", { name: "Invite friends" });
-  await expect(sheet.getByLabel("Invite link")).toHaveValue(new RegExp(`${invite}$`));
+  await expect(sheet.getByLabel("Invite link")).toHaveValue(new RegExp(`${escapeRegExp(invite)}$`));
   await sheet.getByRole("button", { name: /Reset link/ }).click();
-  await expect(sheet.getByLabel("Invite link")).not.toHaveValue(new RegExp(`${invite}$`));
+  await expect(sheet.getByLabel("Invite link")).not.toHaveValue(
+    new RegExp(`${escapeRegExp(invite)}$`),
+  );
   await expect(sheet.getByLabel("Invite link")).toHaveValue(/\/join\//);
-  const fresh = new URL(await sheet.getByLabel("Invite link").inputValue()).pathname;
+  const freshUrl = new URL(await sheet.getByLabel("Invite link").inputValue());
+  const fresh = freshUrl.pathname + freshUrl.search;
 
   // Signed out, no name yet: login → onboarding → straight back to the invite.
   const newbie = await (await browser.newContext()).newPage();

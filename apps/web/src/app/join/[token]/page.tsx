@@ -11,13 +11,18 @@ import { requireUser } from "@/server/auth";
 
 const MAX_AVATARS = 5;
 
-export default async function JoinPage({ params }: PageProps<"/join/[token]">) {
+export default async function JoinPage({ params, searchParams }: PageProps<"/join/[token]">) {
   const { token } = await params;
+  const { bill } = await searchParams;
+  const billId = typeof bill === "string" ? bill : undefined;
   const user = await requireUser();
   // New users pick a name first, then come straight back here.
-  if (!user.displayName) redirect(`/onboarding?next=${encodeURIComponent(`/join/${token}`)}`);
+  if (!user.displayName) {
+    const back = `/join/${token}${billId ? `?bill=${encodeURIComponent(billId)}` : ""}`;
+    redirect(`/onboarding?next=${encodeURIComponent(back)}`);
+  }
 
-  const invite = await getInvitePreview(token);
+  const invite = await getInvitePreview(token, billId);
 
   if (!invite) {
     return (
@@ -41,6 +46,9 @@ export default async function JoinPage({ params }: PageProps<"/join/[token]">) {
         {invite.inviterName} invited you to {invite.kind === "bill" ? "split" : "join"}{" "}
         <span className="text-primary">{invite.name}</span>
       </h1>
+      {invite.groupName ? (
+        <p className="-mt-4 text-body text-muted-foreground">in {invite.groupName}</p>
+      ) : null}
       <div className="flex flex-col items-center gap-2">
         <AvatarStack extra={invite.members.length - shown.length}>
           {shown.map((member) => (
@@ -65,7 +73,7 @@ export default async function JoinPage({ params }: PageProps<"/join/[token]">) {
           </Link>
         </div>
       ) : (
-        <JoinButton token={token} />
+        <JoinButton token={token} billId={billId} />
       )}
     </PhoneFrame>
   );

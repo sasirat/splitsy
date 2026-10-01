@@ -63,9 +63,26 @@ export async function getGroup(groupId: string) {
   };
 }
 
+/** The bill an invite lands on: the one it was shared from if it's really in
+ *  this group (never trust the URL beyond that), else a quick bill's only bill.
+ *  null means land on the group itself. */
+export async function inviteLandingBill(
+  group: { id: string; type: "AD_HOC" | "PERSISTENT" },
+  billId?: string,
+) {
+  if (!billId && group.type !== "AD_HOC") return null;
+  const bill = await getDb().bill.findFirst({
+    where: billId ? { id: billId, groupId: group.id } : { groupId: group.id },
+    select: { id: true, title: true },
+  });
+  if (bill || !billId) return bill;
+  // A foreign billId is ignored, falling back to the group's default landing.
+  return inviteLandingBill(group);
+}
+
 /** What an invite link points at, for the join page. null for links that
  *  don't work (unknown, expired, revoked) — all look the same to outsiders. */
-export async function getInvitePreview(token: string) {
+export async function getInvitePreview(token: string, billId?: string) {
   const user = await requireUser();
   const invite = await getDb().inviteToken.findUnique({
     where: { token },
@@ -79,7 +96,6 @@ export async function getInvitePreview(token: string) {
           name: true,
           type: true,
           members: { orderBy: { joinedAt: "asc" }, select: { user: person } },
-          bills: { select: { id: true, title: true }, take: 1 },
         },
       },
     },
@@ -87,15 +103,17 @@ export async function getInvitePreview(token: string) {
   if (!invite || inviteState(invite, new Date()) !== "valid") return null;
 
   const { group } = invite;
-  const quickBill = group.type === "AD_HOC" ? group.bills[0] : undefined;
+  const bill = await inviteLandingBill(group, billId);
   const members = group.members.map((member) => member.user);
   return {
-    kind: quickBill ? ("bill" as const) : ("group" as const),
-    name: quickBill?.title ?? group.name,
+    kind: bill ? ("bill" as const) : ("group" as const),
+    name: bill?.title ?? group.name,
+    /** Set when a bill in a named group is the landing, for context. */
+    groupName: bill && group.type === "PERSISTENT" ? group.name : null,
     inviterName: personName(invite.createdBy),
     members,
     alreadyMember: members.some((member) => member.id === user.id),
-    destination: quickBill ? `/bills/${quickBill.id}` : `/groups/${group.id}`,
+    destination: bill ? `/bills/${bill.id}` : `/groups/${group.id}`,
   };
 }
 
