@@ -1,7 +1,11 @@
 import { OnboardingScreen } from "@/modules/auth/components/onboarding-screen";
 import { requireUser } from "@/server/auth";
+import { safeRedirectPath } from "@/server/session";
 
-export default async function OnboardingPage() {
+export default async function OnboardingPage({ searchParams }: PageProps<"/onboarding">) {
   const user = await requireUser();
-  return <OnboardingScreen currentName={user.displayName} />;
+  const { next } = await searchParams;
+  // Keeps where the user was heading (e.g. an invite link) across onboarding.
+  const nextPath = safeRedirectPath(typeof next === "string" ? next : undefined);
+  return <OnboardingScreen currentName={user.displayName} next={nextPath} />;
 }

@@ -45,6 +45,17 @@ export function formatBillTime(date: Date): string {
   return billTimeFormatter.format(date);
 }
 
+const shortDateFormatter = new Intl.DateTimeFormat("en-GB", {
+  timeZone: BANGKOK,
+  day: "numeric",
+  month: "short",
+});
+
+/** Short Bangkok date for deadlines: 8 Oct. */
+export function formatShortDate(date: Date): string {
+  return shortDateFormatter.format(date);
+}
+
 /** What to call a person: their display name, else their email. */
 export function personName(person: { displayName: string | null; email: string }): string {
   return person.displayName ?? person.email;

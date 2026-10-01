@@ -1,8 +1,8 @@
 // Session constants shared by proxy.ts and the server. No "server-only" import:
 // the proxy isn't a React Server Component environment.
 
-/** Dev sign-in cookie: holds the signed-in user's id. Clerk replaces it
- *  before invite links (see ROADMAP). */
+/** Dev sign-in cookie: holds the signed-in user's id. Clerk replaces it in
+ *  S14b (see ROADMAP). */
 export const SESSION_COOKIE = "splitsy_session";
 
 /** Tap-to-sign-in is a local-dev convenience and must never work in production. */

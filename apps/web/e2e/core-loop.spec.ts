@@ -1,17 +1,29 @@
 // The core loop, end to end, with two people: Mint creates a bill and adds
-// items, Ploy joins (directly in the DB until invites land in S15), both
-// claim, and the summary shows who owes whom.
+// items, Ploy joins through an invite link, both claim, and the summary shows
+// who owes whom.
 import { expect, test, type Page } from "@playwright/test";
-import { cleanupBill, cleanupGroup, joinBill, setBillStatus } from "./db";
+import { cleanupBill, cleanupGroup, setBillStatus, unnameUser } from "./db";
 
 const TITLE = `E2E dinner ${Date.now()}`;
 const LOCKED_TITLE = `E2E locked ${Date.now()}`;
 const GROUP_NAME = `E2E flat ${Date.now()}`;
+const NEWBIE_TITLE = `E2E newbie ${Date.now()}`;
 
 async function signInAs(page: Page, name: string) {
   await page.goto("/login");
   await page.getByRole("button", { name: `Continue as ${name}` }).click();
   await expect(page).toHaveURL("/");
+}
+
+/** Open the invite sheet and read the link out of it. */
+async function inviteLink(page: Page) {
+  await page.getByRole("button", { name: "Invite friends" }).click();
+  const sheet = page.getByRole("dialog", { name: "Invite friends" });
+  const field = sheet.getByLabel("Invite link");
+  await expect(field).toHaveValue(/\/join\/[A-Za-z0-9_-]{43}$/);
+  const url = await field.inputValue();
+  await sheet.getByRole("button", { name: "Done" }).click();
+  return new URL(url).pathname;
 }
 
 async function claim(page: Page, item: string) {
@@ -28,6 +40,8 @@ test.afterAll(() => {
   cleanupBill(TITLE);
   cleanupBill(LOCKED_TITLE);
   cleanupGroup(GROUP_NAME);
+  cleanupBill(NEWBIE_TITLE);
+  unnameUser("seed_user_newbie");
 });
 
 async function newBill(page: Page, title: string) {
@@ -64,15 +78,19 @@ test("create a bill, add items, split it between two people, see the summary", a
   await expect(mint.getByText("saving…")).toHaveCount(0);
   await expect(mint.getByText("฿400.50").first()).toBeVisible();
 
-  // Ploy joins the bill's group (stand-in for the S15 invite flow).
-  joinBill(TITLE, "seed_user_ploy");
-
+  const invite = await inviteLink(mint);
   await claim(mint, "Pad thai");
   await claim(mint, "Singha");
 
+  // Ploy opens the link while signed out → login → back to the invite → Join.
   const ploy = await (await browser.newContext()).newPage();
-  await signInAs(ploy, "Ploy");
-  await ploy.goto(billUrl);
+  await ploy.goto(invite);
+  await ploy.getByRole("button", { name: "Continue as Ploy" }).click();
+  await expect(
+    ploy.getByRole("heading", { name: new RegExp(`Mint invited you to split ${TITLE}`) }),
+  ).toBeVisible();
+  await ploy.getByRole("button", { name: "Join" }).click();
+  await expect(ploy).toHaveURL(billUrl);
   await claim(ploy, "Pad thai");
 
   // Ploy's view: Pad thai split 2 ways; Som tam unclaimed.
@@ -153,4 +171,36 @@ test("an unknown group shows the not-found page", async ({ page }) => {
   await expect(page.getByRole("heading", { name: "Group not found" })).toBeVisible();
   await page.goto("/bills/new?group=does-not-exist");
   await expect(page.getByRole("heading", { name: "Page not found" })).toBeVisible();
+});
+
+test("a brand-new user joins through onboarding without losing the invite", async ({ browser }) => {
+  const mint = await (await browser.newContext()).newPage();
+  await signInAs(mint, "Mint");
+  await newBill(mint, NEWBIE_TITLE);
+  const billUrl = new URL(mint.url()).pathname;
+  const invite = await inviteLink(mint);
+
+  // Reset link: the old one dies, the new one works.
+  await mint.getByRole("button", { name: "Invite friends" }).click();
+  const sheet = mint.getByRole("dialog", { name: "Invite friends" });
+  await expect(sheet.getByLabel("Invite link")).toHaveValue(new RegExp(`${invite}$`));
+  await sheet.getByRole("button", { name: /Reset link/ }).click();
+  await expect(sheet.getByLabel("Invite link")).not.toHaveValue(new RegExp(`${invite}$`));
+  await expect(sheet.getByLabel("Invite link")).toHaveValue(/\/join\//);
+  const fresh = new URL(await sheet.getByLabel("Invite link").inputValue()).pathname;
+
+  // Signed out, no name yet: login → onboarding → straight back to the invite.
+  const newbie = await (await browser.newContext()).newPage();
+  await newbie.goto(fresh);
+  await newbie.getByRole("button", { name: "Continue as newbie@seed.splitsy.dev" }).click();
+  await expect(newbie).toHaveURL(/\/onboarding\?next=/);
+  await newbie.getByLabel("Your name").fill("Newbie");
+  await newbie.getByRole("button", { name: "Continue" }).click();
+  await expect(newbie).toHaveURL(fresh);
+  await newbie.getByRole("button", { name: "Join" }).click();
+  await expect(newbie).toHaveURL(billUrl);
+
+  // The link from before the reset no longer works.
+  await newbie.goto(invite);
+  await expect(newbie.getByRole("heading", { name: /doesn't work any more/ })).toBeVisible();
 });

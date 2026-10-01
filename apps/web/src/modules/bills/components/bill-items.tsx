@@ -2,6 +2,7 @@
 
 import { cn } from "cn";
 import Link from "next/link";
+import type { ReactNode } from "react";
 import { useOptimistic, useRef, useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { callAction } from "@/lib/call-action";
@@ -54,6 +55,7 @@ function BillItems({
   canEdit,
   members,
   currentUserId,
+  invite,
 }: {
   billId: string;
   title: string;
@@ -64,6 +66,8 @@ function BillItems({
   canEdit: boolean;
   members: SplitMember[];
   currentUserId: string;
+  /** Rendered under the add-item button, e.g. the invite button. */
+  invite?: ReactNode;
 }) {
   const [shownItems, applyOptimistic] = useOptimistic(items, applyChange);
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -141,6 +145,8 @@ function BillItems({
       ) : (
         <p className="text-center text-caption text-cream/90">Settling up — items are locked.</p>
       )}
+
+      {invite}
 
       {pageError ? (
         <p role="alert" className="rounded-lg bg-paper px-4 py-3 text-body text-primary">

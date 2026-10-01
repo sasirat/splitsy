@@ -10,6 +10,7 @@ import {
 } from "@/lib/format";
 import { BillItems } from "@/modules/bills/components/bill-items";
 import { getBill } from "@/modules/bills/queries";
+import { InviteButton } from "@/modules/groups/components/invite-button";
 import { requireOnboardedUser } from "@/server/auth";
 
 export default async function BillPage({ params }: PageProps<"/bills/[id]">) {
@@ -39,6 +40,7 @@ export default async function BillPage({ params }: PageProps<"/bills/[id]">) {
         meta={meta}
         payerName={personName(bill.payer)}
         canEdit={bill.status === "OPEN"}
+        invite={<InviteButton groupId={bill.groupId} className="text-cream" />}
         currentUserId={user.id}
         members={bill.members.map((member) => {
           const name = personName(member);

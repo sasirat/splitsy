@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { formatBaht, formatBillDate, formatBillNumber, formatBillTime, initialsOf } from "./format";
+import {
+  formatBaht,
+  formatBillDate,
+  formatBillNumber,
+  formatBillTime,
+  formatShortDate,
+  initialsOf,
+} from "./format";
 
 describe("formatBaht (satang in)", () => {
   it.each([
@@ -48,5 +55,13 @@ describe("initialsOf", () => {
     ["  Beam  Tan  Lee ", "BT"],
   ])("%j → %s", (name, initials) => {
     expect(initialsOf(name)).toBe(initials);
+  });
+});
+
+describe("formatShortDate", () => {
+  it("shows day + short month in Bangkok time", () => {
+    expect(formatShortDate(new Date("2026-10-08T12:00:00Z"))).toBe("8 Oct");
+    // 20:00 UTC on 7 Oct is already 8 Oct in Bangkok (UTC+7).
+    expect(formatShortDate(new Date("2026-10-07T20:00:00Z"))).toBe("8 Oct");
   });
 });

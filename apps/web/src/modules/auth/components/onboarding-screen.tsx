@@ -10,8 +10,15 @@ import { callAction } from "@/lib/call-action";
 import { updateDisplayName } from "../actions";
 
 /** "Who's at the table?" — pick the name friends see on every item you claim.
- *  Shown to new users after sign-in, and from "Edit name" on home. */
-function OnboardingScreen({ currentName }: { currentName: string | null }) {
+ *  Shown to new users after sign-in, and from "Edit name" on home. Goes to
+ *  `next` (an already-sanitized same-origin path) when done. */
+function OnboardingScreen({
+  currentName,
+  next = "/",
+}: {
+  currentName: string | null;
+  next?: string;
+}) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
@@ -22,7 +29,7 @@ function OnboardingScreen({ currentName }: { currentName: string | null }) {
     startTransition(async () => {
       const result = await callAction(() => updateDisplayName({ displayName }));
       if (!result.ok) return setError(result.error);
-      router.push("/");
+      router.push(next);
     });
   }
 

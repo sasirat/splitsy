@@ -9,3 +9,9 @@ export const createGroupInput = z.object({
 });
 
 export type CreateGroupInput = z.input<typeof createGroupInput>;
+
+export const createInviteInput = z.object({ groupId: z.string().min(1) });
+export type CreateInviteInput = z.input<typeof createInviteInput>;
+
+export const joinGroupInput = z.object({ token: z.string().min(1).max(100) });
+export type JoinGroupInput = z.input<typeof joinGroupInput>;

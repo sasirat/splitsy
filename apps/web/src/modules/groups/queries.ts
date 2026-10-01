@@ -1,7 +1,9 @@
 import "server-only";
+import { personName } from "@/lib/format";
 import { groupAccessWhere } from "@/server/access";
 import { requireUser } from "@/server/auth";
 import { getDb } from "@/server/db";
+import { inviteState } from "./service";
 
 const person = { select: { id: true, displayName: true, email: true } } as const;
 
@@ -60,5 +62,43 @@ export async function getGroup(groupId: string) {
     })),
   };
 }
+
+/** What an invite link points at, for the join page. null for links that
+ *  don't work (unknown, expired, revoked) — all look the same to outsiders. */
+export async function getInvitePreview(token: string) {
+  const user = await requireUser();
+  const invite = await getDb().inviteToken.findUnique({
+    where: { token },
+    select: {
+      expiresAt: true,
+      revokedAt: true,
+      createdBy: person,
+      group: {
+        select: {
+          id: true,
+          name: true,
+          type: true,
+          members: { orderBy: { joinedAt: "asc" }, select: { user: person } },
+          bills: { select: { id: true, title: true }, take: 1 },
+        },
+      },
+    },
+  });
+  if (!invite || inviteState(invite, new Date()) !== "valid") return null;
+
+  const { group } = invite;
+  const quickBill = group.type === "AD_HOC" ? group.bills[0] : undefined;
+  const members = group.members.map((member) => member.user);
+  return {
+    kind: quickBill ? ("bill" as const) : ("group" as const),
+    name: quickBill?.title ?? group.name,
+    inviterName: personName(invite.createdBy),
+    members,
+    alreadyMember: members.some((member) => member.id === user.id),
+    destination: quickBill ? `/bills/${quickBill.id}` : `/groups/${group.id}`,
+  };
+}
+
+export type InvitePreview = NonNullable<Awaited<ReturnType<typeof getInvitePreview>>>;
 
 export type GroupDetail = NonNullable<Awaited<ReturnType<typeof getGroup>>>;

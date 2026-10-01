@@ -5,6 +5,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { PhoneFrame } from "@/components/ui/phone-frame";
 import { initialsOf, personName } from "@/lib/format";
 import { BillCard } from "@/modules/bills/components/bill-card";
+import { InviteButton } from "@/modules/groups/components/invite-button";
 import { getGroup } from "@/modules/groups/queries";
 import { requireOnboardedUser } from "@/server/auth";
 
@@ -42,6 +43,7 @@ export default async function GroupPage({ params }: PageProps<"/groups/[id]">) {
             );
           })}
         </ul>
+        <InviteButton groupId={group.id} className="text-cream" />
       </section>
 
       <section className="flex flex-col gap-2">

@@ -22,3 +22,13 @@ export function findAccessibleBill(billId: string, userId: string) {
 export function groupAccessWhere(userId: string): Prisma.GroupWhereInput {
   return { type: "PERSISTENT", members: { some: { userId } } };
 }
+
+/** Whether `userId` is in the group — any type, including a quick bill's
+ *  hidden group (invites need that; listings use groupAccessWhere). */
+export async function isMember(groupId: string, userId: string): Promise<boolean> {
+  const membership = await getDb().groupMember.findUnique({
+    where: { groupId_userId: { groupId, userId } },
+    select: { userId: true },
+  });
+  return membership !== null;
+}
