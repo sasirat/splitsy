@@ -47,7 +47,7 @@ Core total: ~13–18 focused dev-days.
 - [x] **S13** End-to-end pass of the slice; fix breakage; loading/error/empty states
 - [x] **S14** Persistent groups + membership; attach bills to a group
 - [x] **S15** Invite via share link (token) + join flow _(built on dev sign-in first)_
-- [ ] **S14b** Clerk Google auth replaces dev sign-in (invitees need real accounts); swap only `src/server/auth.ts` + login footer _(after S15 — external setup risk; can spill to S20)_
+- [x] **S14b** Clerk Google auth replaces dev sign-in (invitees need real accounts); swap only `src/server/auth.ts` + login footer _(after S15 — external setup risk; can spill to S20)_
 - **Done when:** full core loop works for a real multi-person bill.
 
 ## Week 4 — Settlement + debt simplification (finish M4)

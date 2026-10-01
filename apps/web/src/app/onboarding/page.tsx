@@ -1,5 +1,5 @@
 import { OnboardingScreen } from "@/modules/auth/components/onboarding-screen";
-import { requireUser } from "@/server/auth";
+import { requireUser, suggestedDisplayName } from "@/server/auth";
 import { safeRedirectPath } from "@/server/session";
 
 export default async function OnboardingPage({ searchParams }: PageProps<"/onboarding">) {
@@ -7,5 +7,9 @@ export default async function OnboardingPage({ searchParams }: PageProps<"/onboa
   const { next } = await searchParams;
   // Keeps where the user was heading (e.g. an invite link) across onboarding.
   const nextPath = safeRedirectPath(typeof next === "string" ? next : undefined);
-  return <OnboardingScreen currentName={user.displayName} next={nextPath} />;
+  // New Google users get their first name prefilled — one tap to continue.
+  const suggestion = user.displayName ? null : await suggestedDisplayName();
+  return (
+    <OnboardingScreen currentName={user.displayName} suggestedName={suggestion} next={nextPath} />
+  );
 }

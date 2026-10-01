@@ -1,7 +1,7 @@
 import Link from "next/link";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import { PhoneFrame } from "@/components/ui/phone-frame";
-import { signOut } from "@/modules/auth/actions";
+import { SignOutButton } from "@/modules/auth/components/sign-out-button";
 import { BillCard } from "@/modules/bills/components/bill-card";
 import { listMyBills } from "@/modules/bills/queries";
 import { GroupCard } from "@/modules/groups/components/group-card";
@@ -65,11 +65,7 @@ export default async function Home() {
         <Link href="/bills/new" className={buttonVariants({ size: "lg", className: "w-full" })}>
           + New bill
         </Link>
-        <form action={signOut}>
-          <Button type="submit" variant="link" className="text-cream">
-            Sign out
-          </Button>
-        </form>
+        <SignOutButton className="text-cream" />
       </div>
     </PhoneFrame>
   );

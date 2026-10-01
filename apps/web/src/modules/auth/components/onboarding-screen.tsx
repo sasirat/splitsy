@@ -14,9 +14,12 @@ import { updateDisplayName } from "../actions";
  *  `next` (an already-sanitized same-origin path) when done. */
 function OnboardingScreen({
   currentName,
+  suggestedName,
   next = "/",
 }: {
   currentName: string | null;
+  /** Prefill for new users, e.g. their Google first name. */
+  suggestedName?: string | null;
   next?: string;
 }) {
   const router = useRouter();
@@ -59,7 +62,7 @@ function OnboardingScreen({
             <Input
               id="displayName"
               name="displayName"
-              defaultValue={currentName ?? ""}
+              defaultValue={currentName ?? suggestedName ?? ""}
               placeholder="Your name"
               maxLength={30}
               autoComplete="nickname"

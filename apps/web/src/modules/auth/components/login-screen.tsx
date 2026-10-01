@@ -4,11 +4,12 @@ import { Button } from "@/components/ui/button";
 import { PhoneFrame } from "@/components/ui/phone-frame";
 import { initialsOf } from "@/lib/format";
 import { signInAs } from "../actions";
+import { GoogleSignInButton } from "./google-sign-in-button";
 import type { DevUser } from "../queries";
 
 /** Login screen (Figma "login"): the paper collage with the wordmark, and the
- *  sign-in actions in the footer. Until Clerk lands, the footer offers one
- *  "Continue as …" button per user (dev only). */
+ *  sign-in actions in the footer: Continue with Google, plus — in development
+ *  only — one "Continue as …" button per seeded user. */
 function LoginScreen({
   users,
   next,
@@ -54,6 +55,7 @@ function LoginScreen({
       </div>
 
       <footer className="flex flex-col items-center gap-6 px-6 pb-8">
+        <GoogleSignInButton next={next ?? "/"} />
         {devSignIn ? (
           users.length > 0 ? (
             <div className="flex w-full flex-col items-center gap-3">
@@ -83,9 +85,7 @@ function LoginScreen({
               No users yet — run <code className="font-mono">pnpm --filter web db:seed</code>.
             </p>
           )
-        ) : (
-          <p className="text-center text-body text-cream">Sign-in isn&apos;t available yet.</p>
-        )}
+        ) : null}
         <p className="text-micro text-cream/60">Terms, privacy, the usual</p>
       </footer>
     </PhoneFrame>

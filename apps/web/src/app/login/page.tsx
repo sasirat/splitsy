@@ -6,7 +6,7 @@ import { devSignInEnabled, safeRedirectPath } from "@/server/session";
 
 export default async function LoginPage({ searchParams }: PageProps<"/login">) {
   const { next } = await searchParams;
-  const nextPath = typeof next === "string" ? next : undefined;
+  const nextPath = typeof next === "string" ? safeRedirectPath(next) : undefined;
 
   if (await getCurrentUser()) redirect(safeRedirectPath(nextPath));
 

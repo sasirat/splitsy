@@ -1,3 +1,4 @@
+import { ClerkProvider } from "@clerk/nextjs";
 import type { Metadata } from "next";
 import { cookie, ibmPlexMono, judson, outfit } from "./fonts";
 import "./globals.css";
@@ -9,11 +10,14 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html
-      lang="en"
-      className={`${judson.variable} ${outfit.variable} ${cookie.variable} ${ibmPlexMono.variable} h-full antialiased`}
-    >
-      <body className="flex min-h-full flex-col font-body text-ink">{children}</body>
-    </html>
+    // signInUrl: our own /login (Google + dev sign-in), not Clerk's hosted page.
+    <ClerkProvider signInUrl="/login">
+      <html
+        lang="en"
+        className={`${judson.variable} ${outfit.variable} ${cookie.variable} ${ibmPlexMono.variable} h-full antialiased`}
+      >
+        <body className="flex min-h-full flex-col font-body text-ink">{children}</body>
+      </html>
+    </ClerkProvider>
   );
 }
