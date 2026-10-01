@@ -43,7 +43,7 @@ Core total: ~13–18 focused dev-days.
 ## Week 3 — Vertical slice complete (finish M3 → start M4)
 
 - [x] **S11** Item-detail split (self-report checkboxes) → persist ItemSplit, live per-head amounts
-- [ ] **S12** Bill summary (itemized, "shared by", subtotal/total) from DB
+- [x] **S12** Bill summary (itemized, "shared by", subtotal/total) from DB
 - [ ] **S13** End-to-end pass of the slice; fix breakage; loading/error/empty states
 - [ ] **S14** Persistent groups + membership; attach bills to a group
 - [ ] **S15** Invite via share link (token) + join flow _(built on dev sign-in first)_

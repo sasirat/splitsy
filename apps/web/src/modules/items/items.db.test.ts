@@ -17,6 +17,7 @@ vi.mock("@/server/auth", () => ({
 
 const { createBill } = await import("@/modules/bills/actions");
 const { getBill } = await import("@/modules/bills/queries");
+const { billSummary } = await import("@/modules/bills/service");
 const { addItem, setMyClaim } = await import("./actions");
 
 const MINT = "seed_user_mint";
@@ -127,5 +128,28 @@ describe("getBill members", () => {
 
     const bill = await getBill(billId);
     expect(bill?.members.map((m) => m.id).sort()).toEqual([MINT, PLOY]);
+  });
+});
+
+describe("billSummary on a real bill", () => {
+  it("shows what each member owes the payer from persisted claims", async () => {
+    const { billId, itemId } = await billWithItem("100", [PLOY, BEAM]);
+    await addItem({ billId, name: "Mango sticky rice", price: "150" });
+    for (const userId of [MINT, PLOY]) {
+      auth.currentUserId = userId;
+      await setMyClaim({ itemId, claimed: true });
+    }
+
+    const bill = await getBill(billId);
+    if (!bill) throw new Error("bill missing");
+    const summary = billSummary(bill.items, bill.members, bill.payerId);
+
+    expect(summary.people.map((p) => [p.userId, p.totalSatang, p.owesPayerSatang])).toEqual([
+      [MINT, 5000, 0],
+      [PLOY, 5000, 5000],
+      [BEAM, 0, 0],
+    ]);
+    expect(summary.owedToPayerSatang).toBe(5000);
+    expect(summary.unassignedItems.map((i) => i.name)).toEqual(["Mango sticky rice"]);
   });
 });

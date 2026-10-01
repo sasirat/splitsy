@@ -1,6 +1,7 @@
 "use client";
 
 import { cn } from "cn";
+import Link from "next/link";
 import { useOptimistic, useRef, useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { callAction } from "@/lib/call-action";
@@ -150,6 +151,14 @@ function BillItems({
       <div className="flex flex-col items-center gap-1 text-center text-caption text-cream/90">
         <span>Paid by {payerName}</span>
         {unclaimed > 0 ? <span>{formatBaht(unclaimed)} not claimed yet</span> : null}
+        {items.length > 0 ? (
+          <Link
+            href={`/bills/${billId}/summary`}
+            className="mt-2 text-body text-cream underline underline-offset-4"
+          >
+            See summary →
+          </Link>
+        ) : null}
       </div>
 
       <div className="sticky bottom-0 -mx-5 mt-auto bg-scene-green/95 py-4 backdrop-blur">
