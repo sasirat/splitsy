@@ -32,9 +32,10 @@ export async function signInAs(formData: FormData) {
   redirect(safeRedirectPath(next));
 }
 
-export async function signOut() {
+/** Clears the dev sign-in cookie. No redirect: the sign-out button navigates
+ *  once, after Clerk has signed out too. */
+export async function clearDevSession() {
   (await cookies()).delete(SESSION_COOKIE);
-  redirect("/login");
 }
 
 /** Set the name friends see on every item you pick (onboarding / edit name). */

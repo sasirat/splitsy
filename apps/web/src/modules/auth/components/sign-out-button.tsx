@@ -1,13 +1,17 @@
 "use client";
 
 import { useClerk } from "@clerk/nextjs";
+import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 import { Button } from "@/components/ui/button";
-import { signOut } from "../actions";
+import { clearDevSession } from "../actions";
 
-/** Signs out of both Clerk (Google) and dev sign-in, then goes to /login. */
+/** Signs out of both dev sign-in and Clerk (Google), then goes to /login.
+ *  The dev cookie is cleared first so the single navigation at the end can't
+ *  land back on a page while still signed in as a dev user. */
 function SignOutButton({ className }: { className?: string }) {
   const clerk = useClerk();
+  const router = useRouter();
   const [pending, startTransition] = useTransition();
 
   return (
@@ -18,8 +22,12 @@ function SignOutButton({ className }: { className?: string }) {
       disabled={pending}
       onClick={() =>
         startTransition(async () => {
-          if (clerk.session) await clerk.signOut();
-          await signOut(); // clears the dev cookie and redirects to /login
+          await clearDevSession();
+          if (clerk.session) {
+            await clerk.signOut({ redirectUrl: "/login" });
+          } else {
+            router.push("/login");
+          }
         })
       }
     >
