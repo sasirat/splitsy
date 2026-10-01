@@ -156,7 +156,6 @@ describe("createBill in a group", () => {
     const { groupId: hiddenGroupId } = await getDb().bill.findUniqueOrThrow({
       where: { id: quickBillId },
     });
-    const before = await getDb().bill.count();
 
     expect(await createBill({ title: "Into a hidden group", groupId: hiddenGroupId })).toEqual({
       ok: false,
@@ -171,6 +170,8 @@ describe("createBill in a group", () => {
       ok: false,
       error: "Group not found",
     });
-    expect(await getDb().bill.count()).toBe(before);
+    // Scoped to these titles so other writes to the shared dev DB can't interfere.
+    const attempted = ["Into a hidden group", "Nowhere", "Sneaky"];
+    expect(await getDb().bill.count({ where: { title: { in: attempted } } })).toBe(0);
   });
 });
