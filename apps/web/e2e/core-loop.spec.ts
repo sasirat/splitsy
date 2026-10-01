@@ -2,10 +2,11 @@
 // items, Ploy joins (directly in the DB until invites land in S15), both
 // claim, and the summary shows who owes whom.
 import { expect, test, type Page } from "@playwright/test";
-import { cleanupBill, joinBill, setBillStatus } from "./db";
+import { cleanupBill, cleanupGroup, joinBill, setBillStatus } from "./db";
 
 const TITLE = `E2E dinner ${Date.now()}`;
 const LOCKED_TITLE = `E2E locked ${Date.now()}`;
+const GROUP_NAME = `E2E flat ${Date.now()}`;
 
 async function signInAs(page: Page, name: string) {
   await page.goto("/login");
@@ -26,6 +27,7 @@ async function claim(page: Page, item: string) {
 test.afterAll(() => {
   cleanupBill(TITLE);
   cleanupBill(LOCKED_TITLE);
+  cleanupGroup(GROUP_NAME);
 });
 
 async function newBill(page: Page, title: string) {
@@ -116,4 +118,39 @@ test("a settling bill is read-only but its summary still loads", async ({ page }
 
   await page.getByRole("link", { name: "See summary →" }).click();
   await expect(page.getByText(/฿65 not claimed yet/)).toBeVisible();
+});
+
+test("create a group and start a bill inside it", async ({ page }) => {
+  await signInAs(page, "Mint");
+
+  await page.getByRole("link", { name: "+ New group" }).click();
+  await page.getByLabel("Group name").fill(GROUP_NAME);
+  await page.getByRole("button", { name: "Create group" }).click();
+  await expect(page).toHaveURL(/\/groups\/(?!new$)[^/]+$/);
+  await expect(page.getByRole("heading", { name: GROUP_NAME })).toBeVisible();
+  await expect(page.getByText("No bills in this group yet.")).toBeVisible();
+
+  await page.getByRole("link", { name: "+ New bill in this group" }).click();
+  await expect(page.getByText(`In ${GROUP_NAME}`)).toBeVisible();
+  await page.getByLabel("Bill name").fill("Rent October");
+  await page.getByRole("button", { name: "Start bill" }).click();
+  await expect(page).toHaveURL(/\/bills\/(?!new)[^/?]+$/);
+
+  // The bill links back to its group, which now lists it.
+  await page.getByRole("link", { name: `← ${GROUP_NAME}` }).click();
+  await expect(page.getByRole("link", { name: /Rent October/ })).toBeVisible();
+
+  // Home shows the group, and the bill tagged with the group's name.
+  await page.goto("/");
+  await expect(page.getByRole("link", { name: new RegExp(GROUP_NAME) }).first()).toBeVisible();
+  const billCard = page.getByRole("link", { name: /Rent October/ });
+  await expect(billCard).toContainText(GROUP_NAME);
+});
+
+test("an unknown group shows the not-found page", async ({ page }) => {
+  await signInAs(page, "Mint");
+  await page.goto("/groups/does-not-exist");
+  await expect(page.getByRole("heading", { name: "Group not found" })).toBeVisible();
+  await page.goto("/bills/new?group=does-not-exist");
+  await expect(page.getByRole("heading", { name: "Page not found" })).toBeVisible();
 });

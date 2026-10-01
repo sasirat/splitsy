@@ -16,3 +16,9 @@ export function findAccessibleBill(billId: string, userId: string) {
     select: { id: true, groupId: true, status: true },
   });
 }
+
+/** A persistent group `userId` is a member of. Quick-bill (AD_HOC) groups are
+ *  implementation details of a single bill, so they never match. */
+export function groupAccessWhere(userId: string): Prisma.GroupWhereInput {
+  return { type: "PERSISTENT", members: { some: { userId } } };
+}

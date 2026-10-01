@@ -16,8 +16,9 @@ const QUICK_PICKS = [
 ] as const;
 
 /** The "new bill" receipt card: name the bill (type or quick-pick), then start.
- *  `date`/`time` are formatted on the server so they match the saved bill. */
-function CreateBillForm({ date, time }: { date: string; time: string }) {
+ *  `date`/`time` are formatted on the server so they match the saved bill.
+ *  With `groupId`, the bill starts inside that group. */
+function CreateBillForm({ date, time, groupId }: { date: string; time: string; groupId?: string }) {
   const router = useRouter();
   const [title, setTitle] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -26,7 +27,7 @@ function CreateBillForm({ date, time }: { date: string; time: string }) {
   function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     startTransition(async () => {
-      const result = await callAction(() => createBill({ title }));
+      const result = await callAction(() => createBill({ title, groupId }));
       if (!result.ok) return setError(result.error);
       router.push(`/bills/${result.billId}`);
     });

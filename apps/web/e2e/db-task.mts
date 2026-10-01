@@ -3,6 +3,7 @@
 //   tsx e2e/db-task.mts join <billTitle> <userId>
 //   tsx e2e/db-task.mts status <billTitle> <OPEN|SETTLING|SETTLED>
 //   tsx e2e/db-task.mts cleanup <billTitle>
+//   tsx e2e/db-task.mts cleanup-group <groupName>
 import "dotenv/config";
 import { PrismaNeon } from "@prisma/adapter-neon";
 import { PrismaClient } from "../src/generated/prisma/client";
@@ -26,6 +27,8 @@ if (task === "join") {
 } else if (task === "cleanup") {
   // Deleting the group cascades to membership, bills, items and splits.
   await db.group.deleteMany({ where: { bills: { some: { title } } } });
+} else if (task === "cleanup-group") {
+  await db.group.deleteMany({ where: { name: title, type: "PERSISTENT" } });
 } else {
   throw new Error(`Unknown task: ${task}`);
 }

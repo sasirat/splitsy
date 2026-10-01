@@ -15,7 +15,14 @@ export async function getBill(billId: string) {
     where: { id: billId, ...billAccessWhere(user.id) },
     include: {
       payer: person,
-      group: { select: { members: { orderBy: { joinedAt: "asc" }, select: { user: person } } } },
+      group: {
+        select: {
+          id: true,
+          name: true,
+          type: true,
+          members: { orderBy: { joinedAt: "asc" }, select: { user: person } },
+        },
+      },
       items: {
         // Concurrent adds can share a position; createdAt keeps order stable.
         orderBy: [{ position: "asc" }, { createdAt: "asc" }],
@@ -28,13 +35,16 @@ export async function getBill(billId: string) {
   return {
     ...rest,
     members: group.members.map((member) => member.user),
+    /** The persistent group this bill is in; null for quick bills. */
+    namedGroup: group.type === "PERSISTENT" ? { id: group.id, name: group.name } : null,
     totals: billTotals(bill.items),
   };
 }
 
 export type BillDetail = NonNullable<Awaited<ReturnType<typeof getBill>>>;
 
-/** The current user's bills, newest first, with item count and subtotal. */
+/** The current user's bills, newest first, with item count, subtotal and
+ *  group name. */
 export async function listMyBills() {
   const user = await requireUser();
   const bills = await getDb().bill.findMany({
@@ -46,11 +56,14 @@ export async function listMyBills() {
       title: true,
       status: true,
       createdAt: true,
+      group: { select: { name: true, type: true } },
       items: { select: { priceSatang: true } },
     },
   });
-  return bills.map(({ items, ...bill }) => ({
+  return bills.map(({ items, group, ...bill }) => ({
     ...bill,
+    /** Set for bills in a persistent group; quick bills have none. */
+    groupName: group.type === "PERSISTENT" ? group.name : null,
     itemCount: items.length,
     subtotalSatang: items.reduce((sum, item) => sum + item.priceSatang, 0),
   }));

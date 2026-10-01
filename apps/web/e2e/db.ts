@@ -13,3 +13,6 @@ export const setBillStatus = (title: string, status: "OPEN" | "SETTLING" | "SETT
 
 /** Delete every group holding a bill with this title. */
 export const cleanupBill = (title: string) => run("cleanup", title);
+
+/** Delete persistent groups with this name (cascades to their bills). */
+export const cleanupGroup = (name: string) => run("cleanup-group", name);

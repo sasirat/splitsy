@@ -4,11 +4,13 @@ import { PhoneFrame } from "@/components/ui/phone-frame";
 import { signOut } from "@/modules/auth/actions";
 import { BillCard } from "@/modules/bills/components/bill-card";
 import { listMyBills } from "@/modules/bills/queries";
+import { GroupCard } from "@/modules/groups/components/group-card";
+import { listMyGroups } from "@/modules/groups/queries";
 import { requireOnboardedUser } from "@/server/auth";
 
 export default async function Home() {
   const user = await requireOnboardedUser();
-  const bills = await listMyBills();
+  const [bills, groups] = await Promise.all([listMyBills(), listMyGroups()]);
 
   return (
     <PhoneFrame scene="blue" className="gap-6 px-5 pt-10 pb-8">
@@ -25,6 +27,25 @@ export default async function Home() {
         </Link>
       </header>
 
+      <section className="flex flex-col gap-3">
+        <div className="flex items-center justify-between">
+          <h2 className="text-label text-cream/80">Your groups</h2>
+          <Link href="/groups/new" className="text-caption text-cream underline underline-offset-4">
+            + New group
+          </Link>
+        </div>
+        {groups.length > 0 ? (
+          <ul className="flex flex-col gap-3">
+            {groups.map((group) => (
+              <li key={group.id}>
+                <GroupCard {...group} />
+              </li>
+            ))}
+          </ul>
+        ) : null}
+      </section>
+
+      <h2 className="-mb-3 text-label text-cream/80">Bills</h2>
       {bills.length > 0 ? (
         <ul className="flex flex-col gap-3">
           {bills.map((bill) => (
