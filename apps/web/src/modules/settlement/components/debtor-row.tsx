@@ -33,7 +33,7 @@ function DebtorRow({
           {initials}
         </Avatar>
         <div className="flex flex-col">
-          <span className="text-body-bold text-ink">{name}</span>
+          <span className="text-body-bold wrap-anywhere text-ink">{name}</span>
           {status ? <span className="text-caption text-muted-foreground">{status}</span> : null}
         </div>
       </div>

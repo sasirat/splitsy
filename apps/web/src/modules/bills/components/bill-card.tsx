@@ -25,7 +25,7 @@ function BillCard({
       <span className="text-caption text-muted-foreground">
         {formatBillNumber(number)} · {formatBillDate(createdAt)}
       </span>
-      <span className="text-h4 text-primary">{title}</span>
+      <span className="text-h4 wrap-anywhere text-primary">{title}</span>
       <span className="flex items-center justify-between text-body text-ink">
         <span>
           {itemCount} item{itemCount === 1 ? "" : "s"}

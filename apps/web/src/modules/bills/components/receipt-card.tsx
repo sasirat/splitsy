@@ -47,7 +47,7 @@ function ReceiptCard({
       />
       <div className="bg-paper px-4 shadow-card">
         <div className="flex flex-col items-center gap-1 px-5 pt-7 pb-4 text-center text-primary">
-          <p className="text-h3 leading-none">{title}</p>
+          <p className="text-h3 leading-none wrap-anywhere">{title}</p>
           {date ? <p className="text-caption">{date}</p> : null}
         </div>
         <ul className="divide-y divide-dashed divide-primary/50 border-y border-dashed border-primary/50">

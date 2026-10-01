@@ -48,7 +48,7 @@ export default async function BillSummaryPage({ params }: PageProps<"/bills/[id]
 
       <header className="flex flex-col gap-1">
         <p className="text-label text-cream/80">Summary</p>
-        <h1 className="text-h1 text-white">{bill.title}</h1>
+        <h1 className="text-h1 wrap-anywhere text-white">{bill.title}</h1>
         <p className="text-caption text-cream/80">{meta}</p>
       </header>
 

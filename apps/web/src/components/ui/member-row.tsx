@@ -34,12 +34,12 @@ function MemberRow({
         className,
       )}
     >
-      <span className="flex items-center gap-3">
+      <span className="flex min-w-0 items-center gap-3">
         <Checkbox checked={checked} onCheckedChange={onCheckedChange} disabled={disabled} />
         <Avatar size="lg" tone="pink">
           {initials}
         </Avatar>
-        <span className="font-body text-base text-ink">{name}</span>
+        <span className="min-w-0 font-body text-base wrap-anywhere text-ink">{name}</span>
       </span>
       <span
         className={cn(

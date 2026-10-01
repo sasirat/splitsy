@@ -5,12 +5,7 @@ import { firstIssue, type ActionResult } from "@/lib/action-result";
 import { billAccessWhere, findAccessibleBill } from "@/server/access";
 import { requireUser } from "@/server/auth";
 import { getDb } from "@/server/db";
-import {
-  addItemInput,
-  setMyClaimInput,
-  type AddItemInput,
-  type SetMyClaimInput,
-} from "./schema";
+import { addItemInput, setMyClaimInput, type AddItemInput, type SetMyClaimInput } from "./schema";
 
 const LOCKED = "This bill is settling up — items are locked";
 

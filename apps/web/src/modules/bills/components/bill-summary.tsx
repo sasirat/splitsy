@@ -27,6 +27,22 @@ function BillSummaryView({
   const iAmPayer = currentUserId === payerId;
   const myOwed = summary.people.find((p) => p.userId === currentUserId)?.owesPayerSatang ?? 0;
 
+  const backToBill = (label: string) => (
+    <Link href={`/bills/${billId}`} className="underline underline-offset-2">
+      {label}
+    </Link>
+  );
+
+  const nothingClaimed = summary.people.every((person) => person.lines.length === 0);
+  if (nothingClaimed && summary.unassignedItems.length === 0) {
+    return (
+      <div className="rounded-lg bg-paper px-4 py-6 text-center text-body text-ink">
+        <p className="text-body-bold">Nothing to summarize yet</p>
+        <p className="text-caption text-muted-foreground">{backToBill("Add items on the bill")}</p>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col gap-4">
       {summary.unassignedItems.length > 0 ? (
@@ -34,58 +50,62 @@ function BillSummaryView({
           <p className="text-body-bold">
             {formatBaht(summary.unassignedSatang)} not claimed yet — totals aren&apos;t final.
           </p>
-          <p className="text-caption">
+          <p className="text-caption wrap-anywhere">
             {summary.unassignedItems.map((item) => item.name).join(", ")} ·{" "}
-            <Link href={`/bills/${billId}`} className="underline underline-offset-2">
-              Claim on the bill
-            </Link>
+            {backToBill("Claim on the bill")}
           </p>
         </div>
       ) : null}
 
-      <ul className="flex flex-col gap-3">
-        {summary.people.map((person) => {
-          const { name, initials } = who(person.userId);
-          const isPayer = person.userId === payerId;
-          return (
-            <li key={person.userId} className="rounded-lg bg-paper px-4 py-3">
-              <div className="flex items-center justify-between gap-3">
-                <div className="flex items-center gap-3">
-                  <Avatar size="lg" tone="pink">
-                    {initials}
-                  </Avatar>
-                  <span className="text-body-bold text-ink">
-                    {person.userId === currentUserId ? "You" : name}
+      {nothingClaimed ? (
+        <p className="rounded-lg bg-paper px-4 py-6 text-center text-body text-muted-foreground">
+          Nobody has claimed anything yet — tap items on the bill to tick what you had.
+        </p>
+      ) : (
+        <ul className="flex flex-col gap-3">
+          {summary.people.map((person) => {
+            const { name, initials } = who(person.userId);
+            const isPayer = person.userId === payerId;
+            return (
+              <li key={person.userId} className="rounded-lg bg-paper px-4 py-3">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <Avatar size="lg" tone="pink">
+                      {initials}
+                    </Avatar>
+                    <span className="min-w-0 text-body-bold wrap-anywhere text-ink">
+                      {person.userId === currentUserId ? "You" : name}
+                    </span>
+                    {isPayer ? <Badge variant="neutral">Paid the bill</Badge> : null}
+                  </div>
+                  <span className="text-amount text-md text-ink">
+                    {formatBaht(person.totalSatang)}
                   </span>
-                  {isPayer ? <Badge variant="neutral">Paid the bill</Badge> : null}
                 </div>
-                <span className="text-amount text-md text-ink">
-                  {formatBaht(person.totalSatang)}
-                </span>
-              </div>
 
-              {person.lines.length > 0 ? (
-                <ul className="mt-2 flex flex-col gap-1 border-t border-divider pt-2">
-                  {person.lines.map((line) => (
-                    <li
-                      key={line.itemId}
-                      className="flex justify-between gap-3 text-caption text-muted-foreground"
-                    >
-                      <span>
-                        {line.name}
-                        {line.sharedWith > 1 ? ` · shared by ${line.sharedWith}` : ""}
-                      </span>
-                      <span>{formatBaht(line.shareSatang)}</span>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="mt-2 text-caption text-muted-foreground">Nothing claimed yet</p>
-              )}
-            </li>
-          );
-        })}
-      </ul>
+                {person.lines.length > 0 ? (
+                  <ul className="mt-2 flex flex-col gap-1 border-t border-divider pt-2">
+                    {person.lines.map((line) => (
+                      <li
+                        key={line.itemId}
+                        className="flex justify-between gap-3 text-caption text-muted-foreground"
+                      >
+                        <span className="min-w-0 wrap-anywhere">
+                          {line.name}
+                          {line.sharedWith > 1 ? ` · shared by ${line.sharedWith}` : ""}
+                        </span>
+                        <span className="shrink-0">{formatBaht(line.shareSatang)}</span>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="mt-2 text-caption text-muted-foreground">Nothing claimed yet</p>
+                )}
+              </li>
+            );
+          })}
+        </ul>
+      )}
 
       <div className="flex flex-col gap-1 rounded-lg bg-paper px-4 py-3 text-ink">
         <div className="flex justify-between text-body">

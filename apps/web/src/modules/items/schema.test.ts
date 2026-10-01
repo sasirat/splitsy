@@ -46,11 +46,10 @@ describe("setMyClaimInput", () => {
     });
   });
 
-  it.each([
-    { itemId: "", claimed: true },
-    { itemId: "i1", claimed: "yes" },
-    { itemId: "i1" },
-  ])("rejects %j", (input) => {
-    expect(setMyClaimInput.safeParse(input).success).toBe(false);
-  });
+  it.each([{ itemId: "", claimed: true }, { itemId: "i1", claimed: "yes" }, { itemId: "i1" }])(
+    "rejects %j",
+    (input) => {
+      expect(setMyClaimInput.safeParse(input).success).toBe(false);
+    },
+  );
 });
