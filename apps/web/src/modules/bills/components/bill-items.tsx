@@ -100,6 +100,10 @@ function BillItems({
     });
   }
 
+  // Each sheet shows its own errors; once both are closed, surface them here so
+  // a failure that lands after "Done" (and its rollback) isn't silent.
+  const pageError = sheetOpen || splitOpen ? null : (error ?? splitError);
+
   const subtotal = sum(shownItems);
   const unclaimed = sum(shownItems.filter((item) => item.sharers.length === 0));
 
@@ -137,9 +141,9 @@ function BillItems({
         <p className="text-center text-caption text-cream/90">Settling up — items are locked.</p>
       )}
 
-      {error && !sheetOpen ? (
+      {pageError ? (
         <p role="alert" className="rounded-lg bg-paper px-4 py-3 text-body text-primary">
-          {error}
+          {pageError}
         </p>
       ) : null}
 
