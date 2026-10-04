@@ -11,5 +11,8 @@ dotenv.config({ path: ".env", quiet: true });
 
 const [command, ...args] = process.argv.slice(2);
 if (!command) throw new Error("Usage: with-test-env.mjs <command> [...args]");
-const { status } = spawnSync(command, args, { stdio: "inherit" });
+const { status, error } = spawnSync(command, args, { stdio: "inherit" });
+if (error) {
+  console.error(`with-test-env: couldn't run "${command}": ${error.message}`);
+}
 process.exit(status ?? 1);
