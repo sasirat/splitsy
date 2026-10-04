@@ -11,6 +11,7 @@ import {
 import { BillSummaryView, type SummaryPerson } from "@/modules/bills/components/bill-summary";
 import { getBill } from "@/modules/bills/queries";
 import { billSummary } from "@/modules/bills/service";
+import { SettleUpButton } from "@/modules/settlement/components/settle-up-button";
 import { requireOnboardedUser } from "@/server/auth";
 
 export default async function BillSummaryPage({ params }: PageProps<"/bills/[id]/summary">) {
@@ -30,6 +31,14 @@ export default async function BillSummaryPage({ params }: PageProps<"/bills/[id]
     const name = personName(person);
     people[person.id] = { name, initials: initialsOf(name) };
   }
+
+  const summary = billSummary(bill.items, bill.members, bill.payerId);
+  const settleBlocked =
+    bill.items.length === 0
+      ? "Add items before settling up."
+      : summary.unassignedItems.length > 0
+        ? "Every item needs claiming before you can settle up."
+        : undefined;
 
   const meta = [
     formatBillNumber(bill.number),
@@ -54,11 +63,22 @@ export default async function BillSummaryPage({ params }: PageProps<"/bills/[id]
 
       <BillSummaryView
         billId={bill.id}
-        summary={billSummary(bill.items, bill.members, bill.payerId)}
+        summary={summary}
         people={people}
         payerId={bill.payerId}
         currentUserId={user.id}
       />
+
+      {bill.status !== "OPEN" ? (
+        <Link
+          href={`/bills/${bill.id}/settle`}
+          className="self-center text-body text-cream underline underline-offset-4"
+        >
+          See settle-up →
+        </Link>
+      ) : bill.payerId === user.id ? (
+        <SettleUpButton billId={bill.id} blockedReason={settleBlocked} />
+      ) : null}
     </PhoneFrame>
   );
 }

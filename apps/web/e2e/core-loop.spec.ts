@@ -108,6 +108,32 @@ test("create a bill, add items, split it between two people, see the summary", a
   await expect(mint.getByText("฿190.50")).toBeVisible();
   const owed = mint.getByText("Friends owe you").locator("..");
   await expect(owed).toContainText("฿90");
+
+  // Som tam is still unclaimed, so Mint can't settle up yet.
+  await expect(mint.getByRole("button", { name: "Settle up" })).toBeDisabled();
+  await expect(mint.getByText("Every item needs claiming before you can settle up.")).toBeVisible();
+
+  // Ploy claims it; now Mint settles up and lands on "You fronted it".
+  await ploy.goto(billUrl);
+  await claim(ploy, "Som tam");
+  // The claim shows optimistically, so retry until it has reached the server.
+  const settleUp = mint.getByRole("button", { name: "Settle up" });
+  await expect(async () => {
+    await mint.reload();
+    await expect(settleUp).toBeEnabled({ timeout: 1_000 });
+  }).toPass();
+  await settleUp.click();
+  await expect(mint).toHaveURL(`${billUrl}/settle`);
+  await expect(mint.getByText("You fronted it")).toBeVisible();
+  await expect(mint.getByText("฿210").first()).toBeVisible();
+  await expect(mint.getByText("Waiting to pay")).toBeVisible();
+
+  // Ploy sees what they owe, and the bill is locked with a link here.
+  await ploy.reload();
+  await expect(ploy.getByText("Settling up — items are locked.")).toBeVisible();
+  await ploy.getByRole("link", { name: "See settle-up →" }).click();
+  await expect(ploy.getByText("You owe Mint")).toBeVisible();
+  await expect(ploy.getByText("Pay Mint directly")).toBeVisible();
 });
 
 test("an unknown bill shows the not-found page", async ({ page }) => {

@@ -21,12 +21,17 @@ if (task === "status") {
   }
   await db.bill.updateMany({ where: { title }, data: { status: arg } });
 } else if (task === "cleanup") {
-  // Deleting the group cascades to membership, bills, items and splits.
+  // Settlements restrict bill deletion, so clear them first; deleting the
+  // group then cascades to membership, bills, items and splits.
+  await db.settlement.deleteMany({ where: { bill: { title } } });
   await db.group.deleteMany({ where: { bills: { some: { title } } } });
 } else if (task === "unname") {
   // Put a seed user back into the "not onboarded" state.
   await db.user.update({ where: { id: title }, data: { displayName: null } });
 } else if (task === "cleanup-group") {
+  await db.settlement.deleteMany({
+    where: { bill: { group: { name: title, type: "PERSISTENT" } } },
+  });
   await db.group.deleteMany({ where: { name: title, type: "PERSISTENT" } });
 } else {
   throw new Error(`Unknown task: ${task}`);

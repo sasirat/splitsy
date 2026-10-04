@@ -165,6 +165,14 @@ function BillItems({
             See summary →
           </Link>
         ) : null}
+        {!canEdit ? (
+          <Link
+            href={`/bills/${billId}/settle`}
+            className="text-body text-cream underline underline-offset-4"
+          >
+            See settle-up →
+          </Link>
+        ) : null}
       </div>
 
       <div className="sticky bottom-0 -mx-5 mt-auto bg-scene-green/95 py-4 backdrop-blur">
