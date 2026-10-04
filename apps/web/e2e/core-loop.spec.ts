@@ -184,7 +184,8 @@ test("create a bill, add items, split it between two people, see the summary", a
   await expect(ploy.getByText("You told Mint you've paid")).toBeVisible();
   await mint.reload();
   await expect(mint.getByText(/Says they've paid/)).toBeVisible();
-  await mint.getByRole("button", { name: "Mark Ploy paid" }).click();
+  // A double tap must not mark it paid and then straight back to unpaid.
+  await mint.getByRole("button", { name: "Mark Ploy paid" }).dblclick();
   await expect(mint.getByText("Everyone has paid you back — all settled.")).toBeVisible();
   // That shows optimistically, so retry until the save has landed.
   await expect(async () => {

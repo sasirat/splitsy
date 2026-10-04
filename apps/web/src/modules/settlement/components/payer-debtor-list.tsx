@@ -49,14 +49,24 @@ function PayerDebtorList({
     ),
   );
   const [error, setError] = useState<string | null>(null);
+  // Rows with a save in flight. Their button is disabled: it flips to "Undo"
+  // at once, so a double tap would otherwise mark paid and straight back.
+  const [saving, setSaving] = useState<ReadonlySet<string>>(new Set());
   const [, startTransition] = useTransition();
 
   function toggle(row: PayerRow) {
+    if (saving.has(row.id)) return;
     setError(null);
+    setSaving((ids) => new Set(ids).add(row.id));
     startTransition(async () => {
       setPaid({ id: row.id, paid: !row.paid });
       const result = await callAction(() => markPaid({ settlementId: row.id, paid: !row.paid }));
       if (!result.ok) setError(`Couldn't update ${row.name}: ${result.error}`);
+      setSaving((ids) => {
+        const rest = new Set(ids);
+        rest.delete(row.id);
+        return rest;
+      });
     });
   }
 
@@ -107,6 +117,7 @@ function PayerDebtorList({
                     variant={row.paid ? "ghost" : "solid"}
                     size="sm"
                     onClick={() => toggle(row)}
+                    disabled={saving.has(row.id)}
                     aria-label={row.paid ? `Undo ${row.name} paid` : `Mark ${row.name} paid`}
                   >
                     {row.paid ? "Undo" : row.claimedLabel ? "Confirm paid" : "Mark paid"}
