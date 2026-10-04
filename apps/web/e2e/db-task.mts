@@ -4,6 +4,7 @@
 //   tsx e2e/db-task.mts cleanup <billTitle>
 //   tsx e2e/db-task.mts cleanup-group <groupName>
 //   tsx e2e/db-task.mts unname <userId>
+//   tsx e2e/db-task.mts reset-payment <userId>
 import "dotenv/config";
 import { PrismaNeon } from "@prisma/adapter-neon";
 import { PrismaClient } from "../src/generated/prisma/client";
@@ -21,13 +22,25 @@ if (task === "status") {
   }
   await db.bill.updateMany({ where: { title }, data: { status: arg } });
 } else if (task === "cleanup") {
+  // Quick bills only: their hidden AD_HOC group belongs to that one bill, so
+  // deleting it is safe. Never touch persistent groups here — they hold other
+  // bills (e.g. the seed's "Friday dinner").
+  const quick = { title, group: { type: "AD_HOC" as const } };
   // Settlements restrict bill deletion, so clear them first; deleting the
   // group then cascades to membership, bills, items and splits.
-  await db.settlement.deleteMany({ where: { bill: { title } } });
-  await db.group.deleteMany({ where: { bills: { some: { title } } } });
+  await db.settlement.deleteMany({ where: { bill: quick } });
+  await db.group.deleteMany({ where: { type: "AD_HOC", bills: { some: { title } } } });
 } else if (task === "unname") {
   // Put a seed user back into the "not onboarded" state.
   await db.user.update({ where: { id: title }, data: { displayName: null } });
+} else if (task === "reset-payment") {
+  // Back to the seed's payment details: Mint has a bank account, nobody a QR.
+  const bank =
+    title === "seed_user_mint"
+      ? { bankName: "KBank", bankAccountNumber: "1234567890", bankAccountName: "Mint S." }
+      : { bankName: null, bankAccountNumber: null, bankAccountName: null };
+  await db.user.update({ where: { id: title }, data: bank });
+  await db.paymentQr.deleteMany({ where: { userId: title } });
 } else if (task === "cleanup-group") {
   await db.settlement.deleteMany({
     where: { bill: { group: { name: title, type: "PERSISTENT" } } },

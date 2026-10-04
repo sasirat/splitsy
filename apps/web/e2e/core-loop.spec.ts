@@ -2,7 +2,7 @@
 // items, Ploy joins through an invite link, both claim, and the summary shows
 // who owes whom.
 import { expect, test, type Page } from "@playwright/test";
-import { cleanupBill, cleanupGroup, setBillStatus, unnameUser } from "./db";
+import { cleanupBill, cleanupGroup, resetPayment, setBillStatus, unnameUser } from "./db";
 
 const TITLE = `E2E dinner ${Date.now()}`;
 const LOCKED_TITLE = `E2E locked ${Date.now()}`;
@@ -14,6 +14,10 @@ async function signInAs(page: Page, name: string) {
   await page.getByRole("button", { name: `Continue as ${name}` }).click();
   await expect(page).toHaveURL("/");
 }
+
+/** The smallest valid PNG, standing in for a QR screenshot. */
+const ONE_PIXEL_PNG =
+  "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=";
 
 const escapeRegExp = (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
@@ -44,6 +48,7 @@ test.afterAll(() => {
   cleanupGroup(GROUP_NAME);
   cleanupBill(NEWBIE_TITLE);
   unnameUser("seed_user_newbie");
+  resetPayment("seed_user_mint");
 });
 
 async function newBill(page: Page, title: string) {
@@ -133,7 +138,35 @@ test("create a bill, add items, split it between two people, see the summary", a
   await expect(ploy.getByText("Settling up — items are locked.")).toBeVisible();
   await ploy.getByRole("link", { name: "See settle-up →" }).click();
   await expect(ploy.getByText("You owe Mint")).toBeVisible();
-  await expect(ploy.getByText("Pay Mint directly")).toBeVisible();
+
+  // Mint adds how to be paid: a bank account and a QR image.
+  await mint.getByRole("button", { name: /Add how friends pay you|Edit/ }).click();
+  const details = mint.getByRole("dialog", { name: "How friends pay you" });
+  await details.getByLabel("Bank", { exact: true }).selectOption("SCB");
+  await details.getByLabel("Account number").fill("123-4-56789-0");
+  await details.getByLabel("Name on the account").fill("Mint E2E");
+  await details.getByRole("button", { name: /^(Save|Update) bank account$/ }).click();
+  await details.getByLabel(/QR image/).setInputFiles({
+    name: "qr.png",
+    mimeType: "image/png",
+    buffer: Buffer.from(ONE_PIXEL_PNG, "base64"),
+  });
+  await expect(details.getByRole("img", { name: "Your payment QR" })).toBeVisible();
+  await details.getByRole("button", { name: "Done" }).click();
+  await expect(mint.getByText("SCB · 123-4-56789-0 · Mint E2E")).toBeVisible();
+
+  // Ploy sees it, with the account number ready to copy and the QR.
+  await ploy.reload();
+  await expect(ploy.getByText("Pay Mint")).toBeVisible();
+  await expect(ploy.getByText("123-4-56789-0")).toBeVisible();
+  await expect(ploy.getByRole("button", { name: "Copy account number" })).toBeVisible();
+  await expect(ploy.getByRole("img", { name: "Mint's payment QR" })).toBeVisible();
+
+  // Mint marks Ploy paid: the only debt, so the bill is settled.
+  await mint.getByRole("button", { name: "Mark Ploy paid" }).click();
+  await expect(mint.getByText("Everyone has paid you back — all settled.")).toBeVisible();
+  await ploy.reload();
+  await expect(ploy.getByText("You're all square with Mint.")).toBeVisible();
 });
 
 test("an unknown bill shows the not-found page", async ({ page }) => {

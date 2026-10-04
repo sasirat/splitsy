@@ -19,8 +19,11 @@ model User {
   clerkId     String   @unique
   email       String
   displayName String?
-  /// PromptPay mobile number or national/tax ID shown at settle-up.
-  promptPayId String?
+  /// How friends pay this user back, shown on bills they paid once settling.
+  /// The three bank fields are set together or not at all.
+  bankName          String?
+  bankAccountNumber String?
+  bankAccountName   String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -32,6 +35,18 @@ model User {
   settlementsOwed    Settlement[]  @relation("SettlementFrom")
   settlementsDue     Settlement[]  @relation("SettlementTo")
   inviteTokensIssued InviteToken[]
+  paymentQr          PaymentQr?
+}
+
+/// A QR image from the user's bank app, shown next to their bank details.
+/// Kept apart from User so user reads never load the bytes.
+model PaymentQr {
+  userId    String   @id
+  image     Bytes
+  mimeType  String
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 /// AD_HOC groups are created implicitly by a quick bill and stay hidden;

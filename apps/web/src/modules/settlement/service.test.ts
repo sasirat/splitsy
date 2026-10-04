@@ -1,6 +1,48 @@
 import { describe, expect, it } from "vitest";
 import { billSummary } from "@/modules/bills/service";
-import { billDebts, netBalances, simplifyDebts, type Payment } from "./service";
+import {
+  billDebts,
+  formatAccountNumber,
+  imageType,
+  netBalances,
+  simplifyDebts,
+  type Payment,
+} from "./service";
+
+describe("formatAccountNumber", () => {
+  it("groups 10-digit accounts the way Thai banks print them", () => {
+    expect(formatAccountNumber("1234567890")).toBe("123-4-56789-0");
+  });
+
+  it("groups 12-digit accounts in fours", () => {
+    expect(formatAccountNumber("020123456789")).toBe("0201-2345-6789");
+  });
+
+  it("leaves anything else as it is", () => {
+    expect(formatAccountNumber("12345678901")).toBe("12345678901");
+  });
+});
+
+describe("imageType", () => {
+  const bytes = (...values: number[]) => new Uint8Array([...values, 0, 0, 0, 0]);
+
+  it("recognises PNG, JPEG and WebP from their first bytes", () => {
+    expect(imageType(bytes(0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a))).toBe("image/png");
+    expect(imageType(bytes(0xff, 0xd8, 0xff, 0xe0))).toBe("image/jpeg");
+    const webp = [0x52, 0x49, 0x46, 0x46, 1, 2, 3, 4, 0x57, 0x45, 0x42, 0x50];
+    expect(imageType(bytes(...webp))).toBe("image/webp");
+  });
+
+  it("rejects anything else, whatever its name or declared type", () => {
+    expect(imageType(bytes(0x47, 0x49, 0x46, 0x38))).toBeNull(); // GIF
+    expect(
+      imageType(new TextEncoder().encode("<svg xmlns='http://www.w3.org/2000/svg'/>")),
+    ).toBeNull();
+    expect(imageType(new Uint8Array([]))).toBeNull();
+    // RIFF but not WebP (e.g. a WAV file).
+    expect(imageType(bytes(0x52, 0x49, 0x46, 0x46, 1, 2, 3, 4, 0x57, 0x41, 0x56, 0x45))).toBeNull();
+  });
+});
 
 // The seeded "Som Tam Nua" bill (prisma/seed.ts), paid by Mint.
 const somTamNua = billSummary(

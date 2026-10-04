@@ -13,12 +13,27 @@ const prisma = new PrismaClient({ adapter: new PrismaNeon({ connectionString }) 
 const baht = (amount: number) => amount * 100;
 
 const users = {
-  mint: { id: "seed_user_mint", displayName: "Mint", promptPayId: "0812345678" },
-  ploy: { id: "seed_user_ploy", displayName: "Ploy", promptPayId: null },
-  beam: { id: "seed_user_beam", displayName: "Beam", promptPayId: null },
+  mint: {
+    id: "seed_user_mint",
+    displayName: "Mint",
+    bankName: "KBank",
+    bankAccountNumber: "1234567890",
+    bankAccountName: "Mint S.",
+  },
+  ploy: { id: "seed_user_ploy", displayName: "Ploy" },
+  beam: { id: "seed_user_beam", displayName: "Beam" },
   // No name yet (reset on every seed) — sign in as them to see onboarding.
-  newbie: { id: "seed_user_newbie", displayName: null, promptPayId: null },
-} satisfies Record<string, { id: string; displayName: string | null; promptPayId: string | null }>;
+  newbie: { id: "seed_user_newbie", displayName: null },
+} satisfies Record<
+  string,
+  {
+    id: string;
+    displayName: string | null;
+    bankName?: string;
+    bankAccountNumber?: string;
+    bankAccountName?: string;
+  }
+>;
 
 type Friend = keyof typeof users;
 

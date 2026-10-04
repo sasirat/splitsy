@@ -63,3 +63,32 @@ export function simplifyDebts(balances: Record<string, number>): Payment[] {
   }
   return payments;
 }
+
+/** An account number as Thai banks print it: 10 digits as 123-4-56789-0,
+ *  12 digits (GSB) in fours. Anything else is returned unchanged. */
+export function formatAccountNumber(digits: string): string {
+  if (/^\d{10}$/.test(digits)) {
+    return `${digits.slice(0, 3)}-${digits[3]}-${digits.slice(4, 9)}-${digits[9]}`;
+  }
+  if (/^\d{12}$/.test(digits)) return digits.replace(/(\d{4})(?=\d)/g, "$1-");
+  return digits;
+}
+
+export type QrImageType = "image/png" | "image/jpeg" | "image/webp";
+
+const startsWith = (bytes: Uint8Array, signature: number[], offset = 0) =>
+  signature.every((byte, i) => bytes[offset + i] === byte);
+
+/** The image type from a file's first bytes — never trust the name or the
+ *  browser's declared type. Only PNG, JPEG and WebP; null for anything else. */
+export function imageType(bytes: Uint8Array): QrImageType | null {
+  if (startsWith(bytes, [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])) return "image/png";
+  if (startsWith(bytes, [0xff, 0xd8, 0xff])) return "image/jpeg";
+  if (
+    startsWith(bytes, [0x52, 0x49, 0x46, 0x46]) &&
+    startsWith(bytes, [0x57, 0x45, 0x42, 0x50], 8)
+  ) {
+    return "image/webp";
+  }
+  return null;
+}

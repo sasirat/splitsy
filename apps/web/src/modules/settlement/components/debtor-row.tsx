@@ -5,13 +5,15 @@ import { Badge } from "@/components/ui/badge";
 import { formatBaht } from "@/lib/format";
 
 /** A "who owes you" row on the settlement screen: avatar + name + status,
- *  with the amount owed and an OWE / PAID badge. */
+ *  with the amount owed, an OWE / PAID badge, and an optional action below
+ *  (the payer's "Mark paid"). */
 function DebtorRow({
   name,
   initials,
   amount,
   status,
   state,
+  action,
   className,
 }: {
   name: string;
@@ -19,12 +21,13 @@ function DebtorRow({
   amount: number;
   status?: string;
   state: "owe" | "paid";
+  action?: React.ReactNode;
   className?: string;
 }) {
   return (
     <div
       className={cn(
-        "flex items-center justify-between border-b border-divider-warm p-4 last:border-b-0",
+        "flex items-center justify-between gap-3 border-b border-divider-warm p-4 last:border-b-0",
         className,
       )}
     >
@@ -37,9 +40,12 @@ function DebtorRow({
           {status ? <span className="text-caption text-muted-foreground">{status}</span> : null}
         </div>
       </div>
-      <div className="flex items-center gap-2">
-        <span className="text-amount text-sm text-primary">{formatBaht(amount)}</span>
-        <Badge variant={state}>{state}</Badge>
+      <div className="flex flex-col items-end gap-2">
+        <div className="flex items-center gap-2">
+          <span className="text-amount text-sm text-primary">{formatBaht(amount)}</span>
+          <Badge variant={state}>{state}</Badge>
+        </div>
+        {action}
       </div>
     </div>
   );

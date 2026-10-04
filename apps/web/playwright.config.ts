@@ -10,6 +10,10 @@ export default defineConfig({
   reporter: "list",
   // Generous: the dev server compiles each route on first visit.
   timeout: 120_000,
+  // Locked item writes cost several ~250ms round trips to Neon (us-east-2), so
+  // a save + refresh can take ~5s. Drop back to the default once tests run
+  // against a local Postgres.
+  expect: { timeout: 15_000 },
   use: {
     baseURL: "http://localhost:3000",
     ...devices["Pixel 7"],
