@@ -17,3 +17,6 @@ out/
 .DS_Store
 coverage/
 *.log
+
+# Local design reference captures
+design-captures/

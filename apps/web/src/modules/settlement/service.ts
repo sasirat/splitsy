@@ -1,0 +1,65 @@
+// Pure settlement math — no Prisma, no Next. All amounts are integer satang.
+import type { BillSummary } from "@/modules/bills/service";
+
+export type Payment = { fromId: string; toId: string; amountSatang: number };
+
+/** Who owes whom on one bill: everyone but the payer pays the payer their
+ *  total, in the summary's order. Anyone at ฿0 is skipped. */
+export function billDebts(summary: Pick<BillSummary, "people">, payerId: string): Payment[] {
+  return summary.people
+    .filter((p) => p.userId !== payerId && p.owesPayerSatang > 0)
+    .map((p) => ({ fromId: p.userId, toId: payerId, amountSatang: p.owesPayerSatang }));
+}
+
+/** Each person's net position across payments, by userId: positive means
+ *  they're owed money, negative means they owe. Always sums to zero; anyone
+ *  who comes out even is left out. */
+export function netBalances(payments: Payment[]): Record<string, number> {
+  const balances: Record<string, number> = {};
+  for (const { fromId, toId, amountSatang } of payments) {
+    balances[fromId] = (balances[fromId] ?? 0) - amountSatang;
+    balances[toId] = (balances[toId] ?? 0) + amountSatang;
+  }
+  for (const [userId, balance] of Object.entries(balances)) {
+    if (balance === 0) delete balances[userId];
+  }
+  return balances;
+}
+
+/** The fewest payments that settle the balances: repeatedly the biggest
+ *  debtor pays the biggest creditor, so there are at most n−1 payments and
+ *  nobody both pays and receives. Ties go to the lowest userId, so the result
+ *  never depends on input order. */
+export function simplifyDebts(balances: Record<string, number>): Payment[] {
+  let sum = 0;
+  for (const [userId, balance] of Object.entries(balances)) {
+    if (!Number.isInteger(balance))
+      throw new RangeError(`Invalid balance for ${userId}: ${balance}`);
+    sum += balance;
+  }
+  if (sum !== 0) throw new RangeError(`Balances must sum to zero, got ${sum}`);
+
+  const byId = (a: { userId: string }, b: { userId: string }) =>
+    a.userId < b.userId ? -1 : a.userId > b.userId ? 1 : 0;
+  const entries = Object.entries(balances)
+    .map(([userId, balance]) => ({ userId, left: Math.abs(balance), owed: balance > 0 }))
+    .filter((e) => e.left > 0)
+    .sort(byId);
+  const creditors = entries.filter((e) => e.owed);
+  const debtors = entries.filter((e) => !e.owed);
+
+  // First in id order among the largest — the stable tie-break.
+  const largest = <T extends { left: number }>(list: T[]) =>
+    list.reduce((best, e) => (e.left > best.left ? e : best));
+
+  const payments: Payment[] = [];
+  while (creditors.some((e) => e.left > 0)) {
+    const creditor = largest(creditors);
+    const debtor = largest(debtors);
+    const amountSatang = Math.min(creditor.left, debtor.left);
+    payments.push({ fromId: debtor.userId, toId: creditor.userId, amountSatang });
+    creditor.left -= amountSatang;
+    debtor.left -= amountSatang;
+  }
+  return payments;
+}

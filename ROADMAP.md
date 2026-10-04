@@ -52,7 +52,7 @@ Core total: ~13–18 focused dev-days.
 
 ## Week 4 — Settlement + debt simplification (finish M4)
 
-- [ ] **S16** Debt-simplification logic ("who owes whom") + Vitest tests
+- [x] **S16** Debt-simplification logic ("who owes whom") + Vitest tests
 - [ ] **S17** "You fronted it" settlement screen: who owes you, amounts, pending/paid
 - [ ] **S18** PromptPay: store number/bank, display + copy, mark-as-paid
 - [ ] **S19** Polish settlement + nudge; remaining states
