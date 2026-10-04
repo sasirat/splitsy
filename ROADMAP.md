@@ -55,7 +55,7 @@ Core total: ~13–18 focused dev-days.
 - [x] **S16** Debt-simplification logic ("who owes whom") + Vitest tests
 - [x] **S17** "You fronted it" settlement screen: who owes you, amounts, pending/paid
 - [x] **S18** How to pay: bank account and/or uploaded QR image, display + copy, mark-as-paid
-- [ ] **S18b** Tests on a local Postgres (Docker) instead of Neon; leaner DB-test setup — fast, non-flaky runs
+- [x] **S18b** Tests on a local Postgres 17 (Docker) instead of Neon, with guards against touching Neon — DB tests ~3s, e2e ~40s
 - [ ] **S19** Polish settlement + nudge; remaining states
 - [ ] **S20** Buffer / catch-up
 - **Done when:** settle-up works; core feature-complete.

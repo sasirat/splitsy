@@ -1,6 +1,5 @@
 import "dotenv/config";
-import { PrismaNeon } from "@prisma/adapter-neon";
-import { PrismaClient } from "../src/generated/prisma/client";
+import { createPrismaClient } from "../src/server/prisma-client";
 
 // Dev seed: three friends (+ one not onboarded), one dinner bill with mixed splits. Idempotent and
 // scoped — it only replaces its own fixed-id rows, never other data.
@@ -8,7 +7,7 @@ import { PrismaClient } from "../src/generated/prisma/client";
 const connectionString = process.env.DATABASE_URL;
 if (!connectionString) throw new Error("DATABASE_URL is not set");
 
-const prisma = new PrismaClient({ adapter: new PrismaNeon({ connectionString }) });
+const prisma = createPrismaClient(connectionString);
 
 const baht = (amount: number) => amount * 100;
 

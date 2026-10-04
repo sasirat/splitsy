@@ -1,5 +1,5 @@
 // Integration tests: resolving the signed-in user from a Clerk session or the
-// dev cookie, against the Neon dev branch. Run with `pnpm test:db`. Clerk and
+// dev cookie, against the local test Postgres. Run with `pnpm test:db`. Clerk and
 // next/headers are mocked; Clerk users created here are deleted afterwards.
 import { afterAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { getDb } from "@/server/db";

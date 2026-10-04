@@ -1,4 +1,4 @@
-// Integration tests against the Neon dev branch (`pnpm test:db`).
+// Integration tests against the local test Postgres (`pnpm test:db`).
 import { afterAll, describe, expect, it, vi } from "vitest";
 import { getDb } from "@/server/db";
 
@@ -8,7 +8,7 @@ vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
 vi.mock("@/server/auth", () => ({
   requireUser: vi.fn(async () => {
     const user = await getDb().user.findUnique({ where: { id: NEWBIE } });
-    if (!user) throw new Error(`Seed user ${NEWBIE} missing — run pnpm db:seed`);
+    if (!user) throw new Error(`Seed user ${NEWBIE} missing — run pnpm test:db:up`);
     return user;
   }),
 }));

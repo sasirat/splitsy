@@ -1,4 +1,4 @@
-// Integration tests: settling up and paying back against the Neon dev branch.
+// Integration tests: settling up and paying back against the local test Postgres.
 // Run with `pnpm test:db`. Signs in as seeded users by mocking requireUser,
 // deletes every group (and settlement) it creates, and restores Mint's
 // payment details afterwards.
@@ -11,7 +11,7 @@ vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
 vi.mock("@/server/auth", () => ({
   requireUser: vi.fn(async () => {
     const user = await getDb().user.findUnique({ where: { id: auth.currentUserId } });
-    if (!user) throw new Error(`Seed user ${auth.currentUserId} missing — run pnpm db:seed`);
+    if (!user) throw new Error(`Seed user ${auth.currentUserId} missing — run pnpm test:db:up`);
     return user;
   }),
 }));
@@ -36,7 +36,7 @@ const createdBillIds: string[] = [];
 /** A bill paid by Mint, with Ploy and Beam in its group, and items claimed as
  *  given: { "Pad thai": ["180", [MINT, PLOY]] }. An empty list leaves it
  *  unclaimed. Built in one nested write — only the code under test goes
- *  through the actions, which keeps round trips to the remote DB down. */
+ *  through the actions. */
 async function billWithClaims(items: Record<string, [string, string[]]>) {
   auth.currentUserId = MINT;
   const bill = await getDb().bill.create({
@@ -191,8 +191,7 @@ describe("startSettling", () => {
     });
   });
 
-  // Five rounds of real races against the remote DB (~8s each on Neon).
-  it("never snapshots claims that change while it's settling", { timeout: 120_000 }, async () => {
+  it("never snapshots claims that change while it's settling", async () => {
     // Race an unclaim (and a new item) against settling: whichever wins, the
     // saved settlements must match the bill's claims afterwards.
     for (let round = 0; round < 5; round++) {

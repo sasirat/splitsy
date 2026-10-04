@@ -6,12 +6,16 @@
 //   tsx e2e/db-task.mts unname <userId>
 //   tsx e2e/db-task.mts reset-payment <userId>
 import "dotenv/config";
-import { PrismaNeon } from "@prisma/adapter-neon";
-import { PrismaClient } from "../src/generated/prisma/client";
+import { isLocalDatabase } from "../src/server/local-db";
+import { createPrismaClient } from "../src/server/prisma-client";
 
 const connectionString = process.env.DATABASE_URL;
 if (!connectionString) throw new Error("DATABASE_URL is not set");
-const db = new PrismaClient({ adapter: new PrismaNeon({ connectionString }) });
+// These tasks delete data — only ever against the local test database.
+if (!isLocalDatabase(connectionString)) {
+  throw new Error("e2e DB tasks only run against the local test DB — load .env.test");
+}
+const db = createPrismaClient(connectionString);
 
 const [task, title, arg] = process.argv.slice(2);
 if (!title) throw new Error("Missing argument");

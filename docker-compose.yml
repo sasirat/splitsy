@@ -1,0 +1,22 @@
+# Local Postgres for DB and e2e tests only — `pnpm dev` stays on Neon.
+# Started by `pnpm --filter web test:db:up`. Data lives in memory (tmpfs), so
+# it's fast and every restart begins empty; test:db:up migrates and seeds it.
+services:
+  postgres-test:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: splitsy
+      POSTGRES_PASSWORD: splitsy
+      POSTGRES_DB: splitsy_test
+    ports:
+      # 5433, so it can't clash with a Homebrew Postgres on 5432.
+      - "5433:5432"
+    tmpfs:
+      - /var/lib/postgresql/data
+    # Tests throw away their data, so trade durability for speed.
+    command: postgres -c fsync=off -c synchronous_commit=off -c full_page_writes=off
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U splitsy -d splitsy_test"]
+      interval: 1s
+      timeout: 3s
+      retries: 30

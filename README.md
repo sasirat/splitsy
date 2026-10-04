@@ -25,6 +25,24 @@ pnpm install
 pnpm dev                  # runs the web app on http://localhost:3000
 ```
 
+`pnpm dev` uses the Neon dev database from `apps/web/.env` (copy `.env.example`).
+
+## Running tests
+
+Unit tests need nothing else. DB and end-to-end tests run against a **local
+Postgres 17 in Docker** (`docker-compose.yml`), never Neon — they refuse to start
+otherwise. Start Docker Desktop, then from `apps/web`:
+
+```bash
+pnpm test                 # unit tests (pure logic)
+pnpm test:db:up           # start the test Postgres, migrate and seed it
+pnpm test:db              # DB integration tests
+pnpm test:e2e             # Playwright, on its own dev server (port 3100)
+pnpm test:db:down         # stop the test Postgres (its data is in memory)
+```
+
+The e2e server builds into `.next-e2e`, so it runs alongside `pnpm dev`.
+
 ## Layout
 
 ```

@@ -1,4 +1,4 @@
-// Integration tests: invite links + joining, against the Neon dev branch.
+// Integration tests: invite links + joining, against the local test Postgres.
 // Run with `pnpm test:db`. Signs in as seeded users by mocking requireUser,
 // and deletes every group it creates (cascading to its invites).
 import { afterAll, beforeEach, describe, expect, it, vi } from "vitest";
@@ -10,7 +10,7 @@ vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
 vi.mock("@/server/auth", () => ({
   requireUser: vi.fn(async () => {
     const user = await getDb().user.findUnique({ where: { id: auth.currentUserId } });
-    if (!user) throw new Error(`Seed user ${auth.currentUserId} missing — run pnpm db:seed`);
+    if (!user) throw new Error(`Seed user ${auth.currentUserId} missing — run pnpm test:db:up`);
     return user;
   }),
 }));

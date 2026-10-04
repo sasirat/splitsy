@@ -59,3 +59,9 @@ The backend lives **inside `apps/web`** (no separate server) and mirrors the fea
 - `src/app/api/**/route.ts` — HTTP endpoints **only where needed** (invite links, Clerk webhooks, and the future React Native app). Route handlers and server actions both wrap the **same `service.ts`**, so RN reuses the backend with no duplicated logic.
 
 Flow: **UI → actions/queries → service → db.** Stack: Prisma + PostgreSQL (Neon/Railway), Clerk (Google) auth, zod validation.
+
+## Testing
+
+- `pnpm dev` runs on **Neon**; DB + e2e tests run on a **local Postgres 17 in Docker** (`docker-compose.yml`, port 5433, `.env.test`).
+- `pnpm test:db:up` → `pnpm test:db` / `pnpm test:e2e` (e2e gets its own dev server on port 3100, `.next-e2e`).
+- Test code and e2e DB helpers must **never** touch Neon — guards refuse non-localhost URLs; keep it that way.
