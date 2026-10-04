@@ -1,17 +1,17 @@
 import { Badge } from "@/components/ui/badge";
-import { TotalDisplay } from "@/modules/bills/components/total-display";
-import { formatBaht, formatShortDate, initialsOf, personName } from "@/lib/format";
+import { formatBaht, formatShortDate, formatTimeAgo, initialsOf, personName } from "@/lib/format";
 import type { SettlementDetail } from "../queries";
 import { formatAccountNumber } from "../service";
+import { ClaimPaidButton } from "./claim-paid-button";
 import { CopyButton } from "./copy-button";
 import { DebtorRow } from "./debtor-row";
-import { MarkPaidButton } from "./mark-paid-button";
+import { PayerDebtorList, type PayerRow } from "./payer-debtor-list";
 import { PaymentDetailsCard } from "./payment-details-card";
 import type { PaymentDetails } from "./payment-details-sheet";
 
-/** Who owes the payer on a settling bill. The payer sees "You fronted it",
- *  what's still owed, how friends pay them, and marks each friend paid;
- *  everyone else sees what they owe, how to pay it, then the full list. */
+/** Who owes the payer on a settling bill. The payer sees what's still owed,
+ *  how friends pay them, and nudges or marks each friend paid; everyone else
+ *  sees what they owe, how to pay it, "I've paid", then the full list. */
 function SettleView({
   settlement,
   currentUserId,
@@ -19,7 +19,7 @@ function SettleView({
   settlement: SettlementDetail;
   currentUserId: string;
 }) {
-  const { payer, settlements, totalSatang, paidSatang, payment } = settlement;
+  const { payer, settlements, payment } = settlement;
   const payerName = personName(payer);
   const iAmPayer = payer.id === currentUserId;
   const mine = settlements.find((s) => s.fromUser.id === currentUserId);
@@ -38,21 +38,38 @@ function SettleView({
     );
   }
 
+  if (iAmPayer) {
+    const now = new Date();
+    const rows: PayerRow[] = settlements.map((s) => {
+      const name = personName(s.fromUser);
+      return {
+        id: s.id,
+        name,
+        initials: initialsOf(name),
+        amountSatang: s.amountSatang,
+        paid: s.status === "PAID",
+        paidLabel: s.paidAt ? `Paid ${formatShortDate(s.paidAt)}` : null,
+        nudgedLabel: s.nudgedAt ? `Nudged ${formatTimeAgo(s.nudgedAt, now)}` : null,
+        claimedLabel: s.paidClaimedAt
+          ? `Says they've paid · ${formatTimeAgo(s.paidClaimedAt, now)}`
+          : null,
+      };
+    });
+    return (
+      <div className="flex flex-col gap-4">
+        <PayerDebtorList
+          billId={settlement.id}
+          billTitle={settlement.title}
+          rows={rows}
+          paymentDetails={<PaymentDetailsCard details={details} />}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col gap-4">
-      {iAmPayer ? (
-        <>
-          <div className="flex flex-col gap-1">
-            <TotalDisplay label="Owed to you" amount={totalSatang - paidSatang} className="px-0" />
-            <p className="text-caption text-cream/90">
-              {paidSatang === totalSatang
-                ? "Everyone has paid you back — all settled."
-                : `${formatBaht(paidSatang)} of ${formatBaht(totalSatang)} paid back`}
-            </p>
-          </div>
-          <PaymentDetailsCard details={details} />
-        </>
-      ) : mine ? (
+      {mine ? (
         <div className="flex flex-col gap-3 rounded-lg bg-paper px-4 py-3 text-ink">
           <div className="flex items-center justify-between gap-3 text-body-bold">
             <span className="min-w-0 wrap-anywhere">You owe {payerName}</span>
@@ -68,7 +85,14 @@ function SettleView({
               You&apos;re all square with {payerName}.
             </p>
           ) : (
-            <PayDetails payerName={payerName} details={details} />
+            <>
+              <PayDetails payerName={payerName} details={details} />
+              <ClaimPaidButton
+                settlementId={mine.id}
+                payerName={payerName}
+                claimed={mine.paidClaimedAt !== null}
+              />
+            </>
           )}
         </div>
       ) : (
@@ -78,9 +102,7 @@ function SettleView({
       )}
 
       <section className="flex flex-col gap-2">
-        <h2 className="text-label text-cream/80">
-          {iAmPayer ? "Who owes you" : `Who owes ${payerName}`}
-        </h2>
+        <h2 className="text-label text-cream/80">Who owes {payerName}</h2>
         <div className="overflow-hidden rounded-lg bg-paper">
           {settlements.map((s) => {
             const name = personName(s.fromUser);
@@ -92,12 +114,13 @@ function SettleView({
                 initials={initialsOf(name)}
                 amount={s.amountSatang}
                 status={
-                  paid ? `Paid${s.paidAt ? ` ${formatShortDate(s.paidAt)}` : ""}` : "Waiting to pay"
+                  paid
+                    ? `Paid${s.paidAt ? ` ${formatShortDate(s.paidAt)}` : ""}`
+                    : s.paidClaimedAt
+                      ? "Says they've paid"
+                      : "Waiting to pay"
                 }
                 state={paid ? "paid" : "owe"}
-                action={
-                  iAmPayer ? <MarkPaidButton settlementId={s.id} paid={paid} name={name} /> : null
-                }
               />
             );
           })}

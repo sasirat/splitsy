@@ -1,4 +1,5 @@
 // Pure settlement math — no Prisma, no Next. All amounts are integer satang.
+import { formatBaht } from "@/lib/format";
 import type { BillSummary } from "@/modules/bills/service";
 
 export type Payment = { fromId: string; toId: string; amountSatang: number };
@@ -91,4 +92,35 @@ export function imageType(bytes: Uint8Array): QrImageType | null {
     return "image/webp";
   }
   return null;
+}
+
+/** The payer's friendly reminder, ready to share on LINE and the like. */
+export function nudgeMessage({
+  name,
+  billTitle,
+  amountSatang,
+  url,
+}: {
+  name: string;
+  billTitle: string;
+  amountSatang: number;
+  url: string;
+}): string {
+  return (
+    `Hi ${name}! Friendly reminder for ${billTitle} 🧾 — you owe ${formatBaht(amountSatang)}. ` +
+    `Pay here: ${url} 🙏`
+  );
+}
+
+/** How much of a bill's settlements is paid back, for "฿x of ฿y paid back". */
+export function settleProgress(
+  settlements: { amountSatang: number; status: "PENDING" | "PAID" }[],
+) {
+  let paidSatang = 0;
+  let totalSatang = 0;
+  for (const { amountSatang, status } of settlements) {
+    totalSatang += amountSatang;
+    if (status === "PAID") paidSatang += amountSatang;
+  }
+  return { paidSatang, totalSatang };
 }

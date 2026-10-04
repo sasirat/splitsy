@@ -53,6 +53,7 @@ function BillItems({
   items,
   payerName,
   canEdit,
+  settled = false,
   members,
   currentUserId,
   invite,
@@ -64,6 +65,8 @@ function BillItems({
   payerName: string;
   /** False once the bill is settling: no new items, no claim changes. */
   canEdit: boolean;
+  /** Everyone has paid the payer back. */
+  settled?: boolean;
   members: SplitMember[];
   currentUserId: string;
   /** Rendered under the add-item button, e.g. the invite button. */
@@ -143,7 +146,9 @@ function BillItems({
           Add item +
         </Button>
       ) : (
-        <p className="text-center text-caption text-cream/90">Settling up — items are locked.</p>
+        <p className="text-center text-caption text-cream/90">
+          {settled ? "Settled — everyone's paid." : "Settling up — items are locked."}
+        </p>
       )}
 
       {invite}

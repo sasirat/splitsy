@@ -13,19 +13,19 @@ datasource db {
 // ─── Users & groups ─────────────────────────────────────────────────────────
 
 model User {
-  id          String   @id @default(cuid())
+  id                String   @id @default(cuid())
   /// Identity key. Email is not unique: a re-created Clerk account can reuse
   /// an email, and it's refreshed from Clerk on sign-in.
-  clerkId     String   @unique
-  email       String
-  displayName String?
+  clerkId           String   @unique
+  email             String
+  displayName       String?
   /// How friends pay this user back, shown on bills they paid once settling.
   /// The three bank fields are set together or not at all.
   bankName          String?
   bankAccountNumber String?
   bankAccountName   String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 
   memberships        GroupMember[]
   groupsCreated      Group[]       @relation("GroupCreatedBy")
@@ -160,15 +160,20 @@ enum SettlementStatus {
 /// A simplified debt: `from` owes `to` for a bill. Not cascaded — a bill
 /// with settlement records can't be deleted by accident.
 model Settlement {
-  id           String           @id @default(cuid())
-  billId       String
-  fromUserId   String
-  toUserId     String
-  amountSatang Int
-  status       SettlementStatus @default(PENDING)
-  paidAt       DateTime?
-  createdAt    DateTime         @default(now())
-  updatedAt    DateTime         @updatedAt
+  id            String           @id @default(cuid())
+  billId        String
+  fromUserId    String
+  toUserId      String
+  amountSatang  Int
+  status        SettlementStatus @default(PENDING)
+  paidAt        DateTime?
+  /// When the payer last sent a reminder (S19 "Nudge").
+  nudgedAt      DateTime?
+  /// When the debtor said "I've paid" — a hint for the payer, who still
+  /// confirms it by marking the settlement PAID. Cleared once marked.
+  paidClaimedAt DateTime?
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
 
   bill     Bill @relation(fields: [billId], references: [id])
   fromUser User @relation("SettlementFrom", fields: [fromUserId], references: [id])

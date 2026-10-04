@@ -70,3 +70,13 @@ export function initialsOf(name: string): string {
     .map((word) => word[0]?.toUpperCase() ?? "")
     .join("");
 }
+
+/** How long ago, for things like "Nudged 2h ago": just now, 5m ago, 3h ago,
+ *  then the short date once it's a day old. A future time reads as just now. */
+export function formatTimeAgo(date: Date, now: Date = new Date()): string {
+  const minutes = Math.floor((now.getTime() - date.getTime()) / 60_000);
+  if (minutes < 1) return "just now";
+  if (minutes < 60) return `${minutes}m ago`;
+  if (minutes < 24 * 60) return `${Math.floor(minutes / 60)}h ago`;
+  return formatShortDate(date);
+}

@@ -62,7 +62,14 @@ async function newBill(page: Page, title: string) {
 test("create a bill, add items, split it between two people, see the summary", async ({
   browser,
 }) => {
-  const mint = await (await browser.newContext()).newPage();
+  // Clipboard access for Nudge's copy fallback (checked below).
+  const mint = await (
+    await browser.newContext({ permissions: ["clipboard-read", "clipboard-write"] })
+  ).newPage();
+  // No share sheet in a test browser: make Nudge fall back to copying.
+  await mint.addInitScript(() => {
+    Object.defineProperty(navigator, "share", { value: undefined });
+  });
   await signInAs(mint, "Mint");
 
   await newBill(mint, TITLE);
@@ -162,11 +169,33 @@ test("create a bill, add items, split it between two people, see the summary", a
   await expect(ploy.getByRole("button", { name: "Copy account number" })).toBeVisible();
   await expect(ploy.getByRole("img", { name: "Mint's payment QR" })).toBeVisible();
 
-  // Mint marks Ploy paid: the only debt, so the bill is settled.
+  // Mint nudges Ploy: the reminder is copied, and the row says when.
+  await mint.getByRole("button", { name: "Nudge Ploy" }).click();
+  await expect(mint.getByText("Reminder copied — paste it in your chat")).toBeVisible();
+  const reminder = await mint.evaluate(() => navigator.clipboard.readText());
+  expect(reminder).toContain(`Hi Ploy! Friendly reminder for ${TITLE}`);
+  expect(reminder).toContain("you owe ฿210.");
+  expect(reminder).toContain(`${billUrl}/settle`);
+  await expect(mint.getByText("Nudged just now")).toBeVisible();
+
+  // Ploy says they've paid; Mint sees it and confirms — the only debt, so
+  // the bill is settled.
+  await ploy.getByRole("button", { name: "I've paid" }).click();
+  await expect(ploy.getByText("You told Mint you've paid")).toBeVisible();
+  await mint.reload();
+  await expect(mint.getByText(/Says they've paid/)).toBeVisible();
   await mint.getByRole("button", { name: "Mark Ploy paid" }).click();
   await expect(mint.getByText("Everyone has paid you back — all settled.")).toBeVisible();
-  await ploy.reload();
-  await expect(ploy.getByText("You're all square with Mint.")).toBeVisible();
+  // That shows optimistically, so retry until the save has landed.
+  await expect(async () => {
+    await ploy.reload();
+    await expect(ploy.getByText("You're all square with Mint.")).toBeVisible({ timeout: 1_000 });
+  }).toPass();
+
+  // Home shows the bill as settled.
+  await mint.goto("/");
+  const card = mint.getByRole("link", { name: new RegExp(escapeRegExp(TITLE)) });
+  await expect(card).toContainText("Settled");
 });
 
 test("an unknown bill shows the not-found page", async ({ page }) => {

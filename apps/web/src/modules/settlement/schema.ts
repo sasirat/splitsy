@@ -41,3 +41,17 @@ export const markPaidInput = z.object({
 });
 
 export type MarkPaidInput = z.input<typeof markPaidInput>;
+
+export const nudgeInput = z.object({
+  settlementId: z.string().min(1),
+});
+
+export type NudgeInput = z.input<typeof nudgeInput>;
+
+export const claimPaidInput = z.object({
+  settlementId: z.string().min(1),
+  /** true = "I've paid", false = take it back. */
+  claimed: z.boolean(),
+});
+
+export type ClaimPaidInput = z.input<typeof claimPaidInput>;

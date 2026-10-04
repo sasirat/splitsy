@@ -7,11 +7,16 @@ import { billAccessWhere } from "@/server/access";
 import { requireUser } from "@/server/auth";
 import { lockBillStatus } from "@/server/bill-lock";
 import { getDb } from "@/server/db";
+import { personName } from "@/lib/format";
 import {
+  claimPaidInput,
   markPaidInput,
+  nudgeInput,
   paymentDetailsInput,
   startSettlingInput,
+  type ClaimPaidInput,
   type MarkPaidInput,
+  type NudgeInput,
   type PaymentDetailsInput,
   type StartSettlingInput,
 } from "./schema";
@@ -164,6 +169,20 @@ export async function removePaymentQr(): Promise<ActionResult> {
   return { ok: true };
 }
 
+/** A settlement on a bill the user can access, with who owes whom; null
+ *  when missing or not a member (same answer, so ids can't be probed). */
+function findSettlement(settlementId: string, userId: string) {
+  return getDb().settlement.findFirst({
+    where: { id: settlementId, bill: billAccessWhere(userId) },
+    select: {
+      billId: true,
+      fromUserId: true,
+      toUser: { select: { id: true, displayName: true, email: true } },
+      bill: { select: { groupId: true } },
+    },
+  });
+}
+
 /** Payer only: mark a friend as paid back (or undo it). The bill is SETTLED
  *  once nobody is left pending, and back to SETTLING if a payment is undone. */
 export async function markPaid(
@@ -175,12 +194,9 @@ export async function markPaid(
   const { settlementId, paid } = parsed.data;
 
   const db = getDb();
-  const settlement = await db.settlement.findFirst({
-    where: { id: settlementId, bill: billAccessWhere(user.id) },
-    select: { billId: true, toUserId: true, bill: { select: { groupId: true } } },
-  });
+  const settlement = await findSettlement(settlementId, user.id);
   if (!settlement) return { ok: false, error: "Payment not found" };
-  if (settlement.toUserId !== user.id) {
+  if (settlement.toUser.id !== user.id) {
     return { ok: false, error: "Only the person who paid can mark payments" };
   }
   const { billId } = settlement;
@@ -191,7 +207,10 @@ export async function markPaid(
     await lockBillStatus(tx, billId, "update");
     await tx.settlement.update({
       where: { id: settlementId },
-      data: paid ? { status: "PAID", paidAt: new Date() } : { status: "PENDING", paidAt: null },
+      // Marking it either way settles any "I've paid" the friend sent.
+      data: paid
+        ? { status: "PAID", paidAt: new Date(), paidClaimedAt: null }
+        : { status: "PENDING", paidAt: null, paidClaimedAt: null },
     });
     const pending = await tx.settlement.count({ where: { billId, status: "PENDING" } });
     const status: SettleStatus = pending === 0 ? "SETTLED" : "SETTLING";
@@ -203,4 +222,54 @@ export async function markPaid(
   revalidatePath(`/groups/${settlement.bill.groupId}`);
   revalidatePath(`/bills/${billId}`, "layout");
   return { ok: true, billStatus };
+}
+
+/** Payer only: note that they just reminded a friend who hasn't paid (the
+ *  reminder itself goes out through the phone's share sheet). */
+export async function recordNudge(input: NudgeInput): Promise<ActionResult> {
+  const user = await requireUser();
+  const parsed = nudgeInput.safeParse(input);
+  if (!parsed.success) return { ok: false, error: firstIssue(parsed.error) };
+  const { settlementId } = parsed.data;
+
+  const settlement = await findSettlement(settlementId, user.id);
+  if (!settlement) return { ok: false, error: "Payment not found" };
+  if (settlement.toUser.id !== user.id) {
+    return { ok: false, error: "Only the person who paid can nudge" };
+  }
+  // Conditional on PENDING, so it can't race a "mark paid".
+  const { count } = await getDb().settlement.updateMany({
+    where: { id: settlementId, status: "PENDING" },
+    data: { nudgedAt: new Date() },
+  });
+  if (count === 0) return { ok: false, error: "They've already paid" };
+
+  revalidatePath(`/bills/${settlement.billId}/settle`);
+  return { ok: true };
+}
+
+/** The friend who owes: "I've paid" (or take it back). Only a hint for the
+ *  payer, who still confirms by marking it paid. */
+export async function claimPaid(input: ClaimPaidInput): Promise<ActionResult> {
+  const user = await requireUser();
+  const parsed = claimPaidInput.safeParse(input);
+  if (!parsed.success) return { ok: false, error: firstIssue(parsed.error) };
+  const { settlementId, claimed } = parsed.data;
+
+  const settlement = await findSettlement(settlementId, user.id);
+  if (!settlement) return { ok: false, error: "Payment not found" };
+  if (settlement.fromUserId !== user.id) {
+    return { ok: false, error: "Only the person who owes this can say they've paid" };
+  }
+  // Conditional on PENDING, so it can't race the payer marking it paid.
+  const { count } = await getDb().settlement.updateMany({
+    where: { id: settlementId, status: "PENDING" },
+    data: { paidClaimedAt: claimed ? new Date() : null },
+  });
+  if (count === 0) {
+    return { ok: false, error: `${personName(settlement.toUser)} has already marked this paid` };
+  }
+
+  revalidatePath(`/bills/${settlement.billId}/settle`);
+  return { ok: true };
 }

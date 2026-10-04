@@ -2,6 +2,7 @@ import "server-only";
 import { billAccessWhere } from "@/server/access";
 import { requireUser } from "@/server/auth";
 import { getDb } from "@/server/db";
+import { settleProgress } from "./service";
 
 const person = { select: { id: true, displayName: true, email: true } } as const;
 
@@ -28,13 +29,19 @@ export async function getSettlement(billId: string) {
       },
       settlements: {
         orderBy: [{ amountSatang: "desc" }, { fromUserId: "asc" }],
-        select: { id: true, amountSatang: true, status: true, paidAt: true, fromUser: person },
+        select: {
+          id: true,
+          amountSatang: true,
+          status: true,
+          paidAt: true,
+          nudgedAt: true,
+          paidClaimedAt: true,
+          fromUser: person,
+        },
       },
     },
   });
   if (!bill) return null;
-  const sum = (list: { amountSatang: number }[]) =>
-    list.reduce((total, s) => total + s.amountSatang, 0);
   const { bankName, bankAccountNumber, bankAccountName, paymentQr, ...payer } = bill.payer;
   const hasBank = bankName !== null && bankAccountNumber !== null && bankAccountName !== null;
   return {
@@ -51,8 +58,7 @@ export async function getSettlement(billId: string) {
             qrVersion: paymentQr ? paymentQr.updatedAt.getTime() : null,
           }
         : null,
-    totalSatang: sum(bill.settlements),
-    paidSatang: sum(bill.settlements.filter((s) => s.status === "PAID")),
+    ...settleProgress(bill.settlements),
   };
 }
 

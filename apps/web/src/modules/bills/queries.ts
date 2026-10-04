@@ -2,6 +2,7 @@ import "server-only";
 import { billAccessWhere } from "@/server/access";
 import { requireUser } from "@/server/auth";
 import { getDb } from "@/server/db";
+import { settleProgress } from "@/modules/settlement/service";
 import { billTotals } from "./service";
 
 const person = { select: { id: true, displayName: true, email: true } } as const;
@@ -58,10 +59,13 @@ export async function listMyBills() {
       createdAt: true,
       group: { select: { name: true, type: true } },
       items: { select: { priceSatang: true } },
+      settlements: { select: { amountSatang: true, status: true } },
     },
   });
-  return bills.map(({ items, group, ...bill }) => ({
+  return bills.map(({ items, group, settlements, ...bill }) => ({
     ...bill,
+    /** "฿x of ฿y paid back" once settling; null while the bill is open. */
+    progress: bill.status === "OPEN" ? null : settleProgress(settlements),
     /** Set for bills in a persistent group; quick bills have none. */
     groupName: group.type === "PERSISTENT" ? group.name : null,
     itemCount: items.length,

@@ -3,6 +3,7 @@ import { personName } from "@/lib/format";
 import { groupAccessWhere } from "@/server/access";
 import { requireUser } from "@/server/auth";
 import { getDb } from "@/server/db";
+import { settleProgress } from "@/modules/settlement/service";
 import { inviteState } from "./service";
 
 const person = { select: { id: true, displayName: true, email: true } } as const;
@@ -46,6 +47,7 @@ export async function getGroup(groupId: string) {
           status: true,
           createdAt: true,
           items: { select: { priceSatang: true } },
+          settlements: { select: { amountSatang: true, status: true } },
         },
       },
     },
@@ -55,8 +57,10 @@ export async function getGroup(groupId: string) {
     id: group.id,
     name: group.name,
     members: group.members.map((member) => member.user),
-    bills: group.bills.map(({ items, ...bill }) => ({
+    bills: group.bills.map(({ items, settlements, ...bill }) => ({
       ...bill,
+      /** "฿x of ฿y paid back" once settling; null while the bill is open. */
+      progress: bill.status === "OPEN" ? null : settleProgress(settlements),
       itemCount: items.length,
       subtotalSatang: items.reduce((sum, item) => sum + item.priceSatang, 0),
     })),

@@ -18,7 +18,9 @@ vi.mock("@/server/auth", () => ({
 
 const { addItem, setMyClaim } = await import("@/modules/items/actions");
 const {
+  claimPaid,
   markPaid,
+  recordNudge,
   removePaymentDetails,
   removePaymentQr,
   savePaymentDetails,
@@ -465,6 +467,111 @@ describe("markPaid", () => {
 
     auth.currentUserId = NEWBIE;
     expect(await markPaid({ settlementId: ploy, paid: true })).toEqual({
+      ok: false,
+      error: "Payment not found",
+    });
+  });
+});
+
+describe('nudges and "I\'ve paid"', () => {
+  async function settlingBill() {
+    const billId = await billWithClaims({
+      "Pad thai": ["180", [MINT, PLOY]],
+      Singha: ["270", [MINT, BEAM]],
+    });
+    await startSettling({ billId });
+    const rows = await getDb().settlement.findMany({ where: { billId } });
+    const of = (userId: string) => rows.find((r) => r.fromUserId === userId)!.id;
+    return { billId, ploy: of(PLOY), beam: of(BEAM) };
+  }
+  const row = (id: string) => getDb().settlement.findUniqueOrThrow({ where: { id } });
+
+  it("records when the payer nudged a friend", async () => {
+    const { ploy } = await settlingBill();
+
+    expect(await recordNudge({ settlementId: ploy })).toEqual({ ok: true });
+    expect((await row(ploy)).nudgedAt).toBeInstanceOf(Date);
+  });
+
+  it("only lets the payer nudge, and only someone who hasn't paid", async () => {
+    const { ploy, beam } = await settlingBill();
+
+    auth.currentUserId = PLOY;
+    expect(await recordNudge({ settlementId: beam })).toEqual({
+      ok: false,
+      error: "Only the person who paid can nudge",
+    });
+
+    auth.currentUserId = MINT;
+    await markPaid({ settlementId: ploy, paid: true });
+    expect(await recordNudge({ settlementId: ploy })).toEqual({
+      ok: false,
+      error: "They've already paid",
+    });
+    expect((await row(ploy)).nudgedAt).toBeNull();
+  });
+
+  it("lets a friend say they've paid, and take it back", async () => {
+    const { ploy } = await settlingBill();
+
+    auth.currentUserId = PLOY;
+    expect(await claimPaid({ settlementId: ploy, claimed: true })).toEqual({ ok: true });
+    expect((await row(ploy)).paidClaimedAt).toBeInstanceOf(Date);
+    // Still the payer's call.
+    expect((await row(ploy)).status).toBe("PENDING");
+
+    expect(await claimPaid({ settlementId: ploy, claimed: false })).toEqual({ ok: true });
+    expect((await row(ploy)).paidClaimedAt).toBeNull();
+  });
+
+  it("only lets the friend who owes claim it, and only while pending", async () => {
+    const { ploy } = await settlingBill();
+
+    auth.currentUserId = BEAM;
+    expect(await claimPaid({ settlementId: ploy, claimed: true })).toEqual({
+      ok: false,
+      error: "Only the person who owes this can say they've paid",
+    });
+
+    auth.currentUserId = MINT;
+    await markPaid({ settlementId: ploy, paid: true });
+    auth.currentUserId = PLOY;
+    expect(await claimPaid({ settlementId: ploy, claimed: true })).toEqual({
+      ok: false,
+      error: "Mint has already marked this paid",
+    });
+  });
+
+  it("clears the claim once the payer marks it paid", async () => {
+    const { ploy } = await settlingBill();
+    auth.currentUserId = PLOY;
+    await claimPaid({ settlementId: ploy, claimed: true });
+
+    auth.currentUserId = MINT;
+    await markPaid({ settlementId: ploy, paid: true });
+    expect((await row(ploy)).paidClaimedAt).toBeNull();
+  });
+
+  it("shows nudges and claims on the settle page", async () => {
+    const { billId, ploy } = await settlingBill();
+    await recordNudge({ settlementId: ploy });
+    auth.currentUserId = PLOY;
+    await claimPaid({ settlementId: ploy, claimed: true });
+
+    const settlement = await getSettlement(billId);
+    const mine = settlement?.settlements.find((s) => s.id === ploy);
+    expect(mine?.nudgedAt).toBeInstanceOf(Date);
+    expect(mine?.paidClaimedAt).toBeInstanceOf(Date);
+  });
+
+  it("hides settlements on bills the user can't access", async () => {
+    const { ploy } = await settlingBill();
+    auth.currentUserId = NEWBIE;
+    expect(await recordNudge({ settlementId: ploy })).toEqual({
+      ok: false,
+      error: "Payment not found",
+    });
+    expect(await claimPaid({ settlementId: ploy, claimed: true })).toEqual({
       ok: false,
       error: "Payment not found",
     });

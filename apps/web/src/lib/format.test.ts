@@ -5,6 +5,7 @@ import {
   formatBillNumber,
   formatBillTime,
   formatShortDate,
+  formatTimeAgo,
   initialsOf,
 } from "./format";
 
@@ -63,5 +64,31 @@ describe("formatShortDate", () => {
     expect(formatShortDate(new Date("2026-10-08T12:00:00Z"))).toBe("8 Oct");
     // 20:00 UTC on 7 Oct is already 8 Oct in Bangkok (UTC+7).
     expect(formatShortDate(new Date("2026-10-07T20:00:00Z"))).toBe("8 Oct");
+  });
+});
+
+describe("formatTimeAgo", () => {
+  const now = new Date("2026-10-04T12:00:00Z");
+  const ago = (ms: number) => formatTimeAgo(new Date(now.getTime() - ms), now);
+  const MIN = 60_000;
+
+  it("says just now under a minute", () => {
+    expect(ago(0)).toBe("just now");
+    expect(ago(59_000)).toBe("just now");
+  });
+
+  it("counts minutes, then hours", () => {
+    expect(ago(MIN)).toBe("1m ago");
+    expect(ago(59 * MIN)).toBe("59m ago");
+    expect(ago(60 * MIN)).toBe("1h ago");
+    expect(ago(23 * 60 * MIN + 59 * MIN)).toBe("23h ago");
+  });
+
+  it("falls back to the date after a day", () => {
+    expect(ago(24 * 60 * MIN)).toBe("3 Oct");
+  });
+
+  it("treats a future time (clock skew) as just now", () => {
+    expect(ago(-5 * MIN)).toBe("just now");
   });
 });

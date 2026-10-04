@@ -5,6 +5,7 @@ import {
   formatAccountNumber,
   imageType,
   netBalances,
+  nudgeMessage,
   simplifyDebts,
   type Payment,
 } from "./service";
@@ -298,5 +299,39 @@ describe("simplifyDebts", () => {
         expect(simplifyDebts(reordered)).toEqual(payments);
       }
     });
+  });
+});
+
+describe("nudgeMessage", () => {
+  it("names the friend, the bill, what they owe and where to pay", () => {
+    expect(
+      nudgeMessage({
+        name: "Ploy",
+        billTitle: "Som Tam Nua",
+        amountSatang: 30666,
+        url: "https://splitsy.app/bills/b1/settle",
+      }),
+    ).toBe(
+      "Hi Ploy! Friendly reminder for Som Tam Nua 🧾 — you owe ฿306.66. " +
+        "Pay here: https://splitsy.app/bills/b1/settle 🙏",
+    );
+  });
+
+  it("shows whole baht without satang", () => {
+    expect(
+      nudgeMessage({ name: "Beam", billTitle: "Taxi", amountSatang: 12000, url: "u" }),
+    ).toContain("you owe ฿120.");
+  });
+
+  it("keeps titles with emoji and long names as they are", () => {
+    const message = nudgeMessage({
+      name: "Ploypailin Srisawat",
+      billTitle: "Mookata 🔥 night",
+      amountSatang: 1,
+      url: "u",
+    });
+    expect(message).toContain("Hi Ploypailin Srisawat!");
+    expect(message).toContain("reminder for Mookata 🔥 night 🧾");
+    expect(message).toContain("you owe ฿0.01.");
   });
 });

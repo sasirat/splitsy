@@ -39,6 +39,8 @@ afterAll(async () => {
     where: { id: { in: createdBillIds } },
     select: { groupId: true },
   });
+  // Settlements restrict bill deletion, so clear them before the group cascade.
+  await getDb().settlement.deleteMany({ where: { billId: { in: createdBillIds } } });
   // Deleting the group cascades to membership, bills, items and splits.
   await getDb().group.deleteMany({ where: { id: { in: bills.map((b) => b.groupId) } } });
 });
@@ -164,5 +166,30 @@ describe("listMyBills", () => {
       ["Older", 0, 0],
     ]);
     expect(mine[0].number).toBeGreaterThan(mine[1].number);
+  });
+
+  it("shows each bill's status, and how much is paid back once settling", async () => {
+    const open = await newBill("Still open");
+    const settling = await newBill("Settling");
+    await getDb().bill.update({
+      where: { id: settling },
+      data: {
+        status: "SETTLING",
+        settlements: {
+          create: [
+            { fromUserId: BEAM, toUserId: MINT, amountSatang: 10000, status: "PAID" },
+            { fromUserId: "seed_user_ploy", toUserId: MINT, amountSatang: 5000 },
+          ],
+        },
+      },
+    });
+
+    const bills = await listMyBills();
+    const byId = (id: string) => bills.find((b) => b.id === id);
+    expect(byId(open)).toMatchObject({ status: "OPEN", progress: null });
+    expect(byId(settling)).toMatchObject({
+      status: "SETTLING",
+      progress: { paidSatang: 10000, totalSatang: 15000 },
+    });
   });
 });
