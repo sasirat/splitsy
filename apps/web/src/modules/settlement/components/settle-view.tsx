@@ -141,7 +141,7 @@ function PayDetails({ payerName, details }: { payerName: string; details: Paymen
           <img
             src={details.qrUrl}
             alt={`${payerName}'s payment QR`}
-            className="size-56 rounded-lg border border-border bg-white object-contain"
+            className="max-h-[75dvh] w-auto max-w-full rounded-lg border border-border bg-white"
           />
         </a>
       ) : null}

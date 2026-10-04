@@ -27,25 +27,38 @@ const FORM_ID = "payment-details-form";
 const fieldClass =
   "flex h-14 w-full rounded-lg border-[1.5px] border-border bg-white px-4 font-body text-md text-ink outline-none focus-visible:border-primary";
 
-/** Longest side of the uploaded QR. Plenty for a phone camera to scan, and
- *  keeps the PNG far below the server's size limit. */
-const QR_MAX_PX = 600;
+/** Longest side of the uploaded image. QR uploads are usually full-screen
+ *  bank-app screenshots with the code in the middle, so keep enough pixels
+ *  for it to scan from another phone. */
+const QR_MAX_PX = 1200;
+/** Must match the server's limit in uploadPaymentQr. */
+const QR_MAX_BYTES = 512 * 1024;
 
-/** Shrink a QR screenshot in the browser before uploading it. */
+/** Shrink a QR screenshot in the browser before uploading it. High-quality
+ *  JPEG keeps QR edges crisp at a fraction of PNG's size; quality only drops
+ *  if a busy screenshot would still be over the limit. */
 async function resizeQr(file: File): Promise<Blob> {
   const bitmap = await createImageBitmap(file);
   const scale = Math.min(1, QR_MAX_PX / Math.max(bitmap.width, bitmap.height));
   const canvas = document.createElement("canvas");
   canvas.width = Math.round(bitmap.width * scale);
   canvas.height = Math.round(bitmap.height * scale);
-  canvas.getContext("2d")?.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+  const context = canvas.getContext("2d");
+  if (!context) throw new Error("no canvas");
+  // JPEG has no transparency; a transparent PNG would turn black without this.
+  context.fillStyle = "#fff";
+  context.fillRect(0, 0, canvas.width, canvas.height);
+  context.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
   bitmap.close();
-  return new Promise((resolve, reject) =>
-    canvas.toBlob(
-      (blob) => (blob ? resolve(blob) : reject(new Error("resize failed"))),
-      "image/png",
-    ),
-  );
+
+  for (const quality of [0.92, 0.8, 0.65]) {
+    const blob = await new Promise<Blob | null>((resolve) =>
+      canvas.toBlob(resolve, "image/jpeg", quality),
+    );
+    if (!blob) throw new Error("resize failed");
+    if (blob.size <= QR_MAX_BYTES) return blob;
+  }
+  throw new Error("still too big");
 }
 
 /** The payer's "How friends pay you" sheet: a bank account, a QR image from
@@ -98,7 +111,7 @@ function PaymentDetailsSheet({
         return;
       }
       const form = new FormData();
-      form.set("qr", image, "qr.png");
+      form.set("qr", image, "qr.jpg");
       const result = await callAction(() => uploadPaymentQr(form));
       if (!result.ok) setError(result.error);
     });
@@ -186,7 +199,7 @@ function PaymentDetailsSheet({
             <img
               src={details.qrUrl}
               alt="Your payment QR"
-              className="mx-auto size-48 rounded-lg border border-border bg-white object-contain"
+              className="mx-auto max-h-72 w-auto rounded-lg border border-border bg-white"
             />
           ) : null}
           <label className="flex h-14 cursor-pointer items-center justify-center rounded-full border border-dashed border-primary text-lg font-bold text-primary has-[:disabled]:opacity-50">
