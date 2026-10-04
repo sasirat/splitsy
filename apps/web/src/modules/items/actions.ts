@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { firstIssue, type ActionResult } from "@/lib/action-result";
 import { billAccessWhere, findAccessibleBill } from "@/server/access";
 import { requireUser } from "@/server/auth";
+import { lockBillStatus } from "@/server/bill-lock";
 import { getDb } from "@/server/db";
 import { addItemInput, setMyClaimInput, type AddItemInput, type SetMyClaimInput } from "./schema";
 
@@ -24,16 +25,20 @@ export async function addItem(input: AddItemInput): Promise<ActionResult<{ itemI
     return { ok: false, error: LOCKED };
   }
 
-  const db = getDb();
-  const last = await db.item.findFirst({
-    where: { billId },
-    orderBy: { position: "desc" },
-    select: { position: true },
+  // Re-check under a lock: settling may have started since the check above.
+  const item = await getDb().$transaction(async (tx) => {
+    if ((await lockBillStatus(tx, billId, "share")) !== "OPEN") return null;
+    const last = await tx.item.findFirst({
+      where: { billId },
+      orderBy: { position: "desc" },
+      select: { position: true },
+    });
+    return tx.item.create({
+      data: { billId, name, priceSatang: price, position: (last?.position ?? -1) + 1 },
+      select: { id: true },
+    });
   });
-  const item = await db.item.create({
-    data: { billId, name, priceSatang: price, position: (last?.position ?? -1) + 1 },
-    select: { id: true },
-  });
+  if (!item) return { ok: false, error: LOCKED };
 
   revalidatePath(`/bills/${billId}`);
   return { ok: true, itemId: item.id };
@@ -55,16 +60,21 @@ export async function setMyClaim(input: SetMyClaimInput): Promise<ActionResult> 
   if (!item) return { ok: false, error: "Item not found" };
   if (item.bill.status !== "OPEN") return { ok: false, error: LOCKED };
 
-  const key = { itemId_userId: { itemId, userId: user.id } };
-  if (claimed) {
-    await db.itemSplit.upsert({
-      where: key,
-      create: { itemId, userId: user.id, shares: 1 },
-      update: {},
-    });
-  } else {
-    await db.itemSplit.deleteMany({ where: { itemId, userId: user.id } });
-  }
+  // Re-check under a lock: settling may have started since the check above.
+  const locked = await db.$transaction(async (tx) => {
+    if ((await lockBillStatus(tx, item.billId, "share")) !== "OPEN") return true;
+    if (claimed) {
+      await tx.itemSplit.upsert({
+        where: { itemId_userId: { itemId, userId: user.id } },
+        create: { itemId, userId: user.id, shares: 1 },
+        update: {},
+      });
+    } else {
+      await tx.itemSplit.deleteMany({ where: { itemId, userId: user.id } });
+    }
+    return false;
+  });
+  if (locked) return { ok: false, error: LOCKED };
 
   revalidatePath(`/bills/${item.billId}`);
   return { ok: true };

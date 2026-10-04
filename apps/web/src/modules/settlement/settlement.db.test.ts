@@ -15,7 +15,6 @@ vi.mock("@/server/auth", () => ({
   }),
 }));
 
-const { createBill } = await import("@/modules/bills/actions");
 const { addItem, setMyClaim } = await import("@/modules/items/actions");
 const { startSettling } = await import("./actions");
 const { getSettlement } = await import("./queries");
@@ -26,31 +25,39 @@ const BEAM = "seed_user_beam";
 const createdBillIds: string[] = [];
 
 /** A bill paid by Mint, with Ploy and Beam in its group, and items claimed as
- *  given: { "Pad thai": ["180", [MINT, PLOY]] }. An empty list leaves it unclaimed. */
+ *  given: { "Pad thai": ["180", [MINT, PLOY]] }. An empty list leaves it
+ *  unclaimed. Built in one nested write — only the code under test goes
+ *  through the actions, which keeps round trips to the remote DB down. */
 async function billWithClaims(items: Record<string, [string, string[]]>) {
   auth.currentUserId = MINT;
-  const created = await createBill({ title: "Settle test" });
-  if (!created.ok) throw new Error(created.error);
-  const { billId } = created;
-  createdBillIds.push(billId);
-
-  const { groupId } = await getDb().bill.findUniqueOrThrow({ where: { id: billId } });
-  await getDb().groupMember.createMany({
-    data: [PLOY, BEAM].map((userId) => ({ groupId, userId })),
+  const bill = await getDb().bill.create({
+    data: {
+      title: "Settle test",
+      payer: { connect: { id: MINT } },
+      createdBy: { connect: { id: MINT } },
+      group: {
+        create: {
+          name: "Settle test",
+          type: "AD_HOC",
+          createdBy: { connect: { id: MINT } },
+          members: {
+            create: [{ userId: MINT, role: "OWNER" }, { userId: PLOY }, { userId: BEAM }],
+          },
+        },
+      },
+      items: {
+        create: Object.entries(items).map(([name, [price, claimers]], position) => ({
+          name,
+          priceSatang: Number(price) * 100,
+          position,
+          splits: { create: claimers.map((userId) => ({ userId, shares: 1 })) },
+        })),
+      },
+    },
+    select: { id: true },
   });
-
-  for (const [name, [price, claimers]] of Object.entries(items)) {
-    auth.currentUserId = MINT;
-    const added = await addItem({ billId, name, price });
-    if (!added.ok) throw new Error(added.error);
-    for (const userId of claimers) {
-      auth.currentUserId = userId;
-      const claimed = await setMyClaim({ itemId: added.itemId, claimed: true });
-      if (!claimed.ok) throw new Error(claimed.error);
-    }
-  }
-  auth.currentUserId = MINT;
-  return billId;
+  createdBillIds.push(bill.id);
+  return bill.id;
 }
 
 const settlementsOf = (billId: string) =>
@@ -157,6 +164,35 @@ describe("startSettling", () => {
       ok: false,
       error: "Bill not found",
     });
+  });
+
+  // Five rounds of real races against the remote DB (~8s each on Neon).
+  it("never snapshots claims that change while it's settling", { timeout: 120_000 }, async () => {
+    // Race an unclaim (and a new item) against settling: whichever wins, the
+    // saved settlements must match the bill's claims afterwards.
+    for (let round = 0; round < 5; round++) {
+      const billId = await billWithClaims({ "Pad thai": ["180", [MINT, PLOY]] });
+      const { id: itemId } = await getDb().item.findFirstOrThrow({ where: { billId } });
+
+      await Promise.all([
+        startSettling({ billId }),
+        (async () => {
+          auth.currentUserId = PLOY;
+          await setMyClaim({ itemId, claimed: false });
+        })(),
+        addItem({ billId, name: "Late snack", price: "40" }),
+      ]);
+
+      const status = await statusOf(billId);
+      if (status === "OPEN") continue;
+      const items = await getDb().item.findMany({ where: { billId }, include: { splits: true } });
+      const unclaimed = items.filter((item) => item.splits.length === 0);
+      expect(unclaimed).toEqual([]);
+      const owed = await settlementsOf(billId);
+      expect(owed).toEqual([
+        { fromUserId: PLOY, toUserId: MINT, amountSatang: 9000, status: "PENDING" },
+      ]);
+    }
   });
 
   it("locks items afterwards", async () => {
