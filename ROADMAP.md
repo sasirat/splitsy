@@ -63,6 +63,7 @@ Core total: ~13–18 focused dev-days.
 ## Week 5 — Polish, real test, ship (M5 + buffer)
 
 - [ ] **S21** Full self-walkthrough; rough edges; mobile responsiveness
+  - Text too small on phones (reported 2026-10-05): captions/badges are 10px, body 15px — raise the type scale in `packages/design-system/configs/typography.ts`
 - [ ] **S22** 2–3 friends on a real bill; collect feedback
 - [ ] **S23** Fix breakage; empty/error states; a11y pass
 - [ ] **S24** Final deploy; README + short case-study writeup
