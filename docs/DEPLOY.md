@@ -63,8 +63,20 @@ Don't run the seed against `live`.
 
 4. **Deploy.** The build log should show "All migrations have been
    successfully applied" before Next builds.
+5. **Settings → Domains → Add Domain** → a `*.vercel.app` name for
+   **Production** (ours: `splitsy-pi.vercel.app`). The automatic
+   per-deployment and branch URLs stay behind Vercel login (Deployment
+   Protection) — good for previews, but friends need the production domain.
 
 ## 3. Clerk (development instance, for now)
+
+Paste the Clerk keys **exactly** — no quotes, no spaces (copy them with the
+copy buttons at dashboard.clerk.com → Configure → API keys). Keep
+`NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` as a **Config** variable: Vercel warns
+about its public prefix, but publishable keys are meant to be public and
+Clerk's sign-in needs it in the browser. A bad value shows up as a 500 on
+every page ("Publishable key not valid"); after fixing it, redeploy without
+the build cache, since the key is baked in at build time.
 
 The dev instance works on the `*.vercel.app` URL, with a small "development
 mode" badge and dev-instance usage limits — fine for testing with friends.

@@ -25,7 +25,7 @@ Core total: ~13–18 focused dev-days.
 ## Week 1 — Foundations + Design System (M0 + M1)
 
 - [x] **S1** Monorepo (pnpm + Turbo) + Next.js 16 + Tailwind v4 + lint/format; Git + GitHub
-- [ ] **S2** Deploy → Vercel (cle1, next to Neon us-east-2) + `live` / `preview` Neon branches + env wiring _(config ready in S20 — finish the steps in docs/DEPLOY.md)_
+- [x] **S2** Deploy → Vercel (cle1, next to Neon us-east-2) + `live` / `preview` Neon branches + env wiring _(live in S20: https://splitsy-pi.vercel.app)_
 - [x] **S3** `design-system` package: Figma tokens (colors, fonts, radii) + `/playground` _(image assets deferred to S4–S5)_
 - [x] **S4** Components pt.1 on shadcn/ui: Button, Avatar/AvatarStack, Pill, Badge, Input, Checkbox + MemberRow → `/playground/components`
 - [x] **S5** Components pt.2: ReceiptCard (torn edge), ItemRow, TotalDisplay, BottomSheet, DebtorRow, PhoneFrame

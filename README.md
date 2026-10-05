@@ -4,8 +4,12 @@ _Split the bill, keep the vibe._
 
 A bill-splitting web app for groups of friends. Persistent groups, invite-based
 bills, and **itemized, self-report splitting** — so people only pay for what they
-actually had. Settle up by sharing a PromptPay number (Thai). Built as a
-portfolio project: research → design → build → deploy.
+actually had. Settle up by sharing a bank account or your bank app's QR, then
+nudge and mark friends paid. Built as a portfolio project: research → design →
+build → deploy.
+
+**Live:** https://splitsy-pi.vercel.app (sign in with Google) — deploy notes in
+[docs/DEPLOY.md](docs/DEPLOY.md).
 
 ## Stack
 
