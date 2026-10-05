@@ -7,7 +7,10 @@
     "./theme.css": "./styles/theme.css",
     "./typography.css": "./styles/typography.css"
   },
-  "files": ["styles", "configs"],
+  "files": [
+    "styles",
+    "configs"
+  ],
   "scripts": {
     "generate": "node scripts/generate-theme.ts",
     "build": "pnpm run generate",

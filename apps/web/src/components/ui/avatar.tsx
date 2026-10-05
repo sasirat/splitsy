@@ -32,7 +32,9 @@ function Avatar({
   tone,
   ...props
 }: React.ComponentProps<"span"> & VariantProps<typeof avatarVariants>) {
-  return <span data-slot="avatar" className={cn(avatarVariants({ size, tone }), className)} {...props} />;
+  return (
+    <span data-slot="avatar" className={cn(avatarVariants({ size, tone }), className)} {...props} />
+  );
 }
 
 export { Avatar, avatarVariants };

@@ -77,7 +77,10 @@ export default function Playground() {
       <Section title="Palette">
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
           {palette.map((s) => (
-            <div key={s.name} className={`${s.box} flex h-20 flex-col justify-end rounded-lg border border-border/50 p-2`}>
+            <div
+              key={s.name}
+              className={`${s.box} flex h-20 flex-col justify-end rounded-lg border border-border/50 p-2`}
+            >
               <span className={`${s.label} font-body text-sm`}>{s.name}</span>
               <span className={`${s.label} font-mono text-2xs opacity-80`}>{s.hex}</span>
             </div>

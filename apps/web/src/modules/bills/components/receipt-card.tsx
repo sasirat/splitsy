@@ -41,8 +41,9 @@ function ReceiptCard({
         src="/art/tape-red.png"
         alt=""
         aria-hidden
-        width={150}
-        height={40}
+        // The file's real size; CSS shows it 150px wide at the same aspect.
+        width={900}
+        height={236}
         className="pointer-events-none absolute -top-4 left-1/2 z-10 h-auto w-[150px] -translate-x-1/2 -rotate-2 select-none"
       />
       <div className="bg-paper px-4 shadow-card">
