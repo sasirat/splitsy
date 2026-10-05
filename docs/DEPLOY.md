@@ -1,22 +1,43 @@
 # Deploying Splitsy (Vercel + Neon + Clerk)
 
-Production runs on **Vercel** (functions in Singapore, `sin1`) against a
-**Neon** database in Singapore (`ap-southeast-1`), with **Clerk** for Google
-sign-in. Config lives in `apps/web/vercel.json`; every deploy runs
-`prisma migrate deploy` before `next build`, so the database schema always
-matches the code.
+Production runs on **Vercel** with functions in **Cleveland (`cle1`)**, right
+next to the **Neon** project's region (AWS `us-east-2`, Ohio), with **Clerk**
+for Google sign-in. Each page makes several database calls in a row, so the
+server sits beside the database: users in Thailand pay one ~250 ms trip to the
+US per request, not one per query. Config lives in `apps/web/vercel.json`;
+every deploy runs `prisma migrate deploy` before `next build`, so the database
+schema always matches the code.
 
 Dev sign-in ("Continue as Mint") is off in production — only Google works.
 
-## 1. Neon: a production database in Singapore
+## 1. Neon: two branches in the existing project
 
-1. Neon console → **New project** → region **AWS Asia Pacific (Singapore)**,
-   Postgres 17. (Your dev database stays in its own project.)
-2. **Connect** → copy both connection strings:
-   - **Pooled** (host contains `-pooler`) → `DATABASE_URL`
-   - **Direct** (no `-pooler`) → `DIRECT_URL`
+Production uses the same Neon project as development, on its own branches.
+A new branch starts as a **copy of its parent's data**, so production gets
+emptied once and its first deploy builds every table from the migrations.
 
-Don't run the seed against production — it's for local/dev data.
+1. Neon console → your Splitsy project → **Branches**. Note which branch your
+   `apps/web/.env` uses (its endpoint id is in the URL host, `ep-…`) — that's
+   your **dev** branch. Leave it alone.
+2. **New branch** `live` (production), parent = your dev branch.
+3. **SQL Editor** → in the branch dropdown pick **`live`** — double-check it
+   says `live` — and run:
+
+   ```sql
+   DROP SCHEMA public CASCADE;
+   CREATE SCHEMA public;
+   ```
+
+   This empties only the new `live` copy. The first deploy recreates the
+   tables with no seed users or test bills.
+
+4. **New branch** `preview`, parent = your dev branch. Keep its data: preview
+   deployments can migrate and play with it freely, and you can reset it from
+   its parent whenever you like.
+5. For both `live` and `preview`: **Connect** → copy the **pooled** URL (host
+   contains `-pooler`) and the **direct** URL (no `-pooler`).
+
+Don't run the seed against `live`.
 
 ## 2. Vercel: import the repo
 
@@ -32,16 +53,13 @@ Don't run the seed against production — it's for local/dev data.
 
    | Name                                | Value                                    |
    | ----------------------------------- | ---------------------------------------- |
-   | `DATABASE_URL`                      | Neon pooled URL (step 1)                 |
-   | `DIRECT_URL`                        | Neon direct URL (step 1)                 |
+   | `DATABASE_URL`                      | `live` branch pooled URL                 |
+   | `DIRECT_URL`                        | `live` branch direct URL                 |
    | `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` | `pk_test_…` from your Clerk dev instance |
    | `CLERK_SECRET_KEY`                  | `sk_test_…` from your Clerk dev instance |
 
    **Preview** environment: the same two Clerk keys, plus `DATABASE_URL` and
-   `DIRECT_URL` from a separate Neon branch — in the production project,
-   **Branches → New branch** named `preview`, then copy its pooled and
-   direct URLs. Previews can migrate that branch freely; reset it from
-   `main` in the Neon console whenever you like.
+   `DIRECT_URL` from the **`preview`** branch.
 
 4. **Deploy.** The build log should show "All migrations have been
    successfully applied" before Next builds.
