@@ -24,7 +24,11 @@ Don't run the seed against production — it's for local/dev data.
 2. **Root Directory**: `apps/web` (Vercel detects the pnpm workspace and
    installs from the repo root). Framework: Next.js. Leave build/install
    commands empty — `vercel.json` sets them.
-3. **Environment Variables** (Production and Preview):
+3. **Environment Variables.** Every build runs `prisma migrate deploy`, so
+   **Preview builds must never point at the production database** — a
+   preview of an unmerged branch would migrate production ahead of its code.
+
+   **Production** environment only:
 
    | Name                                | Value                                    |
    | ----------------------------------- | ---------------------------------------- |
@@ -32,6 +36,12 @@ Don't run the seed against production — it's for local/dev data.
    | `DIRECT_URL`                        | Neon direct URL (step 1)                 |
    | `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` | `pk_test_…` from your Clerk dev instance |
    | `CLERK_SECRET_KEY`                  | `sk_test_…` from your Clerk dev instance |
+
+   **Preview** environment: the same two Clerk keys, plus `DATABASE_URL` and
+   `DIRECT_URL` from a separate Neon branch — in the production project,
+   **Branches → New branch** named `preview`, then copy its pooled and
+   direct URLs. Previews can migrate that branch freely; reset it from
+   `main` in the Neon console whenever you like.
 
 4. **Deploy.** The build log should show "All migrations have been
    successfully applied" before Next builds.
