@@ -22,7 +22,7 @@ export default async function Home() {
         </div>
         <Link
           href="/onboarding"
-          className="shrink-0 pt-1 text-caption text-lagoon underline underline-offset-4"
+          className="shrink-0 pt-1 text-caption text-lagoon underline underline-offset-4 tap-target"
         >
           Edit name
         </Link>
@@ -33,7 +33,7 @@ export default async function Home() {
           <h2 className="text-sm text-pebble">Your groups</h2>
           <Link
             href="/groups/new"
-            className="text-caption text-lagoon underline underline-offset-4"
+            className="text-caption text-lagoon underline underline-offset-4 tap-target"
           >
             + New group
           </Link>

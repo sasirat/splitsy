@@ -17,7 +17,10 @@ export default async function GroupPage({ params }: PageProps<"/groups/[id]">) {
 
   return (
     <PhoneFrame scene="petal" className="gap-6 px-5 pt-8 pb-8">
-      <Link href="/" className="self-start text-caption text-lagoon underline underline-offset-4">
+      <Link
+        href="/"
+        className="self-start text-caption text-lagoon underline underline-offset-4 tap-target"
+      >
         ← Your bills
       </Link>
 

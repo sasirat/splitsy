@@ -29,7 +29,7 @@ export default async function BillPage({ params }: PageProps<"/bills/[id]">) {
     <PhoneFrame scene="green" className="gap-6 px-5 pt-8">
       <Link
         href={bill.namedGroup ? `/groups/${bill.namedGroup.id}` : "/"}
-        className="self-start text-caption wrap-anywhere text-cream underline underline-offset-4"
+        className="self-start text-caption wrap-anywhere text-cream underline underline-offset-4 tap-target"
       >
         {bill.namedGroup ? `← ${bill.namedGroup.name}` : "← Your bills"}
       </Link>

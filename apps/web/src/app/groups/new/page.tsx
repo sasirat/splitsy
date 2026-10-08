@@ -8,7 +8,10 @@ export default async function NewGroupPage() {
 
   return (
     <PhoneFrame scene="sky" className="px-6 pt-8 pb-8">
-      <Link href="/" className="self-start text-caption text-lagoon underline underline-offset-4">
+      <Link
+        href="/"
+        className="self-start text-caption text-lagoon underline underline-offset-4 tap-target"
+      >
         ← Your bills
       </Link>
       <h1 className="mt-6 text-center text-flourish whitespace-nowrap text-primary">New Group</h1>

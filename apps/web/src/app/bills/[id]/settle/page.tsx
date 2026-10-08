@@ -25,7 +25,7 @@ export default async function SettlePage({ params }: PageProps<"/bills/[id]/sett
     <PhoneFrame scene="sky" className="gap-6 px-5 pt-8 pb-8">
       <Link
         href={`/bills/${id}`}
-        className="self-start text-caption text-lagoon underline underline-offset-4"
+        className="self-start text-caption text-lagoon underline underline-offset-4 tap-target"
       >
         ← Back to bill
       </Link>
@@ -40,7 +40,7 @@ export default async function SettlePage({ params }: PageProps<"/bills/[id]/sett
 
       <Link
         href={`/bills/${id}/summary`}
-        className="self-center text-body text-lagoon underline underline-offset-4"
+        className="self-center text-body text-lagoon underline underline-offset-4 tap-target"
       >
         See what everyone had →
       </Link>

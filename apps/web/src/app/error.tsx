@@ -27,7 +27,7 @@ export default function ErrorPage({
       <Button size="lg" className="w-full" onClick={() => retry()}>
         Try again
       </Button>
-      <Link href="/" className="text-caption text-primary underline underline-offset-4">
+      <Link href="/" className="text-caption text-primary underline underline-offset-4 tap-target">
         Back to your bills
       </Link>
       {error.digest ? (

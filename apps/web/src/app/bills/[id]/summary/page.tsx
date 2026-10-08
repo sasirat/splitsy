@@ -50,7 +50,7 @@ export default async function BillSummaryPage({ params }: PageProps<"/bills/[id]
     <PhoneFrame scene="green" className="gap-6 px-5 pt-8 pb-8">
       <Link
         href={`/bills/${bill.id}`}
-        className="self-start text-caption text-cream underline underline-offset-4"
+        className="self-start text-caption text-cream underline underline-offset-4 tap-target"
       >
         ← Back to bill
       </Link>
@@ -72,7 +72,7 @@ export default async function BillSummaryPage({ params }: PageProps<"/bills/[id]
       {bill.status !== "OPEN" ? (
         <Link
           href={`/bills/${bill.id}/settle`}
-          className="self-center text-body text-cream underline underline-offset-4"
+          className="self-center text-body text-cream underline underline-offset-4 tap-target"
         >
           See settle-up →
         </Link>

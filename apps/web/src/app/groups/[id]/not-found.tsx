@@ -9,7 +9,7 @@ export default function GroupNotFound() {
       <p className="text-body text-pebble">
         It may not exist, or you&apos;re not a member. Ask someone in the group to invite you.
       </p>
-      <Link href="/" className="text-caption text-lagoon underline underline-offset-4">
+      <Link href="/" className="text-caption text-lagoon underline underline-offset-4 tap-target">
         Back to your bills
       </Link>
     </PhoneFrame>

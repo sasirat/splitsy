@@ -34,7 +34,10 @@ export default async function JoinPage({ params, searchParams }: PageProps<"/joi
         <p className="text-body text-muted-foreground">
           It may have expired or been reset. Ask whoever sent it for a new one.
         </p>
-        <Link href="/" className="text-caption text-primary underline underline-offset-4">
+        <Link
+          href="/"
+          className="text-caption text-primary underline underline-offset-4 tap-target"
+        >
           Back to your bills
         </Link>
       </PhoneFrame>

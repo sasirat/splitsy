@@ -70,3 +70,21 @@ body {
   color: var(--color-ink);
   background: var(--color-cream);
 }
+
+/*
+ * A 44px-tall touch area (8px wider each side) around small text links, so
+ * "← Back" and "Edit name" are easy to tap without changing how they look
+ * or how much room they take. The link must not clip overflow.
+ */
+@utility tap-target {
+  position: relative;
+  &::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    right: -8px;
+    left: -8px;
+    height: 44px;
+    transform: translateY(-50%);
+  }
+}

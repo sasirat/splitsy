@@ -165,7 +165,7 @@ function BillItems({
         {items.length > 0 ? (
           <Link
             href={`/bills/${billId}/summary`}
-            className="mt-2 text-body text-cream underline underline-offset-4"
+            className="mt-2 text-body text-cream underline underline-offset-4 tap-target"
           >
             See summary →
           </Link>
@@ -173,7 +173,7 @@ function BillItems({
         {!canEdit ? (
           <Link
             href={`/bills/${billId}/settle`}
-            className="text-body text-cream underline underline-offset-4"
+            className="text-body text-cream underline underline-offset-4 tap-target"
           >
             See settle-up →
           </Link>

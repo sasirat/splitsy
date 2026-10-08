@@ -11,7 +11,7 @@ export default function BillNotFound() {
         It may not exist, or you&apos;re not in its group. Ask whoever shared it to send you an
         invite.
       </p>
-      <Link href="/" className="text-caption text-cream underline underline-offset-4">
+      <Link href="/" className="text-caption text-cream underline underline-offset-4 tap-target">
         Back to your bills
       </Link>
     </PhoneFrame>

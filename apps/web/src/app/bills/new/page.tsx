@@ -18,7 +18,7 @@ export default async function NewBillPage({ searchParams }: PageProps<"/bills/ne
     <PhoneFrame scene="cream" className="px-6 pt-8 pb-8">
       <Link
         href={group ? `/groups/${group.id}` : "/"}
-        className="self-start text-caption text-primary underline underline-offset-4"
+        className="self-start text-caption text-primary underline underline-offset-4 tap-target"
       >
         {group ? `← ${group.name}` : "← Your bills"}
       </Link>
