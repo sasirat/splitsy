@@ -57,13 +57,14 @@ Core total: ~13–18 focused dev-days.
 - [x] **S18** How to pay: bank account and/or uploaded QR image, display + copy, mark-as-paid
 - [x] **S18b** Tests on a local Postgres 17 (Docker) instead of Neon, with guards against touching Neon — DB tests ~3s, e2e ~40s
 - [x] **S19** Polish settlement + nudge; remaining states
-- [ ] **S20** Buffer / catch-up
+- [x] **S20** Buffer → Figma refresh: sky/petal scenes + script fonts; new-group plate, group page, envelope invite, home restyle; summary → green, settle → sky. Live deploy fixed (new Neon `live` branch; Prisma client generated in the build)
 - **Done when:** settle-up works; core feature-complete.
 
 ## Week 5 — Polish, real test, ship (M5 + buffer)
 
 - [ ] **S21** Full self-walkthrough; rough edges; mobile responsiveness
   - Text too small on phones (reported 2026-10-05): captions/badges are 10px, body 15px — raise the type scale in `packages/design-system/configs/typography.ts`
+  - Left over from S20: Neon `preview` branch (preview deploys have no DB), 2x garden photo for the invite, expired-invite page in the new style
 - [ ] **S22** 2–3 friends on a real bill; collect feedback
 - [ ] **S23** Fix breakage; empty/error states; a11y pass
 - [ ] **S24** Final deploy; README + short case-study writeup
