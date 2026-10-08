@@ -1,9 +1,10 @@
 "use client";
 
+import type { VariantProps } from "class-variance-authority";
 import { cn } from "cn";
 import { useState, useTransition } from "react";
 import { BottomSheet } from "@/components/ui/bottom-sheet";
-import { Button } from "@/components/ui/button";
+import { Button, type buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import type { ActionResult } from "@/lib/action-result";
 import { callAction } from "@/lib/call-action";
@@ -18,12 +19,14 @@ function InviteButton({
   groupId,
   billId,
   label = "Invite friends",
+  size = "lg",
   className,
 }: {
   groupId: string;
   /** When sharing from a bill, the joiner lands on it (if it's in the group). */
   billId?: string;
   label?: string;
+  size?: VariantProps<typeof buttonVariants>["size"];
   className?: string;
 }) {
   const [open, setOpen] = useState(false);
@@ -77,7 +80,7 @@ function InviteButton({
     <>
       <Button
         variant="dashed"
-        size="lg"
+        size={size}
         className={cn("w-full", className)}
         onClick={() => onOpenChange(true)}
       >

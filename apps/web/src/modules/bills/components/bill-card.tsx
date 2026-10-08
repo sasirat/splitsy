@@ -26,10 +26,11 @@ const LOOK = {
   },
 } as const;
 
-/** Star stickers scattered over the sticker card, as % of Figma's 349×111 card. */
+/** Star stickers scattered over the sticker card, after Figma's 349×111 card —
+ *  nudged off the status badge (top right) and the date (top left). */
 const STARS = [
-  { src: "/art/star-sticker-blue.svg", className: "top-[10%] left-[81%]" },
-  { src: "/art/star-sticker-gray.svg", className: "top-[14%] left-[40%]" },
+  { src: "/art/star-sticker-blue.svg", className: "top-[38%] right-[6%]" },
+  { src: "/art/star-sticker-gray.svg", className: "top-[8%] left-[58%]" },
   { src: "/art/star-sticker-yellow.svg", className: "top-[59%] left-[18%]" },
   { src: "/art/star-sticker-gray.svg", className: "top-[72%] left-[61%]" },
 ] as const;
@@ -74,7 +75,7 @@ function BillCard({
     >
       {look === "sticker"
         ? STARS.map((star, i) => (
-            // Decorative; plain <img> keeps the SVG's own size (next/image can't size it).
+            // Tiny decorative SVGs gain nothing from the image optimizer.
             // eslint-disable-next-line @next/next/no-img-element
             <img
               key={i}

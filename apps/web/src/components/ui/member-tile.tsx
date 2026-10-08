@@ -13,11 +13,13 @@ function MemberTile({
   className?: string;
 }) {
   return (
-    <div className={cn("flex w-16 flex-col items-center gap-1.5", className)}>
+    <div className={cn("flex w-full max-w-16 flex-col items-center gap-1.5", className)}>
       <Avatar size="xl" className="text-md">
         {initials}
       </Avatar>
-      <span className="w-full truncate text-center text-xs font-bold text-primary">{name}</span>
+      <span title={name} className="w-full truncate text-center text-xs font-bold text-primary">
+        {name}
+      </span>
     </div>
   );
 }

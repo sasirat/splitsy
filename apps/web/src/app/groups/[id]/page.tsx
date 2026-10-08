@@ -29,11 +29,11 @@ export default async function GroupPage({ params }: PageProps<"/groups/[id]">) {
       <section className="flex flex-col gap-3">
         <h2 className="text-sm text-pebble">Members · {group.members.length}</h2>
         <div className="flex flex-col gap-5 rounded-lg bg-white p-5 shadow-[0_4px_4px_rgb(193_190_190/0.25)]">
-          <ul className="grid grid-cols-4 justify-items-center gap-y-3">
+          <ul className="grid grid-cols-4 gap-y-3">
             {group.members.map((member) => {
               const name = personName(member);
               return (
-                <li key={member.id}>
+                <li key={member.id} className="flex min-w-0 justify-center">
                   <MemberTile
                     initials={initialsOf(name)}
                     name={member.id === user.id ? "You" : name}
@@ -45,7 +45,8 @@ export default async function GroupPage({ params }: PageProps<"/groups/[id]">) {
           <InviteButton
             groupId={group.id}
             label="Invite Friends +"
-            className="h-11 text-base text-lagoon"
+            size="default"
+            className="text-base text-lagoon"
           />
         </div>
       </section>
