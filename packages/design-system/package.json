@@ -5,7 +5,8 @@
   "type": "module",
   "exports": {
     "./theme.css": "./styles/theme.css",
-    "./typography.css": "./styles/typography.css"
+    "./typography.css": "./styles/typography.css",
+    "./configs/typography": "./configs/typography.ts"
   },
   "files": [
     "styles",

@@ -62,7 +62,7 @@ Core total: ~13–18 focused dev-days.
 
 ## Week 5 — Polish, real test, ship (M5 + buffer)
 
-- [x] **S21** Full self-walkthrough; rough edges; mobile responsiveness — bigger type scale (2xs/xs 14, sm 16, base/md 18), 44px tap targets, every screen checked at 320/390px, two-user walkthrough fixes (your part on bill cards, settle-up confirm, new-bill restyle, invite "Not now", claim hint, copy)
+- [x] **S21** Full self-walkthrough; rough edges; mobile responsiveness — bigger type scale (2xs/xs 14, sm 16, base/md 18, lg 20; headings h4–h1 22/24/30/34), 44px tap targets, every screen checked at 320/390px, two-user walkthrough fixes (your part on bill cards, settle-up confirm, new-bill restyle, invite "Not now", claim hint, copy)
   - Still open from S20: Neon `preview` branch (preview deploys have no DB), 2x garden photo for the invite, expired-invite page in the new style
 - [ ] **S22** 2–3 friends on a real bill; collect feedback
 - [ ] **S23** Fix breakage; empty/error states; a11y pass
