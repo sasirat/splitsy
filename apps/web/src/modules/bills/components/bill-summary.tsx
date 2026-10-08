@@ -69,16 +69,20 @@ function BillSummaryView({
             return (
               <li key={person.userId} className="rounded-lg bg-paper px-4 py-3">
                 <div className="flex items-center justify-between gap-3">
-                  <div className="flex items-center gap-3">
+                  <div className="flex min-w-0 items-center gap-3">
                     <Avatar size="lg" tone="pink">
                       {initials}
                     </Avatar>
-                    <span className="min-w-0 text-body-bold wrap-anywhere text-ink">
-                      {person.userId === currentUserId ? "You" : name}
+                    {/* Name and badge wrap as a pair on narrow phones; the
+                        name only breaks mid-word if it can't fit a line. */}
+                    <span className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
+                      <span className="text-body-bold break-words text-ink">
+                        {person.userId === currentUserId ? "You" : name}
+                      </span>
+                      {isPayer ? <Badge variant="neutral">Paid the bill</Badge> : null}
                     </span>
-                    {isPayer ? <Badge variant="neutral">Paid the bill</Badge> : null}
                   </div>
-                  <span className="text-amount text-md text-ink">
+                  <span className="shrink-0 text-amount text-md text-ink">
                     {formatBaht(person.totalSatang)}
                   </span>
                 </div>

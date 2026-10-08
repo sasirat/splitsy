@@ -63,11 +63,12 @@ function BillCard({
           className={cn("pointer-events-none absolute size-[22px] rotate-[17deg]", star.className)}
         />
       ))}
-      <span className="relative flex items-center justify-between gap-3 text-caption text-pebble">
-        <span>
+      {/* On narrow phones the badges drop below the date, right-aligned. */}
+      <span className="relative flex flex-wrap items-center gap-x-3 gap-y-1 text-caption text-pebble">
+        <span className="whitespace-nowrap">
           {formatBillNumber(number)} · {formatBillDate(createdAt)}
         </span>
-        <span className="flex min-w-0 items-center gap-1.5">
+        <span className="ml-auto flex min-w-0 items-center gap-1.5">
           {groupName ? (
             <Badge variant="neutral" className="max-w-[10rem] truncate">
               {groupName}
