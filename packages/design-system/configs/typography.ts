@@ -14,10 +14,10 @@ export const fonts = {
   royale: "var(--font-bonheur-royale), cursive", // Bonheur Royale — "You're invited"
 } as const;
 
-/** Type scale (px), from the Figma frames — except up to 4xl, raised in S21
- *  because text was too small on phones and the steps had collapsed (Figma:
- *  2xs 10, xs 11, sm 13, base 15, md 16, lg 18, xl 20, 2xl 22, 3xl 28,
- *  4xl 32). Figma's text styles weren't updated to match. */
+/** Type scale (px), from the Figma frames — except 2xs–lg, raised in S21
+ *  because text was too small on phones (Figma: 2xs 10, xs 11, sm 13,
+ *  base 15, md 16, lg 18). Headings (xl and up) keep Figma's sizes; a bump
+ *  to 22/24/30/34 read too big. Figma's text styles weren't updated. */
 export const fontSize = {
   "2xs": "14px",
   xs: "14px",
@@ -25,10 +25,10 @@ export const fontSize = {
   base: "18px",
   md: "18px",
   lg: "20px",
-  xl: "22px",
-  "2xl": "24px",
-  "3xl": "30px",
-  "4xl": "34px",
+  xl: "20px",
+  "2xl": "22px",
+  "3xl": "28px",
+  "4xl": "32px",
   "5xl": "36px",
   "6xl": "48px",
   "7xl": "96px",
@@ -41,10 +41,10 @@ export const fontSize = {
  * Presets whose size varies (amount) omit the size, so a size class can be added.
  */
 export const typePresets = {
-  h1: "font-body text-4xl font-bold", // 34 — big screen titles
-  h2: "font-body text-3xl font-bold", // 30 — "Add item"
-  h3: "font-body text-2xl font-bold", // 24 — card titles
-  h4: "font-body text-xl font-bold", // 22 — small titles
+  h1: "font-body text-4xl font-bold", // 32 — big screen titles
+  h2: "font-body text-3xl font-bold", // 28 — "Add item"
+  h3: "font-body text-2xl font-bold", // 22 — card titles
+  h4: "font-body text-xl font-bold", // 20 — small titles
   body: "font-body text-base", // 18 — default text
   "body-bold": "font-body text-base font-bold",
   label: "font-body text-sm font-bold uppercase", // 16 — section labels
