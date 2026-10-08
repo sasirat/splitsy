@@ -6,10 +6,10 @@ for Google sign-in. Each page makes several database calls in a row, so the
 server sits beside the database: users in Thailand pay one ~250 ms trip to the
 US per request, not one per query. Config lives in `apps/web/vercel.json`;
 every deploy runs `prisma migrate deploy` before `next build`, so the database
-schema always matches the code. The build also runs `prisma generate` first:
-the Prisma client (`src/generated/`) isn't committed, and a build that restores
-Vercel's cache skips `pnpm install` — and with it the `postinstall` that would
-generate it.
+schema always matches the code. The web app's `build` script runs
+`prisma generate` before `next build`: the Prisma client (`src/generated/`)
+isn't committed, and a build that restores Vercel's cache skips
+`pnpm install` — and with it the `postinstall` that would generate it.
 
 Dev sign-in ("Continue as Mint") is off in production — only Google works.
 
