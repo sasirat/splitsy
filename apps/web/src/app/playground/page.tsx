@@ -27,18 +27,19 @@ const scenes: Swatch[] = [
 ];
 
 const typeScale = [
-  { cls: "text-2xs", name: "2xs · 10" },
-  { cls: "text-xs", name: "xs · 11" },
-  { cls: "text-sm", name: "sm · 13" },
-  { cls: "text-base", name: "base · 15" },
-  { cls: "text-md", name: "md · 16" },
-  { cls: "text-lg", name: "lg · 18" },
-  { cls: "text-xl", name: "xl · 20" },
-  { cls: "text-2xl", name: "2xl · 22" },
-  { cls: "text-3xl", name: "3xl · 28" },
-  { cls: "text-4xl", name: "4xl · 32" },
+  { cls: "text-2xs", name: "2xs · 14" },
+  { cls: "text-xs", name: "xs · 14" },
+  { cls: "text-sm", name: "sm · 16" },
+  { cls: "text-base", name: "base · 18" },
+  { cls: "text-md", name: "md · 18" },
+  { cls: "text-lg", name: "lg · 20" },
+  { cls: "text-xl", name: "xl · 22" },
+  { cls: "text-2xl", name: "2xl · 24" },
+  { cls: "text-3xl", name: "3xl · 30" },
+  { cls: "text-4xl", name: "4xl · 34" },
   { cls: "text-5xl", name: "5xl · 36" },
   { cls: "text-6xl", name: "6xl · 48" },
+  { cls: "text-7xl", name: "7xl · 96" },
 ];
 
 const radii = [
