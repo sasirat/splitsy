@@ -1,6 +1,7 @@
 /**
  * Splitsy typography tokens + presets.
- * Judson is the app-wide font. Outfit / Cookie / IBM Plex Mono are login-only;
+ * Judson is the app-wide font. Outfit / Cookie are login-only; IBM Plex Mono is
+ * login microcopy + the group-name input;
  * Kapakana and Bonheur Royale are one-off script titles (new group, invite).
  * The CSS variables (--font-judson, etc.) are provided by next/font in the app.
  */
@@ -8,7 +9,7 @@ export const fonts = {
   body: "var(--font-judson), Georgia, serif", // Judson — everywhere
   display: "var(--font-outfit), system-ui, sans-serif", // Outfit — login wordmark
   script: "var(--font-cookie), cursive", // Cookie — login tagline
-  mono: "var(--font-ibm-plex-mono), ui-monospace, monospace", // login microcopy
+  mono: "var(--font-ibm-plex-mono), ui-monospace, monospace", // login microcopy, group-name input
   flourish: "var(--font-kapakana), cursive", // Kapakana — "New Group" title
   royale: "var(--font-bonheur-royale), cursive", // Bonheur Royale — "You're invited"
 } as const;

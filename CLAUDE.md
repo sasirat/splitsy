@@ -22,7 +22,7 @@ See [ROADMAP.md](./ROADMAP.md) for the build plan (currently in **S4**).
 - Design tokens: `packages/design-system` — TS configs → generated `@theme.css`
   (`pnpm --filter @splitsy/design-system generate`). Single source of truth.
 - Components: **shadcn/ui**, restyled to Splitsy tokens.
-- Fonts: **Judson** app-wide; **Outfit / Cookie / IBM Plex Mono** login-only;
+- Fonts: **Judson** app-wide; **Outfit / Cookie** login-only; **IBM Plex Mono** login microcopy + the new-group name input;
   **Kapakana** (new-group title) and **Bonheur Royale** (invite title) one-off scripts.
 - Settlement: the payer shares a **bank account** and/or an uploaded **QR image** from their bank app
   (stored in Postgres, served by `/payment-qr/[userId]` to bill members only). We never generate QRs.

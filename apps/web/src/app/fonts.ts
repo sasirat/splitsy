@@ -24,7 +24,7 @@ export const cookie = Cookie({
   display: "swap",
 });
 
-/** IBM Plex Mono — login microcopy only. */
+/** IBM Plex Mono — login microcopy and the new-group name input. */
 export const ibmPlexMono = IBM_Plex_Mono({
   subsets: ["latin"],
   weight: ["600", "700"],
@@ -32,20 +32,22 @@ export const ibmPlexMono = IBM_Plex_Mono({
   display: "swap",
 });
 
-/** Kapakana — the "New Group" script title only. Not in the root layout: put
- *  `kapakana.variable` on that screen so other routes don't preload it. */
+/** Kapakana — the "New Group" script title only. Not preloaded: the browser
+ *  fetches it only on the screen that uses it. */
 export const kapakana = Kapakana({
   subsets: ["latin"],
   weight: ["400"],
   variable: "--font-kapakana",
   display: "swap",
+  preload: false,
 });
 
-/** Bonheur Royale — the "You're invited" script title only. Like Kapakana, its
- *  `.variable` goes on the invite screen, not the root layout. */
+/** Bonheur Royale — the "You're invited" script title only. Not preloaded,
+ *  like Kapakana. */
 export const bonheurRoyale = Bonheur_Royale({
   subsets: ["latin"],
   weight: ["400"],
   variable: "--font-bonheur-royale",
   display: "swap",
+  preload: false,
 });

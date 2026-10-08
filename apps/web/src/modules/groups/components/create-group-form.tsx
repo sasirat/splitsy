@@ -1,17 +1,19 @@
 "use client";
 
 import { cn } from "cn";
+import { PencilIcon } from "lucide-react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState, useTransition, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Pill } from "@/components/ui/pill";
 import { callAction } from "@/lib/call-action";
 import { createGroup } from "../actions";
 
 const QUICK_PICKS = ["Flatmates", "Office lunch", "Trip crew"] as const;
 
-/** Name a new group (type or quick-pick), then go to it. */
+/** Name a new group (type or quick-pick), then go to it. The name is written
+ *  on a plate (Figma "create-new-group"). */
 function CreateGroupForm() {
   const router = useRouter();
   const [name, setName] = useState("");
@@ -28,32 +30,47 @@ function CreateGroupForm() {
   }
 
   return (
-    <form onSubmit={onSubmit} className="flex flex-1 flex-col gap-4">
-      <div className="flex flex-col gap-2">
-        <label htmlFor="group-name" className="text-label text-muted-foreground">
-          Group name
-        </label>
-        <Input
-          id="group-name"
-          value={name}
-          onChange={(event) => {
-            setName(event.target.value);
-            setError(null);
-          }}
-          placeholder="e.g. Flatmates"
-          maxLength={60}
-          autoComplete="off"
-          aria-invalid={error ? true : undefined}
-          aria-describedby={error ? "group-name-error" : undefined}
+    <form onSubmit={onSubmit} className="flex flex-1 flex-col items-center gap-4">
+      {/* Plate on the cloth; the input sits on the plate's rim line. Positions
+          are the Figma frame's, as % of the 366×379 art. */}
+      <div className="relative -mx-3 mt-4 aspect-[834/864] w-[calc(100%+1.5rem)]">
+        <Image
+          src="/art/new-group.png"
+          alt=""
+          fill
+          priority
+          sizes="(max-width: 430px) 100vw, 430px"
+          className="object-contain"
         />
-        {error ? (
-          <p id="group-name-error" role="alert" className="text-body text-primary">
-            {error}
-          </p>
-        ) : null}
+        <div className="absolute top-[44%] right-[22%] bottom-[44%] left-[22%] flex items-center gap-2 border-b-[0.5px] border-primary px-2">
+          <label htmlFor="group-name" className="sr-only">
+            Group name
+          </label>
+          <input
+            id="group-name"
+            value={name}
+            onChange={(event) => {
+              setName(event.target.value);
+              setError(null);
+            }}
+            placeholder="Group name"
+            maxLength={60}
+            autoComplete="off"
+            aria-invalid={error ? true : undefined}
+            aria-describedby={error ? "group-name-error" : undefined}
+            className="min-w-0 flex-1 bg-transparent font-mono text-md font-bold text-primary outline-none placeholder:text-primary/50"
+          />
+          <PencilIcon aria-hidden className="size-4 shrink-0 text-primary" />
+        </div>
       </div>
 
-      <div className="flex flex-wrap gap-2">
+      {error ? (
+        <p id="group-name-error" role="alert" className="text-center text-body text-primary">
+          {error}
+        </p>
+      ) : null}
+
+      <div className="flex flex-wrap justify-center gap-2">
         {QUICK_PICKS.map((pick) => {
           const selected = name === pick;
           return (
@@ -80,8 +97,8 @@ function CreateGroupForm() {
         })}
       </div>
 
-      <Button type="submit" variant="solid" size="lg" className="mt-auto w-full" disabled={pending}>
-        {pending ? "Creating…" : "Create group"}
+      <Button type="submit" size="lg" className="mt-auto w-full" disabled={pending}>
+        {pending ? "Creating…" : "Create Group +"}
       </Button>
     </form>
   );

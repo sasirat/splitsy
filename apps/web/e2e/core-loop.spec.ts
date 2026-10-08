@@ -234,7 +234,7 @@ test("create a group and start a bill inside it", async ({ page }) => {
 
   await page.getByRole("link", { name: "+ New group" }).click();
   await page.getByLabel("Group name").fill(GROUP_NAME);
-  await page.getByRole("button", { name: "Create group" }).click();
+  await page.getByRole("button", { name: "Create Group +" }).click();
   await expect(page).toHaveURL(/\/groups\/(?!new$)[^/]+$/);
   await expect(page.getByRole("heading", { name: GROUP_NAME })).toBeVisible();
   await expect(page.getByText("No bills in this group yet.")).toBeVisible();
