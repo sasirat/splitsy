@@ -49,7 +49,7 @@
 }
 
 @utility text-flourish {
-  @apply font-flourish text-7xl leading-none;
+  @apply font-flourish text-[length:min(var(--text-7xl),24vw)] leading-none;
 }
 
 @utility text-royale {

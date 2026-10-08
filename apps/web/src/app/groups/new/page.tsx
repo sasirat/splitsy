@@ -11,10 +11,8 @@ export default async function NewGroupPage() {
       <Link href="/" className="self-start text-caption text-lagoon underline underline-offset-4">
         ← Your bills
       </Link>
-      <h1 className="mt-6 text-center text-flourish whitespace-nowrap text-primary max-[380px]:text-[min(96px,24vw)]">
-        New Group
-      </h1>
-      <p className="-mt-4 text-center text-sm text-primary/80">
+      <h1 className="mt-6 text-center text-flourish whitespace-nowrap text-primary">New Group</h1>
+      <p className="-mt-2 text-center text-sm text-primary/80">
         For people you split with again and again.
       </p>
       <CreateGroupForm />

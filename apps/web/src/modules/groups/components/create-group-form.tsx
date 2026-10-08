@@ -6,6 +6,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState, useTransition, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Pill } from "@/components/ui/pill";
 import { callAction } from "@/lib/call-action";
 import { createGroup } from "../actions";
@@ -42,11 +43,11 @@ function CreateGroupForm() {
           sizes="(max-width: 430px) 100vw, 430px"
           className="object-contain"
         />
-        <div className="absolute top-[44%] right-[22%] bottom-[44%] left-[22%] flex items-center gap-2 border-b-[0.5px] border-primary px-2">
+        <div className="absolute top-[44%] right-[22%] bottom-[44%] left-[22%] flex items-center gap-2 border-b-[0.5px] border-primary px-2 focus-within:border-b-2">
           <label htmlFor="group-name" className="sr-only">
             Group name
           </label>
-          <input
+          <Input
             id="group-name"
             value={name}
             onChange={(event) => {
@@ -58,7 +59,7 @@ function CreateGroupForm() {
             autoComplete="off"
             aria-invalid={error ? true : undefined}
             aria-describedby={error ? "group-name-error" : undefined}
-            className="min-w-0 flex-1 bg-transparent font-mono text-md font-bold text-primary outline-none placeholder:text-primary/50"
+            className="h-full flex-1 rounded-none border-0 bg-transparent px-0 font-mono font-bold text-primary placeholder:text-primary/50"
           />
           <PencilIcon aria-hidden className="size-4 shrink-0 text-primary" />
         </div>

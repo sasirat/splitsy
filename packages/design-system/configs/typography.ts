@@ -50,6 +50,6 @@ export const typePresets = {
   wordmark: "font-display text-6xl font-black", // "Splitsy"
   script: "font-script text-2xl", // tagline
   micro: "font-mono text-2xs font-bold uppercase tracking-wide", // "terms, privacy"
-  flourish: "font-flourish text-7xl leading-none", // "New Group"
+  flourish: "font-flourish text-[length:min(var(--text-7xl),24vw)] leading-none", // "New Group", shrinks on narrow phones
   royale: "font-royale text-6xl tracking-wide", // "You're invited"
 } as const;

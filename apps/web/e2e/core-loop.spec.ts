@@ -233,6 +233,12 @@ test("create a group and start a bill inside it", async ({ page }) => {
   await signInAs(page, "Mint");
 
   await page.getByRole("link", { name: "+ New group" }).click();
+  // No name yet: the error shows under the plate.
+  await page.getByRole("button", { name: "Create Group +" }).click();
+  await expect(page.getByRole("alert")).toHaveText("Give the group a name");
+  // A quick pick writes on the plate; typing replaces it.
+  await page.getByRole("button", { name: "Flatmates" }).click();
+  await expect(page.getByLabel("Group name")).toHaveValue("Flatmates");
   await page.getByLabel("Group name").fill(GROUP_NAME);
   await page.getByRole("button", { name: "Create Group +" }).click();
   await expect(page).toHaveURL(/\/groups\/(?!new$)[^/]+$/);

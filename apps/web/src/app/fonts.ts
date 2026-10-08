@@ -33,21 +33,22 @@ export const ibmPlexMono = IBM_Plex_Mono({
 });
 
 /** Kapakana — the "New Group" script title only. Not preloaded: the browser
- *  fetches it only on the screen that uses it. */
+ *  fetches it only on the screen that uses it, and `block` hides the title
+ *  briefly instead of flashing a 96px fallback. */
 export const kapakana = Kapakana({
   subsets: ["latin"],
   weight: ["400"],
   variable: "--font-kapakana",
-  display: "swap",
+  display: "block",
   preload: false,
 });
 
 /** Bonheur Royale — the "You're invited" script title only. Not preloaded,
- *  like Kapakana. */
+ *  and `block`, like Kapakana. */
 export const bonheurRoyale = Bonheur_Royale({
   subsets: ["latin"],
   weight: ["400"],
   variable: "--font-bonheur-royale",
-  display: "swap",
+  display: "block",
   preload: false,
 });
