@@ -8,7 +8,11 @@ import { inviteState } from "./service";
 
 const person = { select: { id: true, displayName: true, email: true } } as const;
 
-/** The current user's persistent groups, newest first, with counts. */
+/** How many members' names a group card shows as avatars. */
+const PREVIEW_MEMBERS = 4;
+
+/** The current user's persistent groups, newest first, with counts and the
+ *  first few members' names (join order) for the card's avatar row. */
 export async function listMyGroups() {
   const user = await requireUser();
   const groups = await getDb().group.findMany({
@@ -18,12 +22,18 @@ export async function listMyGroups() {
       id: true,
       name: true,
       _count: { select: { members: true, bills: true } },
+      members: {
+        orderBy: { joinedAt: "asc" },
+        take: PREVIEW_MEMBERS,
+        select: { user: person },
+      },
     },
   });
-  return groups.map(({ _count, ...group }) => ({
+  return groups.map(({ _count, members, ...group }) => ({
     ...group,
     memberCount: _count.members,
     billCount: _count.bills,
+    memberNames: members.map((member) => personName(member.user)),
   }));
 }
 

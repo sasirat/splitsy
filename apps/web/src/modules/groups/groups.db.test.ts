@@ -87,6 +87,8 @@ describe("listMyGroups", () => {
       ["Older group", 1, 0],
     ]);
     expect(groups.every((g) => g.name !== "Quick taxi")).toBe(true);
+    // A few member names (join order) for the card's avatar row.
+    expect(mine[0]?.memberNames).toEqual(["Mint"]);
   });
 
   it("doesn't list groups the user isn't in", async () => {

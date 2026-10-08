@@ -9,35 +9,20 @@ const STATUS = {
   SETTLED: { label: "Settled", variant: "paid" },
 } as const;
 
-const LOOK = {
-  /** paper card on the blue home scene */
-  paper: {
-    card: "rounded-xl bg-paper shadow-card",
-    meta: "text-muted-foreground",
-    title: "text-h4",
-    footer: "text-body text-ink",
-  },
-  /** white card with a berry outline and star stickers (Figma group page) */
-  sticker: {
-    card: "rounded-lg border border-primary bg-white shadow-[0_4px_4px_rgb(193_190_190/0.25)]",
-    meta: "text-pebble",
-    title: "text-4xl",
-    footer: "text-sm text-primary",
-  },
-} as const;
-
-/** Star stickers scattered over the sticker card, after Figma's 349×111 card —
- *  nudged off the status badge (top right) and the date (top left). */
+/** Star stickers scattered over the card, after Figma's 349×111 card — kept
+ *  off the top row (date, group and status badges) and mostly in the gap
+ *  between the item count and the amount. */
 const STARS = [
   { src: "/art/star-sticker-blue.svg", className: "top-[38%] right-[6%]" },
-  { src: "/art/star-sticker-gray.svg", className: "top-[8%] left-[58%]" },
+  { src: "/art/star-sticker-gray.svg", className: "top-[64%] left-[38%]" },
   { src: "/art/star-sticker-yellow.svg", className: "top-[59%] left-[18%]" },
-  { src: "/art/star-sticker-gray.svg", className: "top-[72%] left-[61%]" },
+  { src: "/art/star-sticker-gray.svg", className: "top-[76%] left-[60%]" },
 ] as const;
 
 /** One bill in a list: number + date, title, status, item count and
  *  subtotal (or how much is paid back once settling), plus its group when it
- *  belongs to one. */
+ *  belongs to one. A white card with a berry outline and star stickers
+ *  (Figma group page), used on home and group pages alike. */
 function BillCard({
   id,
   number,
@@ -48,7 +33,6 @@ function BillCard({
   groupName,
   status,
   progress,
-  look = "paper",
 }: {
   id: string;
   number: number;
@@ -61,37 +45,25 @@ function BillCard({
   status: keyof typeof STATUS;
   /** Set once settling: how much of what's owed is paid back. */
   progress: { paidSatang: number; totalSatang: number } | null;
-  look?: keyof typeof LOOK;
 }) {
   const { label, variant } = STATUS[status];
-  const styles = LOOK[look];
   return (
     <Link
       href={`/bills/${id}`}
-      className={cn(
-        "relative flex flex-col gap-1 overflow-hidden px-5 py-4 transition-[filter] hover:brightness-97 focus-visible:ring-2 focus-visible:ring-blush focus-visible:outline-none",
-        styles.card,
-      )}
+      className="relative flex flex-col gap-1 overflow-hidden rounded-lg border border-primary bg-white px-5 py-4 shadow-[0_4px_4px_rgb(193_190_190/0.25)] transition-[filter] hover:brightness-97 focus-visible:ring-2 focus-visible:ring-blush focus-visible:outline-none"
     >
-      {look === "sticker"
-        ? STARS.map((star, i) => (
-            // Tiny decorative SVGs gain nothing from the image optimizer.
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              key={i}
-              src={star.src}
-              alt=""
-              aria-hidden
-              className={cn(
-                "pointer-events-none absolute size-[22px] rotate-[17deg]",
-                star.className,
-              )}
-            />
-          ))
-        : null}
-      <span
-        className={cn("relative flex items-center justify-between gap-3 text-caption", styles.meta)}
-      >
+      {STARS.map((star, i) => (
+        // Tiny decorative SVGs gain nothing from the image optimizer.
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          key={i}
+          src={star.src}
+          alt=""
+          aria-hidden
+          className={cn("pointer-events-none absolute size-[22px] rotate-[17deg]", star.className)}
+        />
+      ))}
+      <span className="relative flex items-center justify-between gap-3 text-caption text-pebble">
         <span>
           {formatBillNumber(number)} · {formatBillDate(createdAt)}
         </span>
@@ -104,8 +76,8 @@ function BillCard({
           <Badge variant={variant}>{label}</Badge>
         </span>
       </span>
-      <span className={cn("relative wrap-anywhere text-primary", styles.title)}>{title}</span>
-      <span className={cn("relative flex items-center justify-between", styles.footer)}>
+      <span className="relative text-4xl wrap-anywhere text-primary">{title}</span>
+      <span className="relative flex items-center justify-between text-sm text-primary">
         <span>
           {progress && progress.totalSatang > 0 && status === "SETTLING"
             ? `${formatBaht(progress.paidSatang)} of ${formatBaht(progress.totalSatang)} paid back`

@@ -1,27 +1,43 @@
 import Link from "next/link";
+import { Avatar } from "@/components/ui/avatar";
+import { AvatarStack } from "@/components/ui/avatar-stack";
+import { initialsOf } from "@/lib/format";
 
-/** One group in the home list: name plus member and bill counts. */
+/** One group in the home list: name, member and bill counts, and the first
+ *  few members as avatars — a white card like the group page's. */
 function GroupCard({
   id,
   name,
   memberCount,
   billCount,
+  memberNames,
 }: {
   id: string;
   name: string;
   memberCount: number;
   billCount: number;
+  /** The first few members' names, in join order. */
+  memberNames: string[];
 }) {
   return (
     <Link
       href={`/groups/${id}`}
-      className="flex flex-col gap-1 rounded-xl bg-paper px-5 py-4 shadow-card transition-[filter] hover:brightness-97 focus-visible:ring-2 focus-visible:ring-blush focus-visible:outline-none"
+      className="flex items-center justify-between gap-3 rounded-lg bg-white px-5 py-4 shadow-[0_4px_4px_rgb(193_190_190/0.25)] transition-[filter] hover:brightness-97 focus-visible:ring-2 focus-visible:ring-blush focus-visible:outline-none"
     >
-      <span className="text-h4 wrap-anywhere text-primary">{name}</span>
-      <span className="text-caption text-muted-foreground">
-        {memberCount} member{memberCount === 1 ? "" : "s"} · {billCount} bill
-        {billCount === 1 ? "" : "s"}
+      <span className="flex min-w-0 flex-col gap-1">
+        <span className="text-2xl wrap-anywhere text-primary">{name}</span>
+        <span className="text-sm text-pebble">
+          {memberCount} member{memberCount === 1 ? "" : "s"} · {billCount} bill
+          {billCount === 1 ? "" : "s"}
+        </span>
       </span>
+      <AvatarStack extra={memberCount - memberNames.length} className="shrink-0">
+        {memberNames.map((memberName, i) => (
+          <Avatar key={i} size="md">
+            {initialsOf(memberName)}
+          </Avatar>
+        ))}
+      </AvatarStack>
     </Link>
   );
 }

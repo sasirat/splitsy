@@ -57,7 +57,7 @@ export default async function GroupPage({ params }: PageProps<"/groups/[id]">) {
           <ul className="flex flex-col gap-3">
             {group.bills.map((bill) => (
               <li key={bill.id}>
-                <BillCard {...bill} look="sticker" />
+                <BillCard {...bill} />
               </li>
             ))}
           </ul>
