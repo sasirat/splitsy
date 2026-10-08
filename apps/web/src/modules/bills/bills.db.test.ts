@@ -193,4 +193,26 @@ describe("listMyBills", () => {
       myPart: { role: "payer", paidSatang: 10000, totalSatang: 15000 },
     });
   });
+
+  it("gives a friend their own part, including a claimed payment", async () => {
+    const billId = await newBill("Friend's view");
+    const db = getDb();
+    const { groupId } = await db.bill.findUniqueOrThrow({ where: { id: billId } });
+    await db.groupMember.create({ data: { groupId, userId: BEAM } });
+    await db.bill.update({
+      where: { id: billId },
+      data: {
+        status: "SETTLING",
+        settlements: {
+          create: [
+            { fromUserId: BEAM, toUserId: MINT, amountSatang: 19500, paidClaimedAt: new Date() },
+          ],
+        },
+      },
+    });
+
+    auth.currentUserId = BEAM;
+    const bill = (await listMyBills()).find((b) => b.id === billId);
+    expect(bill?.myPart).toEqual({ role: "debtor", amountSatang: 19500, state: "claimed" });
+  });
 });

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { formatBaht, formatBillDate, formatBillNumber } from "@/lib/format";
 import type { MyBillPart } from "@/modules/settlement/service";
+import { billCardFooter } from "../bill-card-footer";
 
 const STATUS = {
   OPEN: { label: "Open", variant: "neutral" },
@@ -21,26 +22,6 @@ const STARS = [
   { src: "/art/star-sticker-yellow.svg", className: "top-[59%] left-[18%]", underFooter: true },
   { src: "/art/star-sticker-gray.svg", className: "top-[76%] left-[60%]" },
 ] as const;
-
-/** The card's footer line: the item count while open; once settling, the
- *  viewer's own part — what's paid back to the payer, or what a friend owes. */
-function footerText(itemCount: number, myPart: MyBillPart | null): string {
-  if (!myPart) return `${itemCount} item${itemCount === 1 ? "" : "s"}`;
-  switch (myPart.role) {
-    case "payer":
-      return myPart.paidSatang === myPart.totalSatang
-        ? "All paid back"
-        : `${formatBaht(myPart.paidSatang)} of ${formatBaht(myPart.totalSatang)} paid back`;
-    case "debtor":
-      return myPart.state === "paid"
-        ? `You paid ${formatBaht(myPart.amountSatang)}`
-        : myPart.state === "claimed"
-          ? `You said you've paid ${formatBaht(myPart.amountSatang)}`
-          : `You owe ${formatBaht(myPart.amountSatang)}`;
-    case "none":
-      return "Nothing to pay";
-  }
-}
 
 /** One bill in a list: number + date, title, status, item count and
  *  subtotal (or the viewer's part once settling), plus its group when it
@@ -102,7 +83,7 @@ function BillCard({
       </span>
       <span className="relative text-4xl wrap-anywhere text-primary">{title}</span>
       <span className="relative flex items-center justify-between text-sm text-primary">
-        <span>{footerText(itemCount, myPart)}</span>
+        <span>{billCardFooter(itemCount, myPart)}</span>
         <span className="text-amount text-md">{formatBaht(subtotalSatang)}</span>
       </span>
     </Link>

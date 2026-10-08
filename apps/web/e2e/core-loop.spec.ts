@@ -134,12 +134,14 @@ test("create a bill, add items, split it between two people, see the summary", a
     await mint.reload();
     await expect(settleUp).toBeEnabled({ timeout: 1_000 });
   }).toPass();
+  // It locks the bill, so it asks first — and Cancel leaves it open.
+  const confirm = mint.getByRole("dialog", { name: "Lock the bill and settle up?" });
   await settleUp.click();
-  // It locks the bill, so it asks first.
-  await mint
-    .getByRole("dialog", { name: "Lock the bill and settle up?" })
-    .getByRole("button", { name: "Lock and settle up" })
-    .click();
+  await confirm.getByRole("button", { name: "Cancel" }).click();
+  await expect(confirm).toBeHidden();
+  await expect(mint).toHaveURL(`${billUrl}/summary`);
+  await settleUp.click();
+  await confirm.getByRole("button", { name: "Lock and settle up" }).click();
   await expect(mint).toHaveURL(`${billUrl}/settle`);
   await expect(mint.getByText("You fronted it")).toBeVisible();
   await expect(mint.getByText("฿210").first()).toBeVisible();
