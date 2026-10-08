@@ -1,7 +1,7 @@
-import { cn } from "cn";
 import { CircleCheckIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import type { CSSProperties } from "react";
 import { redirect } from "next/navigation";
 import { Avatar } from "@/components/ui/avatar";
 import { AvatarStack } from "@/components/ui/avatar-stack";
@@ -13,7 +13,6 @@ import { getInvitePreview } from "@/modules/groups/queries";
 import { requireUser } from "@/server/auth";
 
 const MAX_AVATARS = 5;
-const LONG_NAME = 14;
 
 export default async function JoinPage({ params, searchParams }: PageProps<"/join/[token]">) {
   const { token } = await params;
@@ -43,11 +42,11 @@ export default async function JoinPage({ params, searchParams }: PageProps<"/joi
   }
 
   const shown = invite.members.slice(0, MAX_AVATARS);
-  // The sheet narrows into the envelope's V below the first line, so a long
-  // name gets a smaller size to wrap inside it.
-  const longName = invite.name.length > LONG_NAME;
   return (
-    <PhoneFrame className="relative isolate overflow-hidden bg-scene-green px-6 pt-10 pb-8 text-center">
+    <PhoneFrame
+      scene="green"
+      className="relative isolate overflow-hidden px-6 pt-10 pb-8 text-center"
+    >
       {/* Figma "invited": a garden photo with the envelope in front of it. */}
       <Image
         src="/art/invite-bg.jpg"
@@ -81,13 +80,13 @@ export default async function JoinPage({ params, searchParams }: PageProps<"/joi
               <span className="text-scene-green">{invite.inviterName}</span> invited you to{" "}
               {invite.kind === "bill" ? "split" : "join"}{" "}
             </span>
+            {/* The sheet narrows into the envelope's V below the first line,
+                so the name shrinks with its length to stay on one line
+                (Figma's 36px for short names; a floor for very long ones,
+                which wrap, balanced, inside the V). */}
             <span
-              className={cn(
-                "line-clamp-2 leading-tight font-bold wrap-anywhere text-lagoon",
-                longName
-                  ? "px-[6%] text-[length:min(26px,6.5cqw)]"
-                  : "text-[length:min(36px,9cqw)]",
-              )}
+              style={{ "--name-len": invite.name.length } as CSSProperties}
+              className="line-clamp-2 px-[4%] text-[length:clamp(min(17px,4.8cqw),calc(96cqw/var(--name-len)),min(36px,9cqw))] leading-tight font-bold text-balance wrap-anywhere text-lagoon"
             >
               {invite.name}
             </span>
@@ -120,6 +119,8 @@ export default async function JoinPage({ params, searchParams }: PageProps<"/joi
       </div>
 
       <div className="mt-6">
+        {/* Figma's "invited-already" frame still says Join; for a member the
+            button opens the group or bill, so it says that. */}
         {invite.alreadyMember ? (
           <Link
             href={invite.destination}
