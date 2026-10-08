@@ -28,7 +28,10 @@ function JoinButton({ token, billId }: { token: string; billId?: string }) {
         {pending ? "Joining…" : "Join"}
       </Button>
       {error ? (
-        <p role="alert" className="text-center text-body text-primary">
+        <p
+          role="alert"
+          className="rounded-lg bg-paper px-4 py-2 text-center text-body text-primary"
+        >
           {error}
         </p>
       ) : null}
