@@ -10,14 +10,14 @@ function GroupCard({
   name,
   memberCount,
   billCount,
-  memberNames,
+  memberPreview,
 }: {
   id: string;
   name: string;
   memberCount: number;
   billCount: number;
-  /** The first few members' names, in join order. */
-  memberNames: string[];
+  /** The first few members, in join order. */
+  memberPreview: { id: string; name: string }[];
 }) {
   return (
     <Link
@@ -31,13 +31,17 @@ function GroupCard({
           {billCount === 1 ? "" : "s"}
         </span>
       </span>
-      <AvatarStack extra={memberCount - memberNames.length} className="shrink-0">
-        {memberNames.map((memberName, i) => (
-          <Avatar key={i} size="md">
-            {initialsOf(memberName)}
-          </Avatar>
-        ))}
-      </AvatarStack>
+      {/* Decorative: the count above already says who's in, and the initials
+          would otherwise be read out as part of the link's name. */}
+      <span aria-hidden className="shrink-0">
+        <AvatarStack extra={memberCount - memberPreview.length}>
+          {memberPreview.map((member) => (
+            <Avatar key={member.id} size="md">
+              {initialsOf(member.name)}
+            </Avatar>
+          ))}
+        </AvatarStack>
+      </span>
     </Link>
   );
 }

@@ -24,6 +24,7 @@ const MINT = "seed_user_mint";
 const PLOY = "seed_user_ploy";
 const BEAM = "seed_user_beam";
 const createdGroupIds: string[] = [];
+const createdUserIds: string[] = [];
 
 async function newGroup(name = "Flatmates") {
   const result = await createGroup({ name });
@@ -49,6 +50,7 @@ beforeEach(() => {
 afterAll(async () => {
   // Deleting a group cascades to membership, bills, items and splits.
   await getDb().group.deleteMany({ where: { id: { in: createdGroupIds } } });
+  await getDb().user.deleteMany({ where: { id: { in: createdUserIds } } });
 });
 
 describe("createGroup", () => {
@@ -87,8 +89,39 @@ describe("listMyGroups", () => {
       ["Older group", 1, 0],
     ]);
     expect(groups.every((g) => g.name !== "Quick taxi")).toBe(true);
-    // A few member names (join order) for the card's avatar row.
-    expect(mine[0]?.memberNames).toEqual(["Mint"]);
+    expect(mine[0]?.memberPreview).toEqual([{ id: MINT, name: "Mint" }]);
+  });
+
+  it("previews the first four members in join order", async () => {
+    const groupId = await newGroup("Big flat");
+    const db = getDb();
+    const extra = await Promise.all(
+      ["Zed", "Yui"].map((name) =>
+        db.user.create({
+          data: { clerkId: `test_${name}_${Date.now()}`, email: `${name}@test`, displayName: name },
+        }),
+      ),
+    );
+    createdUserIds.push(...extra.map((u) => u.id));
+    // Mint joined on create; the rest join a second apart, Yui last.
+    const joiners = [PLOY, BEAM, ...extra.map((u) => u.id)];
+    const start = Date.now();
+    await db.groupMember.createMany({
+      data: joiners.map((userId, i) => ({
+        groupId,
+        userId,
+        joinedAt: new Date(start + (i + 1) * 1000),
+      })),
+    });
+
+    const group = (await listMyGroups()).find((g) => g.id === groupId);
+    expect(group?.memberCount).toBe(5);
+    expect(group?.memberPreview).toEqual([
+      { id: MINT, name: "Mint" },
+      { id: PLOY, name: "Ploy" },
+      { id: BEAM, name: "Beam" },
+      { id: extra[0]?.id, name: "Zed" },
+    ]);
   });
 
   it("doesn't list groups the user isn't in", async () => {

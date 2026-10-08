@@ -12,7 +12,7 @@ const person = { select: { id: true, displayName: true, email: true } } as const
 const PREVIEW_MEMBERS = 4;
 
 /** The current user's persistent groups, newest first, with counts and the
- *  first few members' names (join order) for the card's avatar row. */
+ *  first few members (join order) for the card's avatar row. */
 export async function listMyGroups() {
   const user = await requireUser();
   const groups = await getDb().group.findMany({
@@ -33,7 +33,7 @@ export async function listMyGroups() {
     ...group,
     memberCount: _count.members,
     billCount: _count.bills,
-    memberNames: members.map((member) => personName(member.user)),
+    memberPreview: members.map(({ user }) => ({ id: user.id, name: personName(user) })),
   }));
 }
 
