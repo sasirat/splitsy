@@ -48,3 +48,11 @@
   @apply font-mono text-2xs font-bold uppercase tracking-wide;
 }
 
+@utility text-flourish {
+  @apply font-flourish text-7xl leading-none;
+}
+
+@utility text-royale {
+  @apply font-royale text-6xl tracking-wide;
+}
+

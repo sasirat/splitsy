@@ -25,6 +25,8 @@ export const colors = {
   ink: "#1c1b18", // primary text
   "muted-foreground": "#8c8370", // secondary text (shadcn `text-muted-foreground`)
   sky: "#bae2ff", // uppercase labels on dark scenes
+  lagoon: "#077cc2", // labels, links & dashed secondary buttons on light scenes
+  pebble: "#909090", // quiet labels on the petal scene
 
   /* lines */
   border: "#cdc3ac", // input & control borders
@@ -34,5 +36,6 @@ export const colors = {
   /* scene backgrounds (per-screen themes) */
   "scene-blue": "#407c9d", // login, name
   "scene-green": "#7e9352", // add-items, item-detail, summary
-  "scene-berry": "#621e20", // settlement
+  "scene-sky": "#ddeefb", // new group, settlement
+  "scene-petal": "#fcedf4", // group page
 } as const;

@@ -22,25 +22,25 @@ export default async function SettlePage({ params }: PageProps<"/bills/[id]/sett
   ].join(" · ");
 
   return (
-    <PhoneFrame scene="blue" className="gap-6 px-5 pt-8 pb-8">
+    <PhoneFrame scene="sky" className="gap-6 px-5 pt-8 pb-8">
       <Link
         href={`/bills/${id}`}
-        className="self-start text-caption text-cream underline underline-offset-4"
+        className="self-start text-caption text-lagoon underline underline-offset-4"
       >
         ← Back to bill
       </Link>
 
       <header className="flex flex-col gap-1">
-        <p className="text-label text-cream/80">{iAmPayer ? "You fronted it" : "Settle up"}</p>
-        <h1 className="text-h1 wrap-anywhere text-white">{settlement.title}</h1>
-        <p className="text-caption text-cream/80">{meta}</p>
+        <p className="text-label text-lagoon">{iAmPayer ? "You fronted it" : "Settle up"}</p>
+        <h1 className="text-h1 wrap-anywhere text-primary">{settlement.title}</h1>
+        <p className="text-caption text-primary/80">{meta}</p>
       </header>
 
       <SettleView settlement={settlement} currentUserId={user.id} />
 
       <Link
         href={`/bills/${id}/summary`}
-        className="self-center text-body text-cream underline underline-offset-4"
+        className="self-center text-body text-lagoon underline underline-offset-4"
       >
         See what everyone had →
       </Link>

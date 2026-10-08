@@ -47,7 +47,7 @@ export default async function BillSummaryPage({ params }: PageProps<"/bills/[id]
   ].join(" · ");
 
   return (
-    <PhoneFrame scene="berry" className="gap-6 px-5 pt-8 pb-8">
+    <PhoneFrame scene="green" className="gap-6 px-5 pt-8 pb-8">
       <Link
         href={`/bills/${bill.id}`}
         className="self-start text-caption text-cream underline underline-offset-4"

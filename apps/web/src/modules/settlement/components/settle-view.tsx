@@ -102,7 +102,7 @@ function SettleView({
       )}
 
       <section className="flex flex-col gap-2">
-        <h2 className="text-label text-cream/80">Who owes {payerName}</h2>
+        <h2 className="text-label text-lagoon">Who owes {payerName}</h2>
         <div className="overflow-hidden rounded-lg bg-paper">
           {settlements.map((s) => {
             const name = personName(s.fromUser);

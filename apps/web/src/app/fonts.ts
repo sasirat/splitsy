@@ -1,4 +1,4 @@
-import { Cookie, IBM_Plex_Mono, Judson, Outfit } from "next/font/google";
+import { Bonheur_Royale, Cookie, IBM_Plex_Mono, Judson, Kapakana, Outfit } from "next/font/google";
 
 /** Judson — the app-wide font (body, headings, buttons, amounts, labels). */
 export const judson = Judson({
@@ -29,5 +29,22 @@ export const ibmPlexMono = IBM_Plex_Mono({
   subsets: ["latin"],
   weight: ["600", "700"],
   variable: "--font-ibm-plex-mono",
+  display: "swap",
+});
+
+/** Kapakana — the "New Group" script title only. */
+export const kapakana = Kapakana({
+  subsets: ["latin"],
+  weight: ["400"],
+  variable: "--font-kapakana",
+  display: "swap",
+  adjustFontFallback: false, // next/font has no metrics for it
+});
+
+/** Bonheur Royale — the "You're invited" script title only. */
+export const bonheurRoyale = Bonheur_Royale({
+  subsets: ["latin"],
+  weight: ["400"],
+  variable: "--font-bonheur-royale",
   display: "swap",
 });

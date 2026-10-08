@@ -7,7 +7,8 @@ const phoneFrameVariants = cva("mx-auto flex min-h-dvh w-full max-w-[430px] flex
     scene: {
       blue: "bg-scene-blue",
       green: "bg-scene-green",
-      berry: "bg-scene-berry",
+      sky: "bg-scene-sky",
+      petal: "bg-scene-petal",
       cream: "bg-cream",
       paper: "bg-paper",
     },

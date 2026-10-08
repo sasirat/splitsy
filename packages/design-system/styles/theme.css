@@ -11,17 +11,22 @@
   --color-ink: #1c1b18;
   --color-muted-foreground: #8c8370;
   --color-sky: #bae2ff;
+  --color-lagoon: #077cc2;
+  --color-pebble: #909090;
   --color-border: #cdc3ac;
   --color-divider: #fff2f3;
   --color-divider-warm: #e7dccb;
   --color-scene-blue: #407c9d;
   --color-scene-green: #7e9352;
-  --color-scene-berry: #621e20;
+  --color-scene-sky: #ddeefb;
+  --color-scene-petal: #fcedf4;
   /* fonts */
   --font-body: var(--font-judson), Georgia, serif;
   --font-display: var(--font-outfit), system-ui, sans-serif;
   --font-script: var(--font-cookie), cursive;
   --font-mono: var(--font-ibm-plex-mono), ui-monospace, monospace;
+  --font-flourish: var(--font-kapakana), cursive;
+  --font-royale: var(--font-bonheur-royale), cursive;
   /* type scale */
   --text-2xs: 10px;
   --text-xs: 11px;
@@ -35,6 +40,7 @@
   --text-4xl: 32px;
   --text-5xl: 36px;
   --text-6xl: 48px;
+  --text-7xl: 96px;
   /* radii */
   --radius-xs: 5px;
   --radius-sm: 6px;

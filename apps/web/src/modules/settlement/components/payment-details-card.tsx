@@ -31,7 +31,7 @@ function PaymentDetailsCard({ details }: { details: PaymentDetails | null }) {
         <Button
           variant="dashed"
           size="lg"
-          className="w-full text-cream"
+          className="w-full text-lagoon"
           onClick={() => setOpen(true)}
         >
           Add how friends pay you

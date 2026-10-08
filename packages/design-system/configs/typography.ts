@@ -1,6 +1,7 @@
 /**
  * Splitsy typography tokens + presets.
- * Judson is the app-wide font. Outfit / Cookie / IBM Plex Mono are login-only.
+ * Judson is the app-wide font. Outfit / Cookie / IBM Plex Mono are login-only;
+ * Kapakana and Bonheur Royale are one-off script titles (new group, invite).
  * The CSS variables (--font-judson, etc.) are provided by next/font in the app.
  */
 export const fonts = {
@@ -8,6 +9,8 @@ export const fonts = {
   display: "var(--font-outfit), system-ui, sans-serif", // Outfit — login wordmark
   script: "var(--font-cookie), cursive", // Cookie — login tagline
   mono: "var(--font-ibm-plex-mono), ui-monospace, monospace", // login microcopy
+  flourish: "var(--font-kapakana), cursive", // Kapakana — "New Group" title
+  royale: "var(--font-bonheur-royale), cursive", // Bonheur Royale — "You're invited"
 } as const;
 
 /** Type scale (px), taken from the Figma frames. */
@@ -24,6 +27,7 @@ export const fontSize = {
   "4xl": "32px",
   "5xl": "36px",
   "6xl": "48px",
+  "7xl": "96px",
 } as const;
 
 /**
@@ -45,4 +49,6 @@ export const typePresets = {
   wordmark: "font-display text-6xl font-black", // "Splitsy"
   script: "font-script text-2xl", // tagline
   micro: "font-mono text-2xs font-bold uppercase tracking-wide", // "terms, privacy"
+  flourish: "font-flourish text-7xl leading-none", // "New Group"
+  royale: "font-royale text-6xl tracking-wide", // "You're invited"
 } as const;

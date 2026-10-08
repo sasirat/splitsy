@@ -15,12 +15,15 @@ const palette: Swatch[] = [
   { name: "border", hex: "#cdc3ac", box: "bg-border", label: "text-ink" },
   { name: "divider", hex: "#fff2f3", box: "bg-divider", label: "text-ink" },
   { name: "divider-warm", hex: "#e7dccb", box: "bg-divider-warm", label: "text-ink" },
+  { name: "lagoon", hex: "#077cc2", box: "bg-lagoon", label: "text-white" },
+  { name: "pebble", hex: "#909090", box: "bg-pebble", label: "text-white" },
 ];
 
 const scenes: Swatch[] = [
   { name: "scene-blue", hex: "#407c9d", box: "bg-scene-blue", label: "text-white" },
   { name: "scene-green", hex: "#7e9352", box: "bg-scene-green", label: "text-white" },
-  { name: "scene-berry", hex: "#621e20", box: "bg-scene-berry", label: "text-white" },
+  { name: "scene-sky", hex: "#ddeefb", box: "bg-scene-sky", label: "text-primary" },
+  { name: "scene-petal", hex: "#fcedf4", box: "bg-scene-petal", label: "text-primary" },
 ];
 
 const typeScale = [
