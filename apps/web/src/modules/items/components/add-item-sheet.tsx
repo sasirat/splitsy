@@ -106,7 +106,7 @@ function AddItemSheet({
           role={error ? "alert" : undefined}
           className={error ? "text-body text-primary" : "text-caption text-muted-foreground"}
         >
-          {error ?? "Keep tapping — tidy names later."}
+          {error ?? "Keep going — each one saves as you add it."}
         </p>
       </form>
     </BottomSheet>

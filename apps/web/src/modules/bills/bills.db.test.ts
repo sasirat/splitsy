@@ -168,7 +168,7 @@ describe("listMyBills", () => {
     expect(mine[0].number).toBeGreaterThan(mine[1].number);
   });
 
-  it("shows each bill's status, and how much is paid back once settling", async () => {
+  it("shows each bill's status, and the viewer's part once settling", async () => {
     const open = await newBill("Still open");
     const settling = await newBill("Settling");
     await getDb().bill.update({
@@ -186,10 +186,11 @@ describe("listMyBills", () => {
 
     const bills = await listMyBills();
     const byId = (id: string) => bills.find((b) => b.id === id);
-    expect(byId(open)).toMatchObject({ status: "OPEN", progress: null });
+    expect(byId(open)).toMatchObject({ status: "OPEN", myPart: null });
+    // Mint created (and paid) it, so Mint sees what's been paid back.
     expect(byId(settling)).toMatchObject({
       status: "SETTLING",
-      progress: { paidSatang: 10000, totalSatang: 15000 },
+      myPart: { role: "payer", paidSatang: 10000, totalSatang: 15000 },
     });
   });
 });

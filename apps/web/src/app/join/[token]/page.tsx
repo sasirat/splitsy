@@ -132,7 +132,15 @@ export default async function JoinPage({ params, searchParams }: PageProps<"/joi
             Open {invite.kind === "bill" ? "bill" : "group"}
           </Link>
         ) : (
-          <JoinButton token={token} billId={billId} />
+          <div className="flex flex-col items-center gap-4">
+            <JoinButton token={token} billId={billId} />
+            <Link
+              href="/"
+              className="text-caption text-white underline underline-offset-4 tap-target"
+            >
+              Not now
+            </Link>
+          </div>
         )}
       </div>
     </PhoneFrame>

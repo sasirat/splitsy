@@ -112,6 +112,31 @@ export function nudgeMessage({
   );
 }
 
+/** Where the current user stands on a settling bill, for their bill card:
+ *  the payer sees how much of what's owed is paid back; a friend sees their own
+ *  debt and whether it's still owed, claimed ("I've paid") or confirmed paid. */
+export type MyBillPart =
+  | { role: "payer"; paidSatang: number; totalSatang: number }
+  | { role: "debtor"; amountSatang: number; state: "owe" | "claimed" | "paid" }
+  | { role: "none" };
+
+export function myBillPart(
+  settlements: {
+    fromUserId: string;
+    amountSatang: number;
+    status: "PENDING" | "PAID";
+    paidClaimedAt: Date | null;
+  }[],
+  payerId: string,
+  userId: string,
+): MyBillPart {
+  if (userId === payerId) return { role: "payer", ...settleProgress(settlements) };
+  const mine = settlements.find((settlement) => settlement.fromUserId === userId);
+  if (!mine) return { role: "none" };
+  const state = mine.status === "PAID" ? "paid" : mine.paidClaimedAt ? "claimed" : "owe";
+  return { role: "debtor", amountSatang: mine.amountSatang, state };
+}
+
 /** How much of a bill's settlements is paid back, for "฿x of ฿y paid back". */
 export function settleProgress(
   settlements: { amountSatang: number; status: "PENDING" | "PAID" }[],

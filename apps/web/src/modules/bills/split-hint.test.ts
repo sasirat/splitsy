@@ -22,6 +22,11 @@ describe("splitHint", () => {
     ).toBe("M ฿90 · B ฿180");
   });
 
+  it("is empty when one person has it all — the line already shows the price", () => {
+    expect(splitHint(12000, [{ initials: "P" }])).toBe("");
+    expect(splitHint(12000, [{ initials: "P", shares: 2 }])).toBe("");
+  });
+
   it("is empty when nobody has claimed the item", () => {
     expect(splitHint(5000, [])).toBe("");
   });

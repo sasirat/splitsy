@@ -114,9 +114,20 @@ function BillItems({
 
   const subtotal = sum(shownItems);
   const unclaimed = sum(shownItems.filter((item) => item.sharers.length === 0));
+  // Someone who just joined hasn't claimed anything yet: say what to do.
+  const showClaimHint =
+    canEdit &&
+    me !== undefined &&
+    shownItems.length > 0 &&
+    !shownItems.some((item) => item.sharers.some((sharer) => sharer.userId === me.id));
 
   return (
     <>
+      {showClaimHint ? (
+        <p className="text-center text-body text-cream">
+          Tap the dishes you had to claim your share.
+        </p>
+      ) : null}
       <ReceiptCard title={title} date={meta} subtotal={subtotal} className="mt-4">
         {shownItems.length > 0 ? (
           shownItems.map((item) => (

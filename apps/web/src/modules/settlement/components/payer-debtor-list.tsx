@@ -75,14 +75,24 @@ function PayerDebtorList({
 
   return (
     <>
-      <div className="flex flex-col gap-1">
-        <TotalDisplay label="Owed to you" amount={total - paidBack} className="px-0 text-primary" />
-        <p className="text-caption text-primary/80">
-          {paidBack === total
-            ? "Everyone has paid you back — all settled."
-            : `${formatBaht(paidBack)} of ${formatBaht(total)} paid back`}
-        </p>
-      </div>
+      {paidBack === total ? (
+        // Nothing left to chase: say so instead of a big "฿0".
+        <div className="flex flex-col gap-1 text-primary">
+          <p className="text-h3">All settled</p>
+          <p className="text-caption text-primary/80">Everyone has paid you back — all settled.</p>
+        </div>
+      ) : (
+        <div className="flex flex-col gap-1">
+          <TotalDisplay
+            label="Owed to you"
+            amount={total - paidBack}
+            className="px-0 text-primary"
+          />
+          <p className="text-caption text-primary/80">
+            {formatBaht(paidBack)} of {formatBaht(total)} paid back
+          </p>
+        </div>
+      )}
       {paymentDetails}
 
       <section className="flex flex-col gap-2">

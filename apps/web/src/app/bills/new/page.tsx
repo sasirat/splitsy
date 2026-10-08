@@ -15,20 +15,20 @@ export default async function NewBillPage({ searchParams }: PageProps<"/bills/ne
   const now = new Date();
 
   return (
-    <PhoneFrame scene="cream" className="px-6 pt-8 pb-8">
+    <PhoneFrame scene="petal" className="px-6 pt-8 pb-8">
       <Link
         href={group ? `/groups/${group.id}` : "/"}
-        className="self-start text-caption text-primary underline underline-offset-4 tap-target"
+        className="self-start text-caption text-lagoon underline underline-offset-4 tap-target"
       >
         {group ? `← ${group.name}` : "← Your bills"}
       </Link>
-      <p className="mt-6 text-label text-primary">Hey {user.displayName}!</p>
-      <h1 className="mt-1 text-h1 text-ink">Start your bill!</h1>
-      <p className="mt-2 mb-6 text-body text-muted-foreground">
+      <p className="mt-6 text-sm break-words text-pebble">Hey {user.displayName}!</p>
+      <h1 className="text-4xl text-primary">Start your bill!</h1>
+      <p className="mt-2 mb-6 text-body text-pebble">
         {group ? (
           <>
-            In <span className="text-body-bold text-ink">{group.name}</span> — everyone in the group
-            can see it and claim items.
+            In <span className="text-body-bold text-primary">{group.name}</span> — everyone in the
+            group can see it and claim items.
           </>
         ) : (
           "Name it, share it, pile on the snacks."

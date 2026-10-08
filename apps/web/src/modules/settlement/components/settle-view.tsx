@@ -72,7 +72,9 @@ function SettleView({
       {mine ? (
         <div className="flex flex-col gap-3 rounded-lg bg-paper px-4 py-3 text-ink">
           <div className="flex items-center justify-between gap-3 text-body-bold">
-            <span className="min-w-0 break-words">You owe {payerName}</span>
+            <span className="min-w-0 break-words">
+              {mine.status === "PAID" ? "You paid" : "You owe"} {payerName}
+            </span>
             <span className="flex shrink-0 items-center gap-2">
               {formatBaht(mine.amountSatang)}
               <Badge variant={mine.status === "PAID" ? "paid" : "owe"}>
@@ -101,31 +103,38 @@ function SettleView({
         </p>
       )}
 
-      <section className="flex flex-col gap-2">
-        <h2 className="text-label text-lagoon">Who owes {payerName}</h2>
-        <div className="overflow-hidden rounded-lg bg-paper">
-          {settlements.map((s) => {
-            const name = personName(s.fromUser);
-            const paid = s.status === "PAID";
-            return (
-              <DebtorRow
-                key={s.id}
-                name={s.fromUser.id === currentUserId ? "You" : name}
-                initials={initialsOf(name)}
-                amount={s.amountSatang}
-                status={
-                  paid
-                    ? `Paid${s.paidAt ? ` ${formatShortDate(s.paidAt)}` : ""}`
-                    : s.paidClaimedAt
-                      ? "Says they've paid"
-                      : "Waiting to pay"
-                }
-                state={paid ? "paid" : "owe"}
-              />
-            );
-          })}
-        </div>
-      </section>
+      {/* Only worth listing when someone besides you owes — otherwise it just
+          repeats your own card above. */}
+      {settlements.some((s) => s.fromUser.id !== currentUserId) ? (
+        <section className="flex flex-col gap-2">
+          <h2 className="text-label text-lagoon">Who owes {payerName}</h2>
+          <div className="overflow-hidden rounded-lg bg-paper">
+            {settlements.map((s) => {
+              const name = personName(s.fromUser);
+              const paid = s.status === "PAID";
+              const isMe = s.fromUser.id === currentUserId;
+              return (
+                <DebtorRow
+                  key={s.id}
+                  name={isMe ? "You" : name}
+                  initials={initialsOf(name)}
+                  amount={s.amountSatang}
+                  status={
+                    paid
+                      ? `Paid${s.paidAt ? ` ${formatShortDate(s.paidAt)}` : ""}`
+                      : s.paidClaimedAt
+                        ? isMe
+                          ? `Waiting for ${payerName} to confirm`
+                          : "Says they've paid"
+                        : "Waiting to pay"
+                  }
+                  state={paid ? "paid" : "owe"}
+                />
+              );
+            })}
+          </div>
+        </section>
+      ) : null}
     </div>
   );
 }

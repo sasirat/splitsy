@@ -4,6 +4,7 @@ import {
   billDebts,
   formatAccountNumber,
   imageType,
+  myBillPart,
   netBalances,
   nudgeMessage,
   simplifyDebts,
@@ -333,5 +334,48 @@ describe("nudgeMessage", () => {
     expect(message).toContain("Hi Ploypailin Srisawat!");
     expect(message).toContain("reminder for Mookata 🔥 night 🧾");
     expect(message).toContain("you owe ฿0.01.");
+  });
+});
+
+describe("myBillPart", () => {
+  const settlements = [
+    { fromUserId: "ploy", amountSatang: 19500, status: "PENDING" as const, paidClaimedAt: null },
+    { fromUserId: "beam", amountSatang: 5000, status: "PAID" as const, paidClaimedAt: null },
+    {
+      fromUserId: "tee",
+      amountSatang: 3000,
+      status: "PENDING" as const,
+      paidClaimedAt: new Date("2026-10-08T10:00:00Z"),
+    },
+  ];
+
+  it("gives the payer how much of the total is paid back", () => {
+    expect(myBillPart(settlements, "mint", "mint")).toEqual({
+      role: "payer",
+      paidSatang: 5000,
+      totalSatang: 27500,
+    });
+  });
+
+  it("gives a friend what they owe and where it stands", () => {
+    expect(myBillPart(settlements, "mint", "ploy")).toEqual({
+      role: "debtor",
+      amountSatang: 19500,
+      state: "owe",
+    });
+    expect(myBillPart(settlements, "mint", "tee")).toEqual({
+      role: "debtor",
+      amountSatang: 3000,
+      state: "claimed",
+    });
+    expect(myBillPart(settlements, "mint", "beam")).toEqual({
+      role: "debtor",
+      amountSatang: 5000,
+      state: "paid",
+    });
+  });
+
+  it("says nothing's owed for a member with no debt", () => {
+    expect(myBillPart(settlements, "mint", "newbie")).toEqual({ role: "none" });
   });
 });

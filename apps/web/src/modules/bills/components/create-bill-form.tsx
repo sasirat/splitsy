@@ -35,7 +35,7 @@ function CreateBillForm({ date, time, groupId }: { date: string; time: string; g
 
   return (
     <form onSubmit={onSubmit} className="flex flex-1 flex-col gap-4">
-      <div className="overflow-hidden rounded-xl border-2 border-primary bg-paper shadow-card">
+      <div className="overflow-hidden rounded-lg border border-primary bg-white shadow-[0_4px_4px_rgb(193_190_190/0.25)]">
         <div className="flex items-center justify-between bg-blush px-4 py-3 text-label text-primary">
           <span>New bill</span>
           <span>{date}</span>
@@ -43,7 +43,7 @@ function CreateBillForm({ date, time, groupId }: { date: string; time: string; g
 
         <div className="flex flex-col gap-4 p-4">
           <div className="flex flex-col gap-2">
-            <label htmlFor="title" className="text-label text-muted-foreground">
+            <label htmlFor="title" className="text-sm text-pebble">
               Bill name
             </label>
             <Input
@@ -68,7 +68,7 @@ function CreateBillForm({ date, time, groupId }: { date: string; time: string; g
           </div>
 
           <div className="flex flex-col gap-2">
-            <span className="text-label text-muted-foreground">Quick pick</span>
+            <span className="text-sm text-pebble">Quick pick</span>
             <div className="flex flex-wrap gap-2">
               {QUICK_PICKS.map((pick) => {
                 const selected = title === pick.title;
@@ -98,13 +98,13 @@ function CreateBillForm({ date, time, groupId }: { date: string; time: string; g
           </div>
 
           <div className="flex flex-col gap-1 border-t border-dashed border-primary/50 pt-4">
-            <span className="text-label text-muted-foreground">Time recorded</span>
-            <span className="text-body-bold text-ink">{time} · Bangkok</span>
+            <span className="text-sm text-pebble">Time recorded</span>
+            <span className="text-body-bold text-primary">{time} · Bangkok</span>
           </div>
         </div>
       </div>
 
-      <Button type="submit" variant="solid" size="lg" className="mt-auto w-full" disabled={pending}>
+      <Button type="submit" size="lg" className="mt-auto w-full" disabled={pending}>
         {pending ? "Starting…" : "Start bill"}
       </Button>
     </form>

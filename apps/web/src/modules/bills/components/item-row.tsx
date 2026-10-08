@@ -21,6 +21,7 @@ function ItemRow({
   onSelect?: () => void;
   className?: string;
 }) {
+  const hint = splitHint(price, sharers);
   const content = (
     <>
       <div className="flex items-center justify-between gap-3 text-amount text-md text-ink">
@@ -36,7 +37,7 @@ function ItemRow({
               </Avatar>
             ))}
           </AvatarStack>
-          <span className="text-caption text-primary">{splitHint(price, sharers)}</span>
+          {hint ? <span className="text-caption text-primary">{hint}</span> : null}
         </div>
       ) : null}
     </>
