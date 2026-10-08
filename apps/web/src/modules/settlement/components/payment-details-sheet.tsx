@@ -137,7 +137,16 @@ function PaymentDetailsSheet({
       }
     >
       <div className="flex flex-col gap-6 pb-2">
-        <form id={FORM_ID} onSubmit={onSaveBank} className="flex flex-col gap-3" noValidate>
+        {/* Keyed on the saved account so the uncontrolled fields remount with
+            the new values after a save, instead of their defaultValue changing
+            under them (Base UI warns about that). */}
+        <form
+          key={`${details?.bankName}|${details?.accountNumber}|${details?.accountName}`}
+          id={FORM_ID}
+          onSubmit={onSaveBank}
+          className="flex flex-col gap-3"
+          noValidate
+        >
           <h3 className="text-label text-muted-foreground">Bank account</h3>
           <label className="sr-only" htmlFor="bank-name">
             Bank

@@ -94,7 +94,7 @@ function BillSummaryView({
                         key={line.itemId}
                         className="flex justify-between gap-3 text-caption text-muted-foreground"
                       >
-                        <span className="min-w-0 wrap-anywhere">
+                        <span className="min-w-0 break-words">
                           {line.name}
                           {line.sharedWith > 1 ? ` · shared by ${line.sharedWith}` : ""}
                         </span>

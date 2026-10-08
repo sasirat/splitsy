@@ -25,7 +25,7 @@ function GroupCard({
       className="flex items-center justify-between gap-3 rounded-lg bg-white px-5 py-4 shadow-[0_4px_4px_rgb(193_190_190/0.25)] transition-[filter] hover:brightness-97 focus-visible:ring-2 focus-visible:ring-blush focus-visible:outline-none"
     >
       <span className="flex min-w-0 flex-col gap-1">
-        <span className="text-2xl wrap-anywhere text-primary">{name}</span>
+        <span className="text-2xl break-words text-primary">{name}</span>
         <span className="text-sm text-pebble">
           {memberCount} member{memberCount === 1 ? "" : "s"} · {billCount} bill
           {billCount === 1 ? "" : "s"}

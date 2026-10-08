@@ -24,7 +24,7 @@ function ItemRow({
   const content = (
     <>
       <div className="flex items-center justify-between gap-3 text-amount text-md text-ink">
-        <span className="min-w-0 wrap-anywhere">{name}</span>
+        <span className="min-w-0 break-words">{name}</span>
         <span className="shrink-0">{formatBaht(price)}</span>
       </div>
       {sharers.length > 0 ? (

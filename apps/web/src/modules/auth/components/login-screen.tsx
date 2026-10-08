@@ -68,11 +68,12 @@ function LoginScreen({
                       <form action={signInAs}>
                         <input type="hidden" name="userId" value={user.id} />
                         {next ? <input type="hidden" name="next" value={next} /> : null}
-                        <Button type="submit" size="lg" className="h-12.5 w-full">
+                        <Button type="submit" size="lg" className="h-12.5 w-full px-5">
                           <Avatar size="md" tone="white">
                             {initialsOf(name)}
                           </Avatar>
-                          Continue as {name}
+                          {/* Emails are long: shrink with "…" instead of overflowing. */}
+                          <span className="min-w-0 truncate">Continue as {name}</span>
                         </Button>
                       </form>
                     </li>

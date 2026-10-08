@@ -37,7 +37,7 @@ function BottomSheet({
         >
           <div aria-hidden className="mx-auto mb-2 h-1 w-10 shrink-0 rounded-full bg-border" />
           <div className="flex shrink-0 items-center justify-between gap-4 px-6 pt-2 pb-4">
-            <Dialog.Title className="min-w-0 text-h2 wrap-anywhere text-ink">{title}</Dialog.Title>
+            <Dialog.Title className="min-w-0 text-h2 break-words text-ink">{title}</Dialog.Title>
             <Dialog.Close className="shrink-0 font-body text-sm text-muted-foreground uppercase underline outline-none">
               {closeLabel}
             </Dialog.Close>

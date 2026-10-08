@@ -72,7 +72,7 @@ function SettleView({
       {mine ? (
         <div className="flex flex-col gap-3 rounded-lg bg-paper px-4 py-3 text-ink">
           <div className="flex items-center justify-between gap-3 text-body-bold">
-            <span className="min-w-0 wrap-anywhere">You owe {payerName}</span>
+            <span className="min-w-0 break-words">You owe {payerName}</span>
             <span className="flex shrink-0 items-center gap-2">
               {formatBaht(mine.amountSatang)}
               <Badge variant={mine.status === "PAID" ? "paid" : "owe"}>

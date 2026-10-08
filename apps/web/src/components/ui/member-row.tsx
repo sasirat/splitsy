@@ -39,7 +39,7 @@ function MemberRow({
         <Avatar size="lg" tone="pink">
           {initials}
         </Avatar>
-        <span className="min-w-0 font-body text-base wrap-anywhere text-ink">{name}</span>
+        <span className="min-w-0 font-body text-base break-words text-ink">{name}</span>
       </span>
       <span
         className={cn(
