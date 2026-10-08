@@ -12,7 +12,7 @@
 ## Project
 
 Splitsy — a bill-splitting web app (portfolio). _"Split the bill, keep the vibe."_
-See [ROADMAP.md](./ROADMAP.md) for the build plan (currently in **S4**).
+See [ROADMAP.md](./ROADMAP.md) for the build plan (currently in **S22**).
 
 ## Stack & conventions
 

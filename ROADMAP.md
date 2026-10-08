@@ -62,11 +62,13 @@ Core total: ~13–18 focused dev-days.
 
 ## Week 5 — Polish, real test, ship (M5 + buffer)
 
-- [ ] **S21** Full self-walkthrough; rough edges; mobile responsiveness
-  - Text too small on phones (reported 2026-10-05): captions/badges are 10px, body 15px — raise the type scale in `packages/design-system/configs/typography.ts`
-  - Left over from S20: Neon `preview` branch (preview deploys have no DB), 2x garden photo for the invite, expired-invite page in the new style
+- [x] **S21** Full self-walkthrough; rough edges; mobile responsiveness — bigger type scale (2xs/xs 14, sm 16, base/md 18), 44px tap targets, every screen checked at 320/390px, two-user walkthrough fixes (your part on bill cards, settle-up confirm, new-bill restyle, invite "Not now", claim hint, copy)
+  - Still open from S20: Neon `preview` branch (preview deploys have no DB), 2x garden photo for the invite, expired-invite page in the new style
 - [ ] **S22** 2–3 friends on a real bill; collect feedback
 - [ ] **S23** Fix breakage; empty/error states; a11y pass
+  - Edit / delete items (a typo like ฿1200 can't be fixed today), and delete bills — found in the S21 walkthrough
+  - Reopen a settling bill when someone forgot a dish (settle-up is one-way)
+  - a11y: split-sheet checkboxes have no accessible names
 - [ ] **S24** Final deploy; README + short case-study writeup
 - [ ] **S25** Buffer / first stretch goal (receipt photo or QR)
 - **Done when:** shipped, tested, documented.
@@ -75,6 +77,7 @@ Core total: ~13–18 focused dev-days.
 
 ## Stretch goals (after core is solid)
 
+- [ ] Choose who paid (Figma "Who pays the bill?" — today the creator always pays)
 - [ ] Receipt photo attachment on items
 - [ ] Receipt scanning via OCR (manual entry always works as fallback)
 - [ ] PromptPay QR generation
