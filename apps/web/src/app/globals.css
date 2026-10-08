@@ -74,7 +74,9 @@ body {
 /*
  * A 44px-tall touch area (8px wider each side) around small text links, so
  * "← Back" and "Edit name" are easy to tap without changing how they look
- * or how much room they take. The link must not clip overflow.
+ * or how much room they take. Neither the link nor an ancestor may clip
+ * overflow there (overflow-hidden cuts the area back), and stacked links
+ * need a gap > (44px − link height) or the later one takes the overlap.
  */
 @utility tap-target {
   position: relative;

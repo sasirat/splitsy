@@ -162,22 +162,25 @@ function BillItems({
       <div className="flex flex-col items-center gap-1 text-center text-caption text-cream/90">
         <span>Paid by {payerName}</span>
         {unclaimed > 0 ? <span>{formatBaht(unclaimed)} not claimed yet</span> : null}
-        {items.length > 0 ? (
-          <Link
-            href={`/bills/${billId}/summary`}
-            className="mt-2 text-body text-cream underline underline-offset-4 tap-target"
-          >
-            See summary →
-          </Link>
-        ) : null}
-        {!canEdit ? (
-          <Link
-            href={`/bills/${billId}/settle`}
-            className="text-body text-cream underline underline-offset-4 tap-target"
-          >
-            See settle-up →
-          </Link>
-        ) : null}
+        {/* 20px apart so the two links' 44px tap areas don't overlap. */}
+        <div className="mt-2 flex flex-col items-center gap-5">
+          {items.length > 0 ? (
+            <Link
+              href={`/bills/${billId}/summary`}
+              className="text-body text-cream underline underline-offset-4 tap-target"
+            >
+              See summary →
+            </Link>
+          ) : null}
+          {!canEdit ? (
+            <Link
+              href={`/bills/${billId}/settle`}
+              className="text-body text-cream underline underline-offset-4 tap-target"
+            >
+              See settle-up →
+            </Link>
+          ) : null}
+        </div>
       </div>
 
       <div className="sticky bottom-0 -mx-5 mt-auto bg-scene-green/95 py-4 backdrop-blur">
