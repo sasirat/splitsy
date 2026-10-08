@@ -181,7 +181,7 @@ function BillItems({
       </div>
 
       <div className="sticky bottom-0 -mx-5 mt-auto bg-scene-green/95 py-4 backdrop-blur">
-        <TotalDisplay label="Running total" amount={subtotal} />
+        <TotalDisplay label="Running total" amount={subtotal} className="text-white" />
       </div>
 
       <AddItemSheet

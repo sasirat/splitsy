@@ -8,15 +8,15 @@ export default function Loading() {
       <span className="sr-only" role="status">
         Loading settle-up…
       </span>
-      <Skeleton className="bg-lagoon/15 h-4 w-24" />
+      <Skeleton tone="light" className="h-4 w-24" />
       <div className="flex flex-col gap-2">
-        <Skeleton className="bg-lagoon/15 h-3 w-28" />
-        <Skeleton className="bg-lagoon/15 h-8 w-48" />
+        <Skeleton tone="light" className="h-3 w-28" />
+        <Skeleton tone="light" className="h-8 w-48" />
       </div>
-      <Skeleton className="bg-lagoon/15 h-14 w-full" />
+      <Skeleton tone="light" className="h-14 w-full" />
       <div className="flex flex-col gap-3 bg-paper/60 px-4 py-4">
         {[0, 1, 2].map((i) => (
-          <Skeleton key={i} className="h-14 w-full" />
+          <Skeleton key={i} tone="light" className="h-14 w-full" />
         ))}
       </div>
     </PhoneFrame>

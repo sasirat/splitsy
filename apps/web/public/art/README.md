@@ -1,6 +1,7 @@
 # Splitsy art assets
 
-Drop your exported PNGs here (2x scale, transparent background). They're served
+Drop your exported art here at 2x scale: PNGs with a transparent background for
+stickers and cut-outs, JPG for full-screen photos. They're served
 at `/art/<filename>` and referenced in code as `/art/<filename>`.
 
 Expected filenames:

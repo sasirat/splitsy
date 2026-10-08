@@ -32,16 +32,17 @@ export const ibmPlexMono = IBM_Plex_Mono({
   display: "swap",
 });
 
-/** Kapakana — the "New Group" script title only. */
+/** Kapakana — the "New Group" script title only. Not in the root layout: put
+ *  `kapakana.variable` on that screen so other routes don't preload it. */
 export const kapakana = Kapakana({
   subsets: ["latin"],
   weight: ["400"],
   variable: "--font-kapakana",
   display: "swap",
-  adjustFontFallback: false, // next/font has no metrics for it
 });
 
-/** Bonheur Royale — the "You're invited" script title only. */
+/** Bonheur Royale — the "You're invited" script title only. Like Kapakana, its
+ *  `.variable` goes on the invite screen, not the root layout. */
 export const bonheurRoyale = Bonheur_Royale({
   subsets: ["latin"],
   weight: ["400"],

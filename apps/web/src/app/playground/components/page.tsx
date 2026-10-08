@@ -167,7 +167,7 @@ export default function ComponentsPlayground() {
               sharers={[{ initials: "SC" }, { initials: "KK" }]}
             />
           </ReceiptCard>
-          <TotalDisplay amount={135000} className="pt-8" />
+          <TotalDisplay amount={135000} className="pt-8 text-white" />
         </div>
       </section>
 
