@@ -1,3 +1,4 @@
+import { cn } from "cn";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { formatBaht, formatBillDate, formatBillNumber } from "@/lib/format";
@@ -7,6 +8,31 @@ const STATUS = {
   SETTLING: { label: "Settling", variant: "owe" },
   SETTLED: { label: "Settled", variant: "paid" },
 } as const;
+
+const LOOK = {
+  /** paper card on the blue home scene */
+  paper: {
+    card: "rounded-xl bg-paper shadow-card",
+    meta: "text-muted-foreground",
+    title: "text-h4",
+    footer: "text-body text-ink",
+  },
+  /** white card with a berry outline and star stickers (Figma group page) */
+  sticker: {
+    card: "rounded-lg border border-primary bg-white shadow-[0_4px_4px_rgb(193_190_190/0.25)]",
+    meta: "text-pebble",
+    title: "text-4xl",
+    footer: "text-sm text-primary",
+  },
+} as const;
+
+/** Star stickers scattered over the sticker card, as % of Figma's 349×111 card. */
+const STARS = [
+  { src: "/art/star-sticker-blue.svg", className: "top-[10%] left-[81%]" },
+  { src: "/art/star-sticker-gray.svg", className: "top-[14%] left-[40%]" },
+  { src: "/art/star-sticker-yellow.svg", className: "top-[59%] left-[18%]" },
+  { src: "/art/star-sticker-gray.svg", className: "top-[72%] left-[61%]" },
+] as const;
 
 /** One bill in a list: number + date, title, status, item count and
  *  subtotal (or how much is paid back once settling), plus its group when it
@@ -21,6 +47,7 @@ function BillCard({
   groupName,
   status,
   progress,
+  look = "paper",
 }: {
   id: string;
   number: number;
@@ -33,14 +60,37 @@ function BillCard({
   status: keyof typeof STATUS;
   /** Set once settling: how much of what's owed is paid back. */
   progress: { paidSatang: number; totalSatang: number } | null;
+  look?: keyof typeof LOOK;
 }) {
   const { label, variant } = STATUS[status];
+  const styles = LOOK[look];
   return (
     <Link
       href={`/bills/${id}`}
-      className="flex flex-col gap-1 rounded-xl bg-paper px-5 py-4 shadow-card transition-[filter] hover:brightness-97 focus-visible:ring-2 focus-visible:ring-blush focus-visible:outline-none"
+      className={cn(
+        "relative flex flex-col gap-1 overflow-hidden px-5 py-4 transition-[filter] hover:brightness-97 focus-visible:ring-2 focus-visible:ring-blush focus-visible:outline-none",
+        styles.card,
+      )}
     >
-      <span className="flex items-center justify-between gap-3 text-caption text-muted-foreground">
+      {look === "sticker"
+        ? STARS.map((star, i) => (
+            // Decorative; plain <img> keeps the SVG's own size (next/image can't size it).
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              key={i}
+              src={star.src}
+              alt=""
+              aria-hidden
+              className={cn(
+                "pointer-events-none absolute size-[22px] rotate-[17deg]",
+                star.className,
+              )}
+            />
+          ))
+        : null}
+      <span
+        className={cn("relative flex items-center justify-between gap-3 text-caption", styles.meta)}
+      >
         <span>
           {formatBillNumber(number)} · {formatBillDate(createdAt)}
         </span>
@@ -53,8 +103,8 @@ function BillCard({
           <Badge variant={variant}>{label}</Badge>
         </span>
       </span>
-      <span className="text-h4 wrap-anywhere text-primary">{title}</span>
-      <span className="flex items-center justify-between text-body text-ink">
+      <span className={cn("relative wrap-anywhere text-primary", styles.title)}>{title}</span>
+      <span className={cn("relative flex items-center justify-between", styles.footer)}>
         <span>
           {progress && progress.totalSatang > 0 && status === "SETTLING"
             ? `${formatBaht(progress.paidSatang)} of ${formatBaht(progress.totalSatang)} paid back`

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Avatar } from "@/components/ui/avatar";
 import { buttonVariants } from "@/components/ui/button";
+import { MemberTile } from "@/components/ui/member-tile";
 import { PhoneFrame } from "@/components/ui/phone-frame";
 import { initialsOf, personName } from "@/lib/format";
 import { BillCard } from "@/modules/bills/components/bill-card";
@@ -16,48 +16,52 @@ export default async function GroupPage({ params }: PageProps<"/groups/[id]">) {
   if (!group) notFound();
 
   return (
-    <PhoneFrame scene="blue" className="gap-6 px-5 pt-8 pb-8">
-      <Link href="/" className="self-start text-caption text-cream underline underline-offset-4">
+    <PhoneFrame scene="petal" className="gap-6 px-5 pt-8 pb-8">
+      <Link href="/" className="self-start text-caption text-lagoon underline underline-offset-4">
         ← Your bills
       </Link>
 
-      <header className="flex flex-col gap-1">
-        <p className="text-label text-cream/80">Group</p>
-        <h1 className="text-h1 wrap-anywhere text-white">{group.name}</h1>
+      <header className="flex flex-col">
+        <p className="text-sm text-pebble">Group</p>
+        <h1 className="text-4xl wrap-anywhere text-primary">{group.name}</h1>
       </header>
 
-      <section className="flex flex-col gap-2">
-        <h2 className="text-label text-cream/80">Members · {group.members.length}</h2>
-        <ul className="flex flex-col gap-2 rounded-xl bg-paper px-4 py-3">
-          {group.members.map((member) => {
-            const name = personName(member);
-            return (
-              <li key={member.id} className="flex items-center gap-3">
-                <Avatar size="md" tone="pink">
-                  {initialsOf(name)}
-                </Avatar>
-                <span className="min-w-0 text-body wrap-anywhere text-ink">
-                  {member.id === user.id ? "You" : name}
-                </span>
-              </li>
-            );
-          })}
-        </ul>
-        <InviteButton groupId={group.id} className="text-cream" />
+      <section className="flex flex-col gap-3">
+        <h2 className="text-sm text-pebble">Members · {group.members.length}</h2>
+        <div className="flex flex-col gap-5 rounded-lg bg-white p-5 shadow-[0_4px_4px_rgb(193_190_190/0.25)]">
+          <ul className="grid grid-cols-4 justify-items-center gap-y-3">
+            {group.members.map((member) => {
+              const name = personName(member);
+              return (
+                <li key={member.id}>
+                  <MemberTile
+                    initials={initialsOf(name)}
+                    name={member.id === user.id ? "You" : name}
+                  />
+                </li>
+              );
+            })}
+          </ul>
+          <InviteButton
+            groupId={group.id}
+            label="Invite Friends +"
+            className="h-11 text-base text-lagoon"
+          />
+        </div>
       </section>
 
-      <section className="flex flex-col gap-2">
-        <h2 className="text-label text-cream/80">Bills · {group.bills.length}</h2>
+      <section className="flex flex-col gap-3">
+        <h2 className="text-sm text-pebble">Bills · {group.bills.length}</h2>
         {group.bills.length > 0 ? (
           <ul className="flex flex-col gap-3">
             {group.bills.map((bill) => (
               <li key={bill.id}>
-                <BillCard {...bill} />
+                <BillCard {...bill} look="sticker" />
               </li>
             ))}
           </ul>
         ) : (
-          <p className="rounded-xl bg-paper/10 px-6 py-6 text-center text-body text-cream/80">
+          <p className="rounded-lg bg-white px-6 py-6 text-center text-body text-pebble">
             No bills in this group yet.
           </p>
         )}
