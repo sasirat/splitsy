@@ -27,7 +27,8 @@ function SettleView({
     bankName: payment.bankName,
     accountNumber: payment.accountNumber,
     accountName: payment.accountName,
-    qrUrl: payment.qrVersion ? `/payment-qr/${payer.id}?v=${payment.qrVersion}` : null,
+    // "rev", not the old "v": URLs once served as immutable must never match again.
+    qrUrl: payment.qrVersion ? `/payment-qr/${payer.id}?rev=${payment.qrVersion}` : null,
   };
 
   if (settlements.length === 0) {
