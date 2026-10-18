@@ -8,17 +8,33 @@ import { getPaymentQr } from "@/modules/settlement/queries";
 export async function GET(request: Request, ctx: RouteContext<"/payment-qr/[userId]">) {
   const { userId } = await ctx.params;
   const qr = await getPaymentQr(userId);
-  if (!qr) return new Response("Not found", { status: 404 });
+  if (!qr) return notFound();
 
   const headers = {
     "Cache-Control": "private, no-cache",
     ETag: `"${qr.updatedAt.getTime()}"`,
     "X-Content-Type-Options": "nosniff",
   };
-  if (request.headers.get("If-None-Match") === headers.ETag) {
+  if (matchesETag(request.headers.get("If-None-Match"), headers.ETag)) {
     return new Response(null, { status: 304, headers });
   }
-  return new Response(new Uint8Array(qr.image), {
+  // Removed since the check above? Then there's nothing to show.
+  const image = await qr.loadImage();
+  if (!image) return notFound();
+  return new Response(new Uint8Array(image), {
     headers: { ...headers, "Content-Type": qr.mimeType },
   });
+}
+
+/** Never cached, so a viewer who gains access sees the image right away. */
+const notFound = () =>
+  new Response("Not found", { status: 404, headers: { "Cache-Control": "no-store" } });
+
+/** If-None-Match compares weakly: any tag in the list, W/ ignored, or "*". */
+function matchesETag(ifNoneMatch: string | null, etag: string): boolean {
+  if (!ifNoneMatch) return false;
+  return ifNoneMatch
+    .split(",")
+    .map((tag) => tag.trim())
+    .some((tag) => tag === "*" || tag.replace(/^W\//, "") === etag);
 }

@@ -69,6 +69,7 @@ Core total: ~13–18 focused dev-days.
   - Edit / delete items (a typo like ฿1200 can't be fixed today), and delete bills — found in the S21 walkthrough
   - Reopen a settling bill when someone forgot a dish (settle-up is one-way)
   - a11y: split-sheet checkboxes have no accessible names
+  - Sign-out leaves signed-in pages in the browser cache: Back after signing out can restore a settle page with bank details (bfcache). Clear the cache on sign-out (`Clear-Site-Data`) or make signed-in pages `no-store` — same root cause as the QR fix
 - [ ] **S24** Final deploy; README + short case-study writeup
 - [ ] **S25** Buffer / first stretch goal (receipt photo or QR)
 - **Done when:** shipped, tested, documented.

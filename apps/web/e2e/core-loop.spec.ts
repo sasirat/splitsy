@@ -176,6 +176,23 @@ test("create a bill, add items, split it between two people, see the summary", a
   await expect(ploy.getByRole("button", { name: "Copy account number" })).toBeVisible();
   await expect(ploy.getByRole("img", { name: "Mint's payment QR" })).toBeVisible();
 
+  // The QR is re-authorised on every view: the browser cache is shared by
+  // whoever signs in on it, so it must never serve the image on its own.
+  const qrUrl = await ploy.getByRole("img", { name: "Mint's payment QR" }).getAttribute("src");
+  const qr = await ploy.request.get(qrUrl!);
+  expect(qr.status()).toBe(200);
+  expect(qr.headers()["cache-control"]).toBe("private, no-cache");
+  const etag = qr.headers()["etag"];
+  const revalidated = await ploy.request.get(qrUrl!, { headers: { "If-None-Match": etag } });
+  expect(revalidated.status()).toBe(304);
+  // Someone who shares no settling bill with Mint gets a 404, valid ETag or not.
+  const outsider = await (await browser.newContext()).newPage();
+  await outsider.goto(`/login?next=${encodeURIComponent(qrUrl!)}`);
+  await outsider.getByRole("button", { name: "Continue as newbie@seed.splitsy.dev" }).click();
+  await expect(outsider.getByText("Not found")).toBeVisible();
+  const probe = await outsider.request.get(qrUrl!, { headers: { "If-None-Match": etag } });
+  expect(probe.status()).toBe(404);
+
   // Mint nudges Ploy: the reminder is copied, and the row says when.
   await mint.getByRole("button", { name: "Nudge Ploy" }).click();
   await expect(mint.getByText("Reminder copied — paste it in your chat")).toBeVisible();

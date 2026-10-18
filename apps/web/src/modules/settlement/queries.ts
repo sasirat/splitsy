@@ -64,7 +64,8 @@ export async function getSettlement(billId: string) {
 
 /** A user's payment QR, for the current user only if it's their own or they
  *  share a bill that `userId` paid for and is settling (or settled) — the
- *  only place it's ever shown. null otherwise, or when there's none. */
+ *  only place it's ever shown. null otherwise, or when there's none.
+ *  The bytes load only on demand, so an unchanged-image 304 never reads them. */
 export async function getPaymentQr(userId: string) {
   const viewer = await requireUser();
   const db = getDb();
@@ -75,10 +76,14 @@ export async function getPaymentQr(userId: string) {
     });
     if (!shared) return null;
   }
-  return db.paymentQr.findUnique({
+  const qr = await db.paymentQr.findUnique({
     where: { userId },
-    select: { image: true, mimeType: true, updatedAt: true },
+    select: { mimeType: true, updatedAt: true },
   });
+  if (!qr) return null;
+  const loadImage = async () =>
+    (await db.paymentQr.findUnique({ where: { userId }, select: { image: true } }))?.image ?? null;
+  return { ...qr, loadImage };
 }
 
 export type SettlementDetail = NonNullable<Awaited<ReturnType<typeof getSettlement>>>;

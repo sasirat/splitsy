@@ -375,7 +375,9 @@ describe("getSettlement payment details", () => {
 describe("getPaymentQr", () => {
   it("lets you see your own QR", async () => {
     await uploadPaymentQr(qrForm(PNG));
-    expect((await getPaymentQr(MINT))?.mimeType).toBe("image/png");
+    const qr = await getPaymentQr(MINT);
+    expect(qr?.mimeType).toBe("image/png");
+    expect(new Uint8Array((await qr!.loadImage())!)).toEqual(PNG);
   });
 
   it("shows a payer's QR to members of a bill they're settling", async () => {
