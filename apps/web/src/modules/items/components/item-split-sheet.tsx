@@ -1,5 +1,6 @@
 "use client";
 
+import { useId } from "react";
 import { BottomSheet } from "@/components/ui/bottom-sheet";
 import { MemberRow } from "@/components/ui/member-row";
 import { formatBaht } from "@/lib/format";
@@ -30,6 +31,7 @@ function ItemSplitSheet({
   error: string | null;
   onOpenChange: (open: boolean) => void;
 }) {
+  const questionId = useId();
   const amounts = item ? splitItem(item.priceSatang, item.splits) : {};
   const claimers = item?.splits.length ?? 0;
   // You first, then everyone else in join order.
@@ -56,8 +58,10 @@ function ItemSplitSheet({
                 : `split ${claimers} ways`}
           </p>
 
-          <p className="text-label text-ink">Who had this?</p>
-          <div className="rounded-lg bg-white">
+          <p id={questionId} className="text-label text-ink">
+            Who had this?
+          </p>
+          <div role="group" aria-labelledby={questionId} className="rounded-lg bg-white">
             {ordered.map((member) => {
               const isMe = member.id === currentUserId;
               return (

@@ -136,7 +136,8 @@ model Item {
   @@index([billId, position])
 }
 
-/// A user's self-reported share of an item. `shares` weights uneven splits
+/// A user's share of an item. Anyone in the bill can set it for anyone in the
+/// bill (the user must be a group member too). `shares` weights uneven splits
 /// (e.g. 2 of 3 beers); an even split is everyone at 1.
 model ItemSplit {
   itemId String

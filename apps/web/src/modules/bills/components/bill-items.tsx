@@ -115,14 +115,9 @@ function BillItems({
 
   const subtotal = sum(shownItems);
   const unclaimed = sum(shownItems.filter((item) => item.sharers.length === 0));
-  // Someone who just joined hasn't claimed anything yet: say what to do —
-  // while something's still up for grabs (else they may simply have had nothing).
-  const showClaimHint =
-    canEdit &&
-    unclaimed > 0 &&
-    me !== undefined &&
-    shownItems.length > 0 &&
-    !shownItems.some((item) => item.sharers.some((sharer) => sharer.userId === me.id));
+  // Anyone can tick for anyone, so say what to do while a dish is still
+  // unclaimed — whether or not someone has already ticked you in.
+  const showClaimHint = canEdit && unclaimed > 0 && me !== undefined;
 
   return (
     <>
