@@ -68,7 +68,13 @@ Core total: ~13–18 focused dev-days.
 - [ ] **S23** Fix breakage; empty/error states; a11y pass
   - Edit / delete items (a typo like ฿1200 can't be fixed today), and delete bills — found in the S21 walkthrough
   - Reopen a settling bill when someone forgot a dish (settle-up is one-way)
-  - a11y: split-sheet checkboxes have no accessible names
+  - [x] a11y: split-sheet checkboxes have no accessible names
+  - From the S22 friend test (2026-10-24):
+    - Couldn't fix an item after adding it (same as edit items above)
+    - Picking who shared an item needs a second tap after adding it — let the people be chosen while adding the item
+    - [x] "Can only tick myself" read as the biggest bug: self-report claiming (S11) meant everyone had to join and tick their own — slow at the table. **Decided: anyone in the bill can tick anyone in the bill** (the person ticked must be in the bill too). Trade-off accepted: friends can change each other's shares
+    - [x] UX: disabled checkboxes for other people looked tappable — moot now that every row is tickable
+    - [x] UX: the sheet never said what a tick means ("who had this?" vs "who paid?") — even the builder had to ask. Now headed "Who had this?"; checkboxes are named "<name> ฿<share>" (fixes the a11y item above)
   - Sign-out leaves signed-in pages in the browser cache: Back after signing out can restore a settle page with bank details (bfcache). Clear the cache on sign-out (`Clear-Site-Data`) or make signed-in pages `no-store` — same root cause as the QR fix
 - [ ] **S24** Final deploy; README + short case-study writeup
 - [ ] **S25** Buffer / first stretch goal (receipt photo or QR)

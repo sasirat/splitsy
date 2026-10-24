@@ -8,7 +8,7 @@ import { splitItem, type Split } from "../service";
 export type SplitMember = { id: string; name: string; initials: string };
 
 /** "Who had this?" for one item. Everyone in the group is listed with what
- *  they'd pay; only the current user's own row can be ticked (self-report).
+ *  they'd pay, and anyone can tick anyone — one person can do the whole table.
  *  Amounts use the same split math as the bill totals. */
 function ItemSplitSheet({
   open,
@@ -26,7 +26,7 @@ function ItemSplitSheet({
   members: SplitMember[];
   currentUserId: string;
   canEdit: boolean;
-  onClaimChange: (claimed: boolean) => void;
+  onClaimChange: (userId: string, claimed: boolean) => void;
   error: string | null;
   onOpenChange: (open: boolean) => void;
 }) {
@@ -56,6 +56,7 @@ function ItemSplitSheet({
                 : `split ${claimers} ways`}
           </p>
 
+          <p className="text-label text-ink">Who had this?</p>
           <div className="rounded-lg bg-white">
             {ordered.map((member) => {
               const isMe = member.id === currentUserId;
@@ -66,8 +67,8 @@ function ItemSplitSheet({
                   initials={member.initials}
                   amount={amounts[member.id] ?? 0}
                   checked={member.id in amounts}
-                  disabled={!isMe || !canEdit}
-                  onCheckedChange={isMe ? onClaimChange : undefined}
+                  disabled={!canEdit}
+                  onCheckedChange={(claimed) => onClaimChange(member.id, claimed)}
                 />
               );
             })}
@@ -79,7 +80,7 @@ function ItemSplitSheet({
           >
             {error ??
               (canEdit
-                ? "Tick it if you had some — everyone ticks their own."
+                ? "Tick everyone who had some."
                 : "Settling up — claims are locked.")}
           </p>
         </div>

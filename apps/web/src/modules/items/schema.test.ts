@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { createBillInput } from "@/modules/bills/schema";
-import { addItemInput, setMyClaimInput } from "./schema";
+import { addItemInput, setClaimInput } from "./schema";
 
 describe("addItemInput", () => {
   it("trims the name and converts the price to satang", () => {
@@ -38,18 +38,25 @@ describe("createBillInput", () => {
   });
 });
 
-describe("setMyClaimInput", () => {
-  it("accepts an item id and a claimed flag", () => {
-    expect(setMyClaimInput.parse({ itemId: "i1", claimed: true })).toEqual({
+describe("setClaimInput", () => {
+  it("accepts an item id, who had it, and a claimed flag", () => {
+    expect(setClaimInput.parse({ itemId: "i1", userId: "u1", claimed: true })).toEqual({
       itemId: "i1",
+      userId: "u1",
       claimed: true,
     });
   });
 
-  it.each([{ itemId: "", claimed: true }, { itemId: "i1", claimed: "yes" }, { itemId: "i1" }])(
+  it.each([
+    { itemId: "", userId: "u1", claimed: true },
+    { itemId: "i1", userId: "", claimed: true },
+    { itemId: "i1", claimed: true },
+    { itemId: "i1", userId: "u1", claimed: "yes" },
+    { itemId: "i1", userId: "u1" },
+  ])(
     "rejects %j",
     (input) => {
-      expect(setMyClaimInput.safeParse(input).success).toBe(false);
+      expect(setClaimInput.safeParse(input).success).toBe(false);
     },
   );
 });

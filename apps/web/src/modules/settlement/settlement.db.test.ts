@@ -16,7 +16,7 @@ vi.mock("@/server/auth", () => ({
   }),
 }));
 
-const { addItem, setMyClaim } = await import("@/modules/items/actions");
+const { addItem, setClaim } = await import("@/modules/items/actions");
 const {
   claimPaid,
   markPaid,
@@ -204,7 +204,7 @@ describe("startSettling", () => {
         startSettling({ billId }),
         (async () => {
           auth.currentUserId = PLOY;
-          await setMyClaim({ itemId, claimed: false });
+          await setClaim({ itemId, userId: auth.currentUserId, claimed: false });
         })(),
         addItem({ billId, name: "Late snack", price: "40" }),
       ]);

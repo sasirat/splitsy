@@ -21,10 +21,12 @@ export const addItemInput = z.object({
 
 export type AddItemInput = z.input<typeof addItemInput>;
 
-export const setMyClaimInput = z.object({
+export const setClaimInput = z.object({
   itemId: z.string().min(1),
-  /** true = "I had this", false = take my claim back. */
+  /** Who had it — anyone in the bill can tick for anyone in the bill. */
+  userId: z.string().min(1),
+  /** true = they had this, false = take the claim back. */
   claimed: z.boolean(),
 });
 
-export type SetMyClaimInput = z.input<typeof setMyClaimInput>;
+export type SetClaimInput = z.input<typeof setClaimInput>;

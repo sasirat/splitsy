@@ -7,7 +7,7 @@ import { useOptimistic, useRef, useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { callAction } from "@/lib/call-action";
 import { formatBaht } from "@/lib/format";
-import { setMyClaim } from "@/modules/items/actions";
+import { setClaim } from "@/modules/items/actions";
 import { AddItemSheet, type NewItem } from "@/modules/items/components/add-item-sheet";
 import { ItemSplitSheet, type SplitMember } from "@/modules/items/components/item-split-sheet";
 import type { Sharer } from "../split-hint";
@@ -26,16 +26,16 @@ export type ReceiptItem = {
 
 type OptimisticChange =
   | { type: "add"; item: ReceiptItem }
-  | { type: "claim"; itemId: string; claimed: boolean; me: SplitMember };
+  | { type: "claim"; itemId: string; claimed: boolean; member: SplitMember };
 
 function applyChange(items: ReceiptItem[], change: OptimisticChange): ReceiptItem[] {
   if (change.type === "add") return [...items, change.item];
-  const { itemId, claimed, me } = change;
+  const { itemId, claimed, member } = change;
   return items.map((item) => {
     if (item.id !== itemId) return item;
-    const others = item.sharers.filter((sharer) => sharer.userId !== me.id);
+    const others = item.sharers.filter((sharer) => sharer.userId !== member.id);
     const sharers = claimed
-      ? [...others, { userId: me.id, initials: me.initials, shares: 1 }]
+      ? [...others, { userId: member.id, initials: member.initials, shares: 1 }]
       : others;
     return { ...item, sharers };
   });
@@ -45,7 +45,7 @@ const sum = (items: ReceiptItem[]) => items.reduce((total, item) => total + item
 
 /** The bill's receipt with rapid add-item entry and a pinned running total.
  *  New items show instantly (faded) and settle once the server confirms.
- *  Tap an item to claim your share; claims also update instantly. */
+ *  Tap an item to tick who had it (anyone, for anyone); ticks update instantly. */
 function BillItems({
   billId,
   title,
@@ -97,13 +97,14 @@ function BillItems({
     setSplitOpen(true);
   }
 
-  function onClaimChange(claimed: boolean) {
-    if (!splitTarget || !me) return;
+  function onClaimChange(userId: string, claimed: boolean) {
+    const member = members.find((m) => m.id === userId);
+    if (!splitTarget || !member) return;
     const { id: itemId, name } = splitTarget;
     setSplitError(null);
     startTransition(async () => {
-      applyOptimistic({ type: "claim", itemId, claimed, me });
-      const result = await callAction(() => setMyClaim({ itemId, claimed }));
+      applyOptimistic({ type: "claim", itemId, claimed, member });
+      const result = await callAction(() => setClaim({ itemId, userId, claimed }));
       if (!result.ok) setSplitError(`Couldn't update "${name}": ${result.error}`);
     });
   }
@@ -127,7 +128,7 @@ function BillItems({
     <>
       {showClaimHint ? (
         <p className="text-center text-body text-cream">
-          Tap the dishes you had to claim your share.
+          Tap a dish to tick who had it.
         </p>
       ) : null}
       <ReceiptCard title={title} date={meta} subtotal={subtotal} className="mt-4">

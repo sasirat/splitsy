@@ -32,12 +32,14 @@ async function inviteLink(page: Page) {
   return url.pathname + url.search;
 }
 
-async function claim(page: Page, item: string) {
+/** Tick who had an item — yourself by default ("You"), or anyone else in the bill. */
+async function claim(page: Page, item: string, who = "You") {
   await page.getByRole("button", { name: new RegExp(`^${item}`) }).click();
   const sheet = page.getByRole("dialog", { name: item });
-  // Your own row is always first and the only enabled checkbox.
-  await sheet.getByRole("checkbox").first().click();
-  await expect(sheet.getByRole("checkbox").first()).toBeChecked();
+  // Each row's label names its checkbox: "<name> ฿<their share>".
+  const box = sheet.getByRole("checkbox", { name: new RegExp(`^${who} ฿`) });
+  await box.click();
+  await expect(box).toBeChecked();
   await sheet.getByRole("button", { name: "Done" }).click();
   await expect(sheet).toBeHidden();
 }
@@ -125,9 +127,11 @@ test("create a bill, add items, split it between two people, see the summary", a
   await expect(mint.getByRole("button", { name: "Settle up" })).toBeDisabled();
   await expect(mint.getByText("Every item needs claiming before you can settle up.")).toBeVisible();
 
-  // Ploy claims it; now Mint settles up and lands on "You fronted it".
-  await ploy.goto(billUrl);
-  await claim(ploy, "Som tam");
+  // Mint ticks it for Ploy (anyone can tick anyone); now Mint settles up and
+  // lands on "You fronted it".
+  await mint.goto(billUrl);
+  await claim(mint, "Som tam", "Ploy");
+  await mint.goto(`${billUrl}/summary`);
   // The claim shows optimistically, so retry until it has reached the server.
   const settleUp = mint.getByRole("button", { name: "Settle up" });
   await expect(async () => {
@@ -148,7 +152,7 @@ test("create a bill, add items, split it between two people, see the summary", a
   await expect(mint.getByText("Waiting to pay")).toBeVisible();
 
   // Ploy sees what they owe, and the bill is locked with a link here.
-  await ploy.reload();
+  await ploy.goto(billUrl);
   await expect(ploy.getByText("Settling up — items are locked.")).toBeVisible();
   await ploy.getByRole("link", { name: "See settle-up →" }).click();
   await expect(ploy.getByText("You owe Mint")).toBeVisible();

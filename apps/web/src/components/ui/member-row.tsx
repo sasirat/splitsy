@@ -8,7 +8,7 @@ import { Checkbox } from "./checkbox";
 
 /** A "who's splitting this?" row: checkbox + avatar + name + per-head amount (satang).
  *  The whole row is a <label>, so tapping anywhere toggles the checkbox.
- *  `disabled` shows someone else's claim read-only. */
+ *  `disabled` shows a claim read-only (e.g. once the bill is settling). */
 function MemberRow({
   name,
   initials,
@@ -36,7 +36,8 @@ function MemberRow({
     >
       <span className="flex min-w-0 items-center gap-3">
         <Checkbox checked={checked} onCheckedChange={onCheckedChange} disabled={disabled} />
-        <Avatar size="lg" tone="pink">
+        {/* The row label names the checkbox: "Ploy ฿45", not "P Ploy ฿45". */}
+        <Avatar size="lg" tone="pink" aria-hidden>
           {initials}
         </Avatar>
         <span className="min-w-0 font-body text-base break-words text-ink">{name}</span>
