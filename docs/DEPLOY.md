@@ -23,6 +23,14 @@ emptied once and its first deploy builds every table from the migrations.
    `apps/web/.env` uses (its endpoint id is in the URL host, `ep-…`) — that's
    your **dev** branch. Leave it alone.
 2. **New branch** `live` (production), parent = your dev branch.
+   **Untick "Automatically delete branch after"** — the Console ticks it by
+   default (1 day), and Neon deletes the branch, its data and its endpoint
+   for good when it expires. `live` vanished this way twice (Oct 2026): every
+   deploy then failed with `P1001: Can't reach database server` and Google
+   sign-in errored on every page. To be safe, also make `live` the project's
+   **default branch** (Branches → `live` → ⋯ → Set as default): the default
+   branch can't be deleted or archived. Local dev is unaffected — `.env`
+   points at the dev branch's endpoint directly.
 3. **SQL Editor** → in the branch dropdown pick **`live`** — double-check it
    says `live` — and run:
 
@@ -34,13 +42,20 @@ emptied once and its first deploy builds every table from the migrations.
    This empties only the new `live` copy. The first deploy recreates the
    tables with no seed users or test bills.
 
-4. **New branch** `preview`, parent = your dev branch. Keep its data: preview
+4. **New branch** `preview`, parent = your dev branch (untick expiration
+   here too). Keep its data: preview
    deployments can migrate and play with it freely, and you can reset it from
    its parent whenever you like.
 5. For both `live` and `preview`: **Connect** → copy the **pooled** URL (host
    contains `-pooler`) and the **direct** URL (no `-pooler`).
 
 Don't run the seed against `live`.
+
+**If `live` is ever recreated**, it gets a new endpoint (`ep-…`): redo step 3
+(empty it before its first deploy), then update both `DATABASE_URL` and
+`DIRECT_URL` in Vercel's Production environment and redeploy. Its old data is
+gone; Clerk still has the accounts, and each user's row is recreated on their
+next sign-in.
 
 ## 2. Vercel: import the repo
 
