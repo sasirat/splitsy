@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { createBillInput } from "@/modules/bills/schema";
-import { addItemInput, setClaimInput } from "./schema";
+import { addItemInput, deleteItemInput, setClaimInput, updateItemInput } from "./schema";
 
 describe("addItemInput", () => {
   it("trims the name and converts the price to satang", () => {
@@ -53,10 +53,32 @@ describe("setClaimInput", () => {
     { itemId: "i1", claimed: true },
     { itemId: "i1", userId: "u1", claimed: "yes" },
     { itemId: "i1", userId: "u1" },
-  ])(
-    "rejects %j",
-    (input) => {
-      expect(setClaimInput.safeParse(input).success).toBe(false);
-    },
-  );
+  ])("rejects %j", (input) => {
+    expect(setClaimInput.safeParse(input).success).toBe(false);
+  });
+});
+
+describe("updateItemInput", () => {
+  it("trims the name and parses the price like addItemInput", () => {
+    expect(updateItemInput.parse({ itemId: "i1", name: " Pad thai ", price: "1,200.50" })).toEqual({
+      itemId: "i1",
+      name: "Pad thai",
+      price: 120050,
+    });
+  });
+
+  it.each([
+    { itemId: "", name: "Pad thai", price: "90" },
+    { itemId: "i1", name: " ", price: "90" },
+    { itemId: "i1", name: "Pad thai", price: "abc" },
+  ])("rejects %j", (input) => {
+    expect(updateItemInput.safeParse(input).success).toBe(false);
+  });
+});
+
+describe("deleteItemInput", () => {
+  it("needs an item id", () => {
+    expect(deleteItemInput.parse({ itemId: "i1" })).toEqual({ itemId: "i1" });
+    expect(deleteItemInput.safeParse({ itemId: "" }).success).toBe(false);
+  });
 });

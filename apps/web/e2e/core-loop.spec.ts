@@ -8,6 +8,7 @@ const TITLE = `E2E dinner ${Date.now()}`;
 const LOCKED_TITLE = `E2E locked ${Date.now()}`;
 const GROUP_NAME = `E2E flat ${Date.now()}`;
 const NEWBIE_TITLE = `E2E newbie ${Date.now()}`;
+const TYPO_TITLE = `E2E typo ${Date.now()}`;
 
 async function signInAs(page: Page, name: string) {
   await page.goto("/login");
@@ -49,6 +50,7 @@ test.afterAll(() => {
   cleanupBill(LOCKED_TITLE);
   cleanupGroup(GROUP_NAME);
   cleanupBill(NEWBIE_TITLE);
+  cleanupBill(TYPO_TITLE);
   unnameUser("seed_user_newbie");
   resetPayment("seed_user_mint");
 });
@@ -225,6 +227,51 @@ test("create a bill, add items, split it between two people, see the summary", a
   await mint.goto("/");
   const card = mint.getByRole("link", { name: new RegExp(escapeRegExp(TITLE)) });
   await expect(card).toContainText("Settled");
+});
+
+test("fix a typo in an item, then delete one after a confirm", async ({ page }) => {
+  await signInAs(page, "Mint");
+  await newBill(page, TYPO_TITLE);
+  await page.getByRole("button", { name: "Add item +" }).click();
+  for (const [name, price] of [
+    ["Pad thia", "1800"],
+    ["Water", "20"],
+  ]) {
+    await page.getByLabel("Item name").fill(name);
+    await page.getByLabel("Price in baht").fill(price);
+    await page.getByRole("button", { name: "Add item", exact: true }).click();
+  }
+  await page.getByRole("button", { name: "Done" }).click();
+  await expect(page.getByText("saving…")).toHaveCount(0);
+  await expect(page.getByText("฿1,820").first()).toBeVisible();
+
+  // Edit: the form starts with what's there; ticks would stay.
+  await claim(page, "Pad thia");
+  await page.getByRole("button", { name: /^Pad thia/ }).click();
+  await page
+    .getByRole("dialog", { name: "Pad thia" })
+    .getByRole("button", { name: "Edit item" })
+    .click();
+  const edit = page.getByRole("dialog", { name: "Edit item" });
+  await expect(edit.getByLabel("Price in baht")).toHaveValue("1800");
+  await edit.getByLabel("Item name").fill("Pad thai");
+  await edit.getByLabel("Price in baht").fill("180");
+  await edit.getByRole("button", { name: "Save" }).click();
+  const fixed = page.getByRole("dialog", { name: "Pad thai" });
+  await expect(fixed.getByRole("checkbox", { name: /^You ฿180/ })).toBeChecked();
+  await fixed.getByRole("button", { name: "Done" }).click();
+  await expect(page.getByText("฿200").first()).toBeVisible();
+
+  // Delete asks first; "Keep it" backs out.
+  await page.getByRole("button", { name: /^Water/ }).click();
+  await page.getByRole("dialog", { name: "Water" }).getByRole("button", { name: "Delete" }).click();
+  const confirm = page.getByRole("dialog", { name: "Delete Water?" });
+  await confirm.getByRole("button", { name: "Keep it" }).click();
+  await page.getByRole("dialog", { name: "Water" }).getByRole("button", { name: "Delete" }).click();
+  await confirm.getByRole("button", { name: "Delete item" }).click();
+  await expect(confirm).toBeHidden();
+  await expect(page.getByRole("button", { name: /^Water/ })).toHaveCount(0);
+  await expect(page.getByText("฿180").first()).toBeVisible();
 });
 
 test("an unknown bill shows the not-found page", async ({ page }) => {

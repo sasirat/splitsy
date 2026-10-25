@@ -18,7 +18,7 @@ vi.mock("@/server/auth", () => ({
 const { createBill } = await import("@/modules/bills/actions");
 const { getBill } = await import("@/modules/bills/queries");
 const { billSummary } = await import("@/modules/bills/service");
-const { addItem, setClaim } = await import("./actions");
+const { addItem, deleteItem, setClaim, updateItem } = await import("./actions");
 
 const MINT = "seed_user_mint";
 const PLOY = "seed_user_ploy";
@@ -57,7 +57,9 @@ describe("setClaim", () => {
   it("claims an item for the current user and shows in the bill totals", async () => {
     const { billId, itemId } = await billWithItem("180");
 
-    expect(await setClaim({ itemId, userId: auth.currentUserId, claimed: true })).toEqual({ ok: true });
+    expect(await setClaim({ itemId, userId: auth.currentUserId, claimed: true })).toEqual({
+      ok: true,
+    });
 
     const bill = await getBill(billId);
     expect(bill?.items[0].splits).toEqual([expect.objectContaining({ userId: MINT, shares: 1 })]);
@@ -69,7 +71,9 @@ describe("setClaim", () => {
     const { itemId } = await billWithItem();
 
     await setClaim({ itemId, userId: auth.currentUserId, claimed: true });
-    expect(await setClaim({ itemId, userId: auth.currentUserId, claimed: true })).toEqual({ ok: true });
+    expect(await setClaim({ itemId, userId: auth.currentUserId, claimed: true })).toEqual({
+      ok: true,
+    });
     expect(await getDb().itemSplit.count({ where: { itemId } })).toBe(1);
   });
 
@@ -77,8 +81,12 @@ describe("setClaim", () => {
     const { itemId } = await billWithItem();
 
     await setClaim({ itemId, userId: auth.currentUserId, claimed: true });
-    expect(await setClaim({ itemId, userId: auth.currentUserId, claimed: false })).toEqual({ ok: true });
-    expect(await setClaim({ itemId, userId: auth.currentUserId, claimed: false })).toEqual({ ok: true });
+    expect(await setClaim({ itemId, userId: auth.currentUserId, claimed: false })).toEqual({
+      ok: true,
+    });
+    expect(await setClaim({ itemId, userId: auth.currentUserId, claimed: false })).toEqual({
+      ok: true,
+    });
     expect(await getDb().itemSplit.count({ where: { itemId } })).toBe(0);
   });
 
@@ -87,7 +95,9 @@ describe("setClaim", () => {
 
     for (const userId of [MINT, PLOY, BEAM]) {
       auth.currentUserId = userId;
-      expect(await setClaim({ itemId, userId: auth.currentUserId, claimed: true })).toEqual({ ok: true });
+      expect(await setClaim({ itemId, userId: auth.currentUserId, claimed: true })).toEqual({
+        ok: true,
+      });
     }
 
     const bill = await getBill(billId);
@@ -140,11 +150,93 @@ describe("setClaim", () => {
       ok: false,
       error: "Item not found",
     });
-    expect(await setClaim({ itemId: "does-not-exist", userId: auth.currentUserId, claimed: true })).toEqual({
+    expect(
+      await setClaim({ itemId: "does-not-exist", userId: auth.currentUserId, claimed: true }),
+    ).toEqual({
       ok: false,
       error: "Item not found",
     });
     expect(await getDb().itemSplit.count({ where: { itemId } })).toBe(0);
+  });
+});
+
+describe("updateItem", () => {
+  it("renames and reprices an item; ticks stay and shares follow the price", async () => {
+    const { billId, itemId } = await billWithItem("1800", [PLOY]);
+    await setClaim({ itemId, userId: MINT, claimed: true });
+    await setClaim({ itemId, userId: PLOY, claimed: true });
+
+    // Anyone in the bill can fix it, not only whoever added it.
+    auth.currentUserId = PLOY;
+    expect(await updateItem({ itemId, name: "  Pad thai ", price: "180" })).toEqual({ ok: true });
+
+    const bill = await getBill(billId);
+    expect(bill?.items[0]).toEqual(
+      expect.objectContaining({ name: "Pad thai", priceSatang: 18000 }),
+    );
+    expect(bill?.totals.perPersonSatang).toEqual({ [MINT]: 9000, [PLOY]: 9000 });
+  });
+
+  it("rejects a bad name or price without changing anything", async () => {
+    const { itemId } = await billWithItem("90");
+
+    expect(await updateItem({ itemId, name: "", price: "90" })).toEqual({
+      ok: false,
+      error: "What was it called?",
+    });
+    expect(await updateItem({ itemId, name: "Pad thai", price: "1,2" })).toEqual({
+      ok: false,
+      error: "Enter a price like 120 or 120.50",
+    });
+    expect(await getDb().item.findUnique({ where: { id: itemId } })).toEqual(
+      expect.objectContaining({ name: "Pad thai", priceSatang: 9000 }),
+    );
+  });
+
+  it("refuses once the bill is settling, and for people outside the bill", async () => {
+    const { billId, itemId } = await billWithItem("90");
+
+    auth.currentUserId = BEAM;
+    expect(await updateItem({ itemId, name: "Hacked", price: "1" })).toEqual({
+      ok: false,
+      error: "Item not found",
+    });
+
+    auth.currentUserId = MINT;
+    await getDb().bill.update({ where: { id: billId }, data: { status: "SETTLING" } });
+    expect(await updateItem({ itemId, name: "Late fix", price: "1" })).toEqual({
+      ok: false,
+      error: "This bill is settling up — items are locked",
+    });
+    expect((await getDb().item.findUniqueOrThrow({ where: { id: itemId } })).name).toBe("Pad thai");
+  });
+});
+
+describe("deleteItem", () => {
+  it("deletes the item and its ticks", async () => {
+    const { billId, itemId } = await billWithItem("90", [PLOY]);
+    await setClaim({ itemId, userId: PLOY, claimed: true });
+
+    expect(await deleteItem({ itemId })).toEqual({ ok: true });
+    expect((await getBill(billId))?.items).toEqual([]);
+    expect(await getDb().itemSplit.count({ where: { itemId } })).toBe(0);
+    // Already gone: same answer as any unknown item.
+    expect(await deleteItem({ itemId })).toEqual({ ok: false, error: "Item not found" });
+  });
+
+  it("refuses once the bill is settling, and for people outside the bill", async () => {
+    const { billId, itemId } = await billWithItem("90");
+
+    auth.currentUserId = BEAM;
+    expect(await deleteItem({ itemId })).toEqual({ ok: false, error: "Item not found" });
+
+    auth.currentUserId = MINT;
+    await getDb().bill.update({ where: { id: billId }, data: { status: "SETTLING" } });
+    expect(await deleteItem({ itemId })).toEqual({
+      ok: false,
+      error: "This bill is settling up — items are locked",
+    });
+    expect(await getDb().item.count({ where: { id: itemId } })).toBe(1);
   });
 });
 

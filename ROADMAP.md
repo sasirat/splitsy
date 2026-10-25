@@ -66,11 +66,12 @@ Core total: ~13–18 focused dev-days.
   - Still open from S20: Neon `preview` branch (preview deploys have no DB), 2x garden photo for the invite, expired-invite page in the new style
 - [ ] **S22** 2–3 friends on a real bill; collect feedback
 - [ ] **S23** Fix breakage; empty/error states; a11y pass
-  - Edit / delete items (a typo like ฿1200 can't be fixed today), and delete bills — found in the S21 walkthrough
+  - [x] Edit / delete items (a typo like ฿1200 couldn't be fixed) — anyone in the bill, while it's open; delete asks first
+  - Delete bills — found in the S21 walkthrough
   - Reopen a settling bill when someone forgot a dish (settle-up is one-way)
   - [x] a11y: split-sheet checkboxes have no accessible names
   - From the S22 friend test (2026-10-24):
-    - Couldn't fix an item after adding it (same as edit items above)
+    - [x] Couldn't fix an item after adding it (same as edit items above)
     - Picking who shared an item needs a second tap after adding it — let the people be chosen while adding the item
     - [x] "Can only tick myself" read as the biggest bug: self-report claiming (S11) meant everyone had to join and tick their own — slow at the table. **Decided: anyone in the bill can tick anyone in the bill** (the person ticked must be in the bill too). Trade-off accepted: friends can change each other's shares
     - [x] UX: disabled checkboxes for other people looked tappable — moot now that every row is tickable

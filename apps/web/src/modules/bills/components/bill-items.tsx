@@ -209,6 +209,7 @@ function BillItems({
         open={splitOpen}
         item={
           splitTarget && {
+            id: splitTarget.id,
             name: splitTarget.name,
             priceSatang: splitTarget.priceSatang,
             splits: splitTarget.sharers.map(({ userId, shares }) => ({ userId, shares })),
