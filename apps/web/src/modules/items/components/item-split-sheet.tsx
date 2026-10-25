@@ -1,5 +1,6 @@
 "use client";
 
+import { PencilIcon, Trash2Icon } from "lucide-react";
 import { useId, useState, useTransition, type FormEvent } from "react";
 import { BottomSheet } from "@/components/ui/bottom-sheet";
 import { Button } from "@/components/ui/button";
@@ -16,6 +17,12 @@ export type SplitMember = { id: string; name: string; initials: string };
 
 type Mode = "split" | "edit" | "delete";
 
+/** "you, Mint and Ploy" */
+const listNames = new Intl.ListFormat("en", { style: "long", type: "conjunction" });
+
+/** The server's answer when the item no longer exists. */
+const GONE = "Item not found";
+
 /** Satang as the user would type it back: 120, 120.50. */
 const bahtInput = (satang: number) =>
   satang % 100 === 0 ? String(satang / 100) : (satang / 100).toFixed(2);
@@ -31,6 +38,7 @@ function ItemSplitSheet({
   currentUserId,
   canEdit,
   onClaimChange,
+  onItemGone,
   error,
   onOpenChange,
 }: {
@@ -41,6 +49,8 @@ function ItemSplitSheet({
   currentUserId: string;
   canEdit: boolean;
   onClaimChange: (userId: string, claimed: boolean) => void;
+  /** Someone else deleted the item first: the caller says so and refreshes. */
+  onItemGone: (name: string) => void;
   error: string | null;
   onOpenChange: (open: boolean) => void;
 }) {
@@ -49,6 +59,15 @@ function ItemSplitSheet({
   const [mode, setMode] = useState<Mode>("split");
   const [editError, setEditError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
+  // Back to "Who had this?" whenever a different item (or none) is shown —
+  // including when the open item vanishes, which closes the sheet without
+  // going through changeOpen.
+  const [modeItemId, setModeItemId] = useState(item?.id);
+  if (item?.id !== modeItemId) {
+    setModeItemId(item?.id);
+    setMode("split");
+    setEditError(null);
+  }
 
   const amounts = item ? splitItem(item.priceSatang, item.splits) : {};
   const claimers = item?.splits.length ?? 0;
@@ -88,20 +107,22 @@ function ItemSplitSheet({
     startTransition(async () => {
       const result = await callAction(() => updateItem(input));
       if (result.ok) setMode("split");
+      else if (result.error === GONE) onItemGone(item.name);
       else setEditError(result.error);
     });
   }
 
   function remove() {
     if (!item) return;
-    const itemId = item.id;
+    const { id: itemId, name } = item;
     setEditError(null);
     startTransition(async () => {
       const result = await callAction(() => deleteItem({ itemId }));
       if (result.ok) {
         setMode("split");
         onOpenChange(false);
-      } else setEditError(result.error);
+      } else if (result.error === GONE) onItemGone(name);
+      else setEditError(result.error);
     });
   }
 
@@ -165,7 +186,10 @@ function ItemSplitSheet({
         <div className="flex flex-col gap-4 pb-6">
           <p className="text-body text-muted-foreground">
             {formatBaht(item.priceSatang)} comes off the bill
-            {tickedNames.length > 0 ? `, and ${tickedNames.join(", ")} lose this tick` : ""}.
+            {tickedNames.length > 0
+              ? `, along with the ticks from ${listNames.format(tickedNames)}`
+              : ""}
+            .
           </p>
           {editError ? (
             <p role="alert" className="text-body text-primary">
@@ -219,11 +243,19 @@ function ItemSplitSheet({
           </p>
 
           {canEdit ? (
-            <div className="flex justify-center gap-2">
+            <div className="flex justify-between border-t border-divider pt-3">
               <Button variant="ghost" size="sm" onClick={() => show("edit")}>
+                <PencilIcon aria-hidden className="size-4" />
                 Edit item
               </Button>
-              <Button variant="ghost" size="sm" onClick={() => show("delete")}>
+              {/* Destructive: set apart on the other side, with a bin, and outlined. */}
+              <Button
+                variant="dashed"
+                size="sm"
+                className="text-primary"
+                onClick={() => show("delete")}
+              >
+                <Trash2Icon aria-hidden className="size-4" />
                 Delete
               </Button>
             </div>

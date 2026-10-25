@@ -105,7 +105,7 @@ export async function setClaim(input: SetClaimInput): Promise<ActionResult> {
 function findAccessibleItem(itemId: string, userId: string) {
   return getDb().item.findFirst({
     where: { id: itemId, bill: billAccessWhere(userId) },
-    select: { billId: true, bill: { select: { status: true } } },
+    select: { billId: true, bill: { select: { status: true, groupId: true } } },
   });
 }
 
@@ -128,7 +128,11 @@ async function changeOpenItem(
   if (outcome === "locked") return { ok: false, error: LOCKED };
   if (outcome === "gone") return { ok: false, error: "Item not found" };
 
-  revalidatePath(`/bills/${item.billId}`);
+  // A price change or delete moves amounts beyond the bill page: home cards
+  // (your part), the group page, and the bill's summary.
+  revalidatePath("/");
+  revalidatePath(`/groups/${item.bill.groupId}`);
+  revalidatePath(`/bills/${item.billId}`, "layout");
   return { ok: true };
 }
 

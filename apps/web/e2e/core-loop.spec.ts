@@ -272,6 +272,29 @@ test("fix a typo in an item, then delete one after a confirm", async ({ page }) 
   await expect(confirm).toBeHidden();
   await expect(page.getByRole("button", { name: /^Water/ })).toHaveCount(0);
   await expect(page.getByText("฿180").first()).toBeVisible();
+
+  // First change wins: deleted in another tab, so saving here says so.
+  const other = await page.context().newPage();
+  await other.goto(page.url());
+  await other.getByRole("button", { name: /^Pad thai/ }).click();
+  await other
+    .getByRole("dialog", { name: "Pad thai" })
+    .getByRole("button", { name: "Delete" })
+    .click();
+  await other.getByRole("button", { name: "Delete item" }).click();
+  await expect(other.getByRole("button", { name: /^Pad thai/ })).toHaveCount(0);
+
+  await page.getByRole("button", { name: /^Pad thai/ }).click();
+  await page
+    .getByRole("dialog", { name: "Pad thai" })
+    .getByRole("button", { name: "Edit item" })
+    .click();
+  await page
+    .getByRole("dialog", { name: "Edit item" })
+    .getByRole("button", { name: "Save" })
+    .click();
+  await expect(page.getByText('"Pad thai" was deleted by someone else.')).toBeVisible();
+  await expect(page.getByRole("button", { name: /^Pad thai/ })).toHaveCount(0);
 });
 
 test("an unknown bill shows the not-found page", async ({ page }) => {

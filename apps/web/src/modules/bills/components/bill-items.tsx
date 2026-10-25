@@ -2,6 +2,7 @@
 
 import { cn } from "cn";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import type { ReactNode } from "react";
 import { useOptimistic, useRef, useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
@@ -80,6 +81,7 @@ function BillItems({
   const [splitError, setSplitError] = useState<string | null>(null);
   const [, startTransition] = useTransition();
   const nextPendingId = useRef(0);
+  const router = useRouter();
 
   const me = members.find((member) => member.id === currentUserId);
   const splitTarget = shownItems.find((item) => item.id === splitItemId);
@@ -109,6 +111,14 @@ function BillItems({
     });
   }
 
+  // Someone else deleted it first — first change wins. Close the sheet, say
+  // so on the page, and reload the receipt without it.
+  function onItemGone(name: string) {
+    setSplitOpen(false);
+    setSplitError(`"${name}" was deleted by someone else.`);
+    router.refresh();
+  }
+
   // Each sheet shows its own errors; once both are closed, surface them here so
   // a failure that lands after "Done" (and its rollback) isn't silent.
   const pageError = sheetOpen || splitOpen ? null : (error ?? splitError);
@@ -122,9 +132,7 @@ function BillItems({
   return (
     <>
       {showClaimHint ? (
-        <p className="text-center text-body text-cream">
-          Tap a dish to tick who had it.
-        </p>
+        <p className="text-center text-body text-cream">Tap a dish to tick who had it.</p>
       ) : null}
       <ReceiptCard title={title} date={meta} subtotal={subtotal} className="mt-4">
         {shownItems.length > 0 ? (
@@ -219,6 +227,7 @@ function BillItems({
         currentUserId={currentUserId}
         canEdit={canEdit && me !== undefined}
         onClaimChange={onClaimChange}
+        onItemGone={onItemGone}
         error={splitError}
         onOpenChange={setSplitOpen}
       />
