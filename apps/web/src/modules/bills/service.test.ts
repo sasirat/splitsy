@@ -164,3 +164,48 @@ describe("billSummary", () => {
     });
   });
 });
+
+// The case-study dinner: A pays; C is allergic to shrimp; only A and B drink;
+// B leaves before the last order. Ids are the seed users', so the leftover
+// satang go where the DB journey test expects them.
+describe("billSummary — the dinner journey", () => {
+  const A = "seed_user_mint";
+  const B = "seed_user_ploy";
+  const C = "seed_user_beam";
+  const D = "seed_user_newbie";
+  const ate = (...userIds: string[]) => userIds.map((userId) => ({ userId, shares: 1 }));
+  const items = [
+    { id: "tomyum", name: "Tom yum goong", priceSatang: 32000, splits: ate(A, B, D) },
+    { id: "padthai", name: "Pad thai", priceSatang: 18000, splits: ate(A, B, C, D) },
+    { id: "somtam", name: "Som tam", priceSatang: 12000, splits: ate(A, B, C, D) },
+    { id: "beer", name: "Beer", priceSatang: 20000, splits: ate(A, B) },
+    { id: "soda", name: "Soft drinks", priceSatang: 6000, splits: ate(C, D) },
+    { id: "pork", name: "Grilled pork neck", priceSatang: 15000, splits: ate(A, C, D) },
+  ];
+  const summary = billSummary(items, [{ id: B }, { id: C }, { id: D }], A);
+  const byPerson = Object.fromEntries(summary.people.map((p) => [p.userId, p]));
+
+  it("charges each person only for what they had", () => {
+    expect(byPerson[A].totalSatang).toBe(33167); // ฿331.67
+    expect(byPerson[B].totalSatang).toBe(28166); // ฿281.66 — no pork, they'd left
+    expect(byPerson[C].totalSatang).toBe(15500); // ฿155.00 — no shrimp, no beer
+    expect(byPerson[D].totalSatang).toBe(26167); // ฿261.67
+  });
+
+  it("hands the shrimp dish's 2 leftover satang out in a fixed order", () => {
+    const shrimp = (userId: string) =>
+      byPerson[userId].lines.find((line) => line.itemId === "tomyum")?.shareSatang;
+    // ฿320 / 3 = 10666.67 satang: the lowest two user ids get the extra satang.
+    expect([shrimp(A), shrimp(D), shrimp(B)]).toEqual([10667, 10667, 10666]);
+    expect(byPerson[C].lines.some((line) => line.itemId === "tomyum")).toBe(false);
+  });
+
+  it("adds up to the bill exactly, and everyone but A owes A their share", () => {
+    const total = summary.people.reduce((sum, p) => sum + p.totalSatang, 0);
+    expect(total).toBe(103000);
+    expect(summary.subtotalSatang).toBe(103000);
+    expect(summary.unassignedSatang).toBe(0);
+    expect(byPerson[A].owesPayerSatang).toBe(0);
+    expect(summary.owedToPayerSatang).toBe(28166 + 15500 + 26167); // ฿698.33
+  });
+});
