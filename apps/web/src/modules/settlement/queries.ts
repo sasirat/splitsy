@@ -2,6 +2,7 @@ import "server-only";
 import { billAccessWhere } from "@/server/access";
 import { requireUser } from "@/server/auth";
 import { getDb } from "@/server/db";
+import { billDeleteBlock } from "@/modules/bills/service";
 import { settleProgress } from "./service";
 
 const person = { select: { id: true, displayName: true, email: true } } as const;
@@ -59,6 +60,8 @@ export async function getSettlement(billId: string) {
           }
         : null,
     ...settleProgress(bill.settlements),
+    /** Nobody has paid the payer yet, so anyone in the bill may delete it. */
+    canDelete: billDeleteBlock(bill.settlements) === null,
   };
 }
 

@@ -20,6 +20,13 @@ import {
 
 const LOCKED = "This bill is settling up — items are locked";
 
+/** Why an item write can't go ahead, from the bill's locked status: null when
+ *  open; the bill may also have been deleted under the user (see deleteBill). */
+function closedReason(status: Awaited<ReturnType<typeof lockBillStatus>>): string | null {
+  if (status === "OPEN") return null;
+  return status === null ? "This bill was deleted" : LOCKED;
+}
+
 /** Append an item to an open bill the current user can access. It starts
  *  unclaimed — people tick what they had in S11. */
 export async function addItem(input: AddItemInput): Promise<ActionResult<{ itemId: string }>> {
@@ -37,7 +44,8 @@ export async function addItem(input: AddItemInput): Promise<ActionResult<{ itemI
 
   // Re-check under a lock: settling may have started since the check above.
   const item = await getDb().$transaction(async (tx) => {
-    if ((await lockBillStatus(tx, billId, "share")) !== "OPEN") return null;
+    const closed = closedReason(await lockBillStatus(tx, billId, "share"));
+    if (closed) return { closed };
     const last = await tx.item.findFirst({
       where: { billId },
       orderBy: { position: "desc" },
@@ -48,7 +56,7 @@ export async function addItem(input: AddItemInput): Promise<ActionResult<{ itemI
       select: { id: true },
     });
   });
-  if (!item) return { ok: false, error: LOCKED };
+  if ("closed" in item) return { ok: false, error: item.closed };
 
   revalidatePath(`/bills/${billId}`);
   return { ok: true, itemId: item.id };
@@ -81,8 +89,9 @@ export async function setClaim(input: SetClaimInput): Promise<ActionResult> {
   if (item.bill.status !== "OPEN") return { ok: false, error: LOCKED };
 
   // Re-check under a lock: settling may have started since the check above.
-  const locked = await db.$transaction(async (tx) => {
-    if ((await lockBillStatus(tx, item.billId, "share")) !== "OPEN") return true;
+  const closed = await db.$transaction(async (tx) => {
+    const reason = closedReason(await lockBillStatus(tx, item.billId, "share"));
+    if (reason) return reason;
     if (claimed) {
       await tx.itemSplit.upsert({
         where: { itemId_userId: { itemId, userId } },
@@ -92,9 +101,9 @@ export async function setClaim(input: SetClaimInput): Promise<ActionResult> {
     } else {
       await tx.itemSplit.deleteMany({ where: { itemId, userId } });
     }
-    return false;
+    return null;
   });
-  if (locked) return { ok: false, error: LOCKED };
+  if (closed) return { ok: false, error: closed };
 
   revalidatePath(`/bills/${item.billId}`);
   return { ok: true };
@@ -122,10 +131,11 @@ async function changeOpenItem(
   if (item.bill.status !== "OPEN") return { ok: false, error: LOCKED };
 
   const outcome = await getDb().$transaction(async (tx) => {
-    if ((await lockBillStatus(tx, item.billId, "share")) !== "OPEN") return "locked";
+    const closed = closedReason(await lockBillStatus(tx, item.billId, "share"));
+    if (closed) return { closed };
     return (await write(tx)) > 0 ? "done" : "gone";
   });
-  if (outcome === "locked") return { ok: false, error: LOCKED };
+  if (typeof outcome === "object") return { ok: false, error: outcome.closed };
   if (outcome === "gone") return { ok: false, error: "Item not found" };
 
   // A price change or delete moves amounts beyond the bill page: home cards

@@ -204,7 +204,8 @@ export async function markPaid(
   // Under the bill's lock, so two quick taps on different rows can't both
   // read "someone still pending" and leave a fully paid bill SETTLING.
   const billStatus = await db.$transaction(async (tx) => {
-    await lockBillStatus(tx, billId, "update");
+    // Gone if a friend deleted the bill meanwhile (allowed until someone pays).
+    if ((await lockBillStatus(tx, billId, "update")) === null) return null;
     await tx.settlement.update({
       where: { id: settlementId },
       // Marking it either way settles any "I've paid" the friend sent.
@@ -217,6 +218,7 @@ export async function markPaid(
     await tx.bill.update({ where: { id: billId }, data: { status } });
     return status;
   });
+  if (billStatus === null) return { ok: false, error: "This bill was deleted" };
 
   revalidatePath("/");
   revalidatePath(`/groups/${settlement.bill.groupId}`);
