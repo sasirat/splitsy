@@ -24,10 +24,14 @@ import { requireOnboardedUser } from "@/server/auth";
 export default async function BillSummaryPage({ params }: PageProps<"/bills/[id]/summary">) {
   const user = await requireOnboardedUser();
   const { id } = await params;
-  const bill = await getBill(id);
+  // Both at once: the settlement is only shown once settling, but fetching it
+  // up front saves a second round trip.
+  const [bill, fetchedSettlement] = await Promise.all([getBill(id), getSettlement(id)]);
   if (!bill) notFound();
   const settling = bill.status !== "OPEN";
-  const settlement = settling ? await getSettlement(id) : null;
+  // Gone between the two reads (deleted meanwhile): don't show it as open.
+  if (settling && !fetchedSettlement) notFound();
+  const settlement = settling ? fetchedSettlement : null;
 
   // Everyone who appears on the bill: members, the payer, and past sharers.
   const people: Record<string, SummaryPerson> = {};

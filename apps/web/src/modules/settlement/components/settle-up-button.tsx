@@ -21,9 +21,10 @@ function SettleUpButton({ billId, blockedReason }: { billId: string; blockedReas
     startTransition(async () => {
       const result = await callAction(() => startSettling({ billId }));
       if (!result.ok) return setError(result.error);
-      // Same page: it re-renders with the settle-up on top.
+      // Same page: it re-renders with the settle-up on top, so go up to it.
       setConfirming(false);
       router.refresh();
+      window.scrollTo({ top: 0, behavior: "smooth" });
     });
   }
 
