@@ -27,7 +27,7 @@ function NudgeButton({
 
   function nudge() {
     setNote(null);
-    const url = `${window.location.origin}/bills/${billId}/settle`;
+    const url = `${window.location.origin}/bills/${billId}/summary`;
     const text = nudgeMessage({ name, billTitle, amountSatang, url });
     startTransition(async () => {
       try {

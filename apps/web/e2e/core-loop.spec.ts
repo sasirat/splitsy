@@ -150,8 +150,10 @@ test("create a bill, add items, split it between two people, see the summary", a
   await expect(mint).toHaveURL(`${billUrl}/summary`);
   await settleUp.click();
   await confirm.getByRole("button", { name: "Lock and settle up" }).click();
-  await expect(mint).toHaveURL(`${billUrl}/settle`);
+  // Same page: the summary turns into the settle-up, with the breakdown below.
   await expect(mint.getByText("You fronted it")).toBeVisible();
+  await expect(mint).toHaveURL(`${billUrl}/summary`);
+  await expect(mint.getByRole("heading", { name: "What everyone had" })).toBeVisible();
   await expect(mint.getByText("฿210").first()).toBeVisible();
   await expect(mint.getByText("Waiting to pay")).toBeVisible();
 
@@ -159,6 +161,11 @@ test("create a bill, add items, split it between two people, see the summary", a
   await ploy.goto(billUrl);
   await expect(ploy.getByText("Settling up — items are locked.")).toBeVisible();
   await ploy.getByRole("link", { name: "See settle-up →" }).click();
+  await expect(ploy).toHaveURL(`${billUrl}/summary`);
+  await expect(ploy.getByText("You owe Mint")).toBeVisible();
+  // Old /settle links (in reminders already sent) land on the same page.
+  await ploy.goto(`${billUrl}/settle`);
+  await expect(ploy).toHaveURL(`${billUrl}/summary`);
   await expect(ploy.getByText("You owe Mint")).toBeVisible();
 
   // Mint adds how to be paid: a bank account and a QR image.
@@ -207,7 +214,7 @@ test("create a bill, add items, split it between two people, see the summary", a
   const reminder = await mint.evaluate(() => navigator.clipboard.readText());
   expect(reminder).toContain(`Hi Ploy! Friendly reminder for ${TITLE}`);
   expect(reminder).toContain("you owe ฿210.");
-  expect(reminder).toContain(`${billUrl}/settle`);
+  expect(reminder).toContain(`${billUrl}/summary`);
   await expect(mint.getByText("Nudged just now")).toBeVisible();
 
   // Ploy says they've paid; Mint sees it and confirms — the only debt, so
@@ -348,7 +355,8 @@ test("a settling bill is read-only but its summary still loads", async ({ page }
   await expect(sheet.getByRole("checkbox").first()).toHaveAttribute("aria-disabled", "true");
   await sheet.getByRole("button", { name: "Done" }).click();
 
-  await page.getByRole("link", { name: "See summary →" }).click();
+  // While settling, the bill's one link reads "See settle-up" — same page.
+  await page.getByRole("link", { name: "See settle-up →" }).click();
   await expect(page.getByText(/฿65 not claimed yet/)).toBeVisible();
 });
 

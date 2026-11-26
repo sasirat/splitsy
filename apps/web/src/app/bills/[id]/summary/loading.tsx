@@ -1,12 +1,12 @@
 import { PhoneFrame } from "@/components/ui/phone-frame";
 import { Skeleton } from "@/components/ui/skeleton";
 
-/** The settle page's own skeleton, on its sky scene (the bill's is green). */
+/** The summary page's own skeleton, on its sky scene (the bill's is green). */
 export default function Loading() {
   return (
     <PhoneFrame scene="sky" className="gap-6 px-5 pt-8" aria-busy>
       <span className="sr-only" role="status">
-        Loading settle-up…
+        Loading summary…
       </span>
       <Skeleton tone="light" className="h-4 w-24" />
       <div className="flex flex-col gap-2">

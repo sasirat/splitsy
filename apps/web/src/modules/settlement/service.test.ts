@@ -310,11 +310,11 @@ describe("nudgeMessage", () => {
         name: "Ploy",
         billTitle: "Som Tam Nua",
         amountSatang: 30666,
-        url: "https://splitsy.app/bills/b1/settle",
+        url: "https://splitsy.app/bills/b1/summary",
       }),
     ).toBe(
       "Hi Ploy! Friendly reminder for Som Tam Nua 🧾 — you owe ฿306.66. " +
-        "Pay here: https://splitsy.app/bills/b1/settle 🙏",
+        "Pay here: https://splitsy.app/bills/b1/summary 🙏",
     );
   });
 

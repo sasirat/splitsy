@@ -7,9 +7,9 @@ import { Button } from "@/components/ui/button";
 import { callAction } from "@/lib/call-action";
 import { startSettling } from "../actions";
 
-/** The payer's "Settle up" on the summary: after a confirm (it can't be
- *  undone — items lock), locks the bill and opens the settle screen. Disabled
- *  (with the reason) while items are unclaimed. */
+/** The payer's "Settle up" on the summary: after a confirm (items lock),
+ *  locks the bill; the summary then shows the settle-up. Disabled (with the
+ *  reason) while items are unclaimed. */
 function SettleUpButton({ billId, blockedReason }: { billId: string; blockedReason?: string }) {
   const router = useRouter();
   const [confirming, setConfirming] = useState(false);
@@ -20,8 +20,10 @@ function SettleUpButton({ billId, blockedReason }: { billId: string; blockedReas
     setError(null);
     startTransition(async () => {
       const result = await callAction(() => startSettling({ billId }));
-      if (result.ok) router.push(`/bills/${billId}/settle`);
-      else setError(result.error);
+      if (!result.ok) return setError(result.error);
+      // Same page: it re-renders with the settle-up on top.
+      setConfirming(false);
+      router.refresh();
     });
   }
 
@@ -39,7 +41,7 @@ function SettleUpButton({ billId, blockedReason }: { billId: string; blockedReas
         Settle up
       </Button>
       {blockedReason ? (
-        <p className="text-center text-caption text-cream/90">{blockedReason}</p>
+        <p className="text-center text-caption text-primary/80">{blockedReason}</p>
       ) : null}
 
       <BottomSheet

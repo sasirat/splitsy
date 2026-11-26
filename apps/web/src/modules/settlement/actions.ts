@@ -246,7 +246,7 @@ export async function recordNudge(input: NudgeInput): Promise<ActionResult> {
   });
   if (count === 0) return { ok: false, error: "They've already paid" };
 
-  revalidatePath(`/bills/${settlement.billId}/settle`);
+  revalidatePath(`/bills/${settlement.billId}/summary`);
   return { ok: true };
 }
 
@@ -272,6 +272,6 @@ export async function claimPaid(input: ClaimPaidInput): Promise<ActionResult> {
     return { ok: false, error: `${personName(settlement.toUser)} has already marked this paid` };
   }
 
-  revalidatePath(`/bills/${settlement.billId}/settle`);
+  revalidatePath(`/bills/${settlement.billId}/summary`);
   return { ok: true };
 }

@@ -14,6 +14,7 @@ function BillSummaryView({
   people,
   payerId,
   currentUserId,
+  showOwed = true,
 }: {
   billId: string;
   summary: BillSummary;
@@ -21,6 +22,9 @@ function BillSummaryView({
   people: Record<string, SummaryPerson>;
   payerId: string;
   currentUserId: string;
+  /** The "Friends owe you / You owe …" line; off once settling, when the
+   *  settle-up above already says it. */
+  showOwed?: boolean;
 }) {
   const who = (userId: string) => people[userId] ?? { name: "Someone", initials: "?" };
   const payerName = who(payerId).name;
@@ -116,19 +120,21 @@ function BillSummaryView({
           <span>Subtotal</span>
           <span>{formatBaht(summary.subtotalSatang)}</span>
         </div>
-        <div className="flex justify-between text-body-bold">
-          {iAmPayer ? (
-            <>
-              <span>Friends owe you</span>
-              <span>{formatBaht(summary.owedToPayerSatang)}</span>
-            </>
-          ) : (
-            <>
-              <span>You owe {payerName}</span>
-              <span>{formatBaht(myOwed)}</span>
-            </>
-          )}
-        </div>
+        {showOwed ? (
+          <div className="flex justify-between text-body-bold">
+            {iAmPayer ? (
+              <>
+                <span>Friends owe you</span>
+                <span>{formatBaht(summary.owedToPayerSatang)}</span>
+              </>
+            ) : (
+              <>
+                <span>You owe {payerName}</span>
+                <span>{formatBaht(myOwed)}</span>
+              </>
+            )}
+          </div>
+        ) : null}
       </div>
     </div>
   );
