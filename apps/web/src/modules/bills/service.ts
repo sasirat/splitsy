@@ -113,3 +113,14 @@ export function billSummary(
   }
   return summary;
 }
+
+/** Why a bill can't be deleted, or null if it can. Deleting is fine until
+ *  money has (probably) moved to the payer: a confirmed payment, or a friend's
+ *  "I've paid" the payer hasn't confirmed yet. Open bills have no settlements,
+ *  and a settled bill always has payments, so only that check is needed. */
+export function billDeleteBlock(
+  settlements: { status: "PENDING" | "PAID"; paidClaimedAt: Date | null }[],
+): string | null {
+  const paid = settlements.some((s) => s.status === "PAID" || s.paidClaimedAt !== null);
+  return paid ? "Someone has already paid — this bill can't be deleted." : null;
+}

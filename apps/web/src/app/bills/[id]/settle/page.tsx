@@ -2,6 +2,8 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { PhoneFrame } from "@/components/ui/phone-frame";
 import { formatBillDate, formatBillNumber, formatBillTime } from "@/lib/format";
+import { DeleteBillButton } from "@/modules/bills/components/delete-bill-button";
+import { billDeleteBlock } from "@/modules/bills/service";
 import { SettleView } from "@/modules/settlement/components/settle-view";
 import { getSettlement } from "@/modules/settlement/queries";
 import { requireOnboardedUser } from "@/server/auth";
@@ -44,6 +46,16 @@ export default async function SettlePage({ params }: PageProps<"/bills/[id]/sett
       >
         See what everyone had →
       </Link>
+
+      {/* Until someone pays, a bill that's settling can still be deleted. */}
+      {billDeleteBlock(settlement.settlements) === null ? (
+        <DeleteBillButton
+          billId={settlement.id}
+          title={settlement.title}
+          settling
+          className="mt-2 self-center text-primary/80"
+        />
+      ) : null}
     </PhoneFrame>
   );
 }

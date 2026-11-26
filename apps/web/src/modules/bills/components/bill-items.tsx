@@ -58,6 +58,7 @@ function BillItems({
   members,
   currentUserId,
   invite,
+  footerAction,
 }: {
   billId: string;
   title: string;
@@ -72,6 +73,8 @@ function BillItems({
   currentUserId: string;
   /** Rendered under the add-item button, e.g. the invite button. */
   invite?: ReactNode;
+  /** Rendered last among the links, e.g. "Delete bill". */
+  footerAction?: ReactNode;
 }) {
   const [shownItems, applyOptimistic] = useOptimistic(items, applyChange);
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -197,6 +200,7 @@ function BillItems({
               See settle-up →
             </Link>
           ) : null}
+          {footerAction}
         </div>
       </div>
 

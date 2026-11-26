@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { billSummary, billTotals } from "./service";
+import { billDeleteBlock, billSummary, billTotals } from "./service";
 
 describe("billTotals", () => {
   it("sums the subtotal and each person's share across items", () => {
@@ -207,5 +207,29 @@ describe("billSummary — the dinner journey", () => {
     expect(summary.unassignedSatang).toBe(0);
     expect(byPerson[A].owesPayerSatang).toBe(0);
     expect(summary.owedToPayerSatang).toBe(28166 + 15500 + 26167); // ฿698.33
+  });
+});
+
+describe("billDeleteBlock", () => {
+  const pending = { status: "PENDING" as const, paidClaimedAt: null };
+
+  it("allows an open bill (no settlements yet)", () => {
+    expect(billDeleteBlock([])).toBeNull();
+  });
+
+  it("allows a settling bill nobody has paid yet", () => {
+    expect(billDeleteBlock([pending, pending])).toBeNull();
+  });
+
+  it("blocks once a friend says they've paid, even before the payer confirms", () => {
+    expect(billDeleteBlock([pending, { status: "PENDING", paidClaimedAt: new Date() }])).toBe(
+      "Someone has already paid — this bill can't be deleted.",
+    );
+  });
+
+  it("blocks once a payment is confirmed (so a settled bill never qualifies)", () => {
+    expect(billDeleteBlock([pending, { status: "PAID", paidClaimedAt: null }])).toBe(
+      "Someone has already paid — this bill can't be deleted.",
+    );
   });
 });

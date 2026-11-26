@@ -9,6 +9,7 @@ import {
   personName,
 } from "@/lib/format";
 import { BillItems } from "@/modules/bills/components/bill-items";
+import { DeleteBillButton } from "@/modules/bills/components/delete-bill-button";
 import { getBill } from "@/modules/bills/queries";
 import { InviteButton } from "@/modules/groups/components/invite-button";
 import { requireOnboardedUser } from "@/server/auth";
@@ -42,6 +43,17 @@ export default async function BillPage({ params }: PageProps<"/bills/[id]">) {
         canEdit={bill.status === "OPEN"}
         settled={bill.status === "SETTLED"}
         invite={<InviteButton groupId={bill.groupId} billId={bill.id} className="text-cream" />}
+        footerAction={
+          bill.canDelete ? (
+            <DeleteBillButton
+              billId={bill.id}
+              title={bill.title}
+              itemCount={bill.items.length}
+              settling={bill.status !== "OPEN"}
+              className="text-cream/80"
+            />
+          ) : null
+        }
         currentUserId={user.id}
         members={bill.members.map((member) => {
           const name = personName(member);

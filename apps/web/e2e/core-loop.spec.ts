@@ -9,6 +9,7 @@ const LOCKED_TITLE = `E2E locked ${Date.now()}`;
 const GROUP_NAME = `E2E flat ${Date.now()}`;
 const NEWBIE_TITLE = `E2E newbie ${Date.now()}`;
 const TYPO_TITLE = `E2E typo ${Date.now()}`;
+const DOOMED_TITLE = `E2E doomed ${Date.now()}`;
 
 async function signInAs(page: Page, name: string) {
   await page.goto("/login");
@@ -51,6 +52,7 @@ test.afterAll(() => {
   cleanupGroup(GROUP_NAME);
   cleanupBill(NEWBIE_TITLE);
   cleanupBill(TYPO_TITLE);
+  cleanupBill(DOOMED_TITLE); // only if the test failed before deleting it
   unnameUser("seed_user_newbie");
   resetPayment("seed_user_mint");
 });
@@ -295,6 +297,29 @@ test("fix a typo in an item, then delete one after a confirm", async ({ page }) 
     .click();
   await expect(page.getByText('"Pad thai" was deleted by someone else.')).toBeVisible();
   await expect(page.getByRole("button", { name: /^Pad thai/ })).toHaveCount(0);
+});
+
+test("delete a bill after a confirm; home stops listing it", async ({ page }) => {
+  await signInAs(page, "Mint");
+  await newBill(page, DOOMED_TITLE);
+  await page.getByRole("button", { name: "Add item +" }).click();
+  await page.getByLabel("Item name").fill("Tea");
+  await page.getByLabel("Price in baht").fill("45");
+  await page.getByRole("button", { name: "Add item", exact: true }).click();
+  await page.getByRole("button", { name: "Done" }).click();
+  await expect(page.getByText("saving…")).toHaveCount(0);
+
+  // It asks first, says what goes, and Cancel keeps the bill.
+  const confirm = page.getByRole("dialog", { name: `Delete ${DOOMED_TITLE}?` });
+  await page.getByRole("button", { name: "Delete bill" }).click();
+  await expect(confirm).toContainText("Its 1 item and everyone's claims go too.");
+  await confirm.getByRole("button", { name: "Cancel" }).click();
+  await expect(confirm).toBeHidden();
+
+  await page.getByRole("button", { name: "Delete bill" }).click();
+  await confirm.getByRole("button", { name: "Delete bill" }).click();
+  await expect(page).toHaveURL("/");
+  await expect(page.getByText(DOOMED_TITLE)).toHaveCount(0);
 });
 
 test("an unknown bill shows the not-found page", async ({ page }) => {

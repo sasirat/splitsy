@@ -15,13 +15,14 @@ vi.mock("@/server/auth", () => ({
   }),
 }));
 
-const { createBill } = await import("./actions");
+const { createBill, deleteBill } = await import("./actions");
 const { getBill, listMyBills } = await import("./queries");
 const { addItem } = await import("@/modules/items/actions");
 
 const MINT = "seed_user_mint";
 const BEAM = "seed_user_beam";
 const createdBillIds: string[] = [];
+const createdGroupIds: string[] = [];
 
 async function newBill(title = "Test bill") {
   const result = await createBill({ title });
@@ -42,7 +43,9 @@ afterAll(async () => {
   // Settlements restrict bill deletion, so clear them before the group cascade.
   await getDb().settlement.deleteMany({ where: { billId: { in: createdBillIds } } });
   // Deleting the group cascades to membership, bills, items and splits.
-  await getDb().group.deleteMany({ where: { id: { in: bills.map((b) => b.groupId) } } });
+  await getDb().group.deleteMany({
+    where: { id: { in: [...bills.map((b) => b.groupId), ...createdGroupIds] } },
+  });
 });
 
 describe("createBill", () => {
@@ -214,5 +217,86 @@ describe("listMyBills", () => {
     auth.currentUserId = BEAM;
     const bill = (await listMyBills()).find((b) => b.id === billId);
     expect(bill?.myPart).toEqual({ role: "debtor", amountSatang: 19500, state: "claimed" });
+  });
+});
+
+describe("deleteBill", () => {
+  /** Puts a bill into SETTLING with one debt from Beam, optionally paid. */
+  async function startSettling(billId: string, payment?: "claimed" | "paid") {
+    await getDb().bill.update({
+      where: { id: billId },
+      data: {
+        status: payment === "paid" ? "SETTLED" : "SETTLING",
+        settlements: {
+          create: {
+            fromUserId: BEAM,
+            toUserId: MINT,
+            amountSatang: 5000,
+            status: payment === "paid" ? "PAID" : "PENDING",
+            paidClaimedAt: payment === "claimed" ? new Date() : null,
+          },
+        },
+      },
+    });
+  }
+
+  it("deletes a quick bill together with its hidden group", async () => {
+    const billId = await newBill("Delete me");
+    await addItem({ billId, name: "Tea", price: "45" });
+    const { groupId } = await getDb().bill.findUniqueOrThrow({ where: { id: billId } });
+
+    expect(await deleteBill({ billId })).toEqual({ ok: true, redirectTo: "/" });
+    expect(await getDb().bill.findUnique({ where: { id: billId } })).toBeNull();
+    expect(await getDb().group.findUnique({ where: { id: groupId } })).toBeNull();
+    expect(await getDb().item.count({ where: { billId } })).toBe(0);
+  });
+
+  it("deletes a bill in a persistent group but keeps the group", async () => {
+    const group = await getDb().group.create({
+      data: {
+        name: "Flat",
+        type: "PERSISTENT",
+        createdById: MINT,
+        members: { create: { userId: MINT, role: "OWNER" } },
+      },
+    });
+    createdGroupIds.push(group.id);
+    const created = await createBill({ title: "Rent", groupId: group.id });
+    if (!created.ok) throw new Error(created.error);
+
+    expect(await deleteBill({ billId: created.billId })).toEqual({
+      ok: true,
+      redirectTo: `/groups/${group.id}`,
+    });
+    expect(await getDb().bill.findUnique({ where: { id: created.billId } })).toBeNull();
+    expect(await getDb().group.findUnique({ where: { id: group.id } })).not.toBeNull();
+  });
+
+  it("deletes a settling bill nobody has paid, settlements and all", async () => {
+    const billId = await newBill("Settling, unpaid");
+    await startSettling(billId);
+
+    expect(await deleteBill({ billId })).toMatchObject({ ok: true });
+    expect(await getDb().settlement.count({ where: { billId } })).toBe(0);
+    expect(await getDb().bill.findUnique({ where: { id: billId } })).toBeNull();
+  });
+
+  it.each(["claimed", "paid"] as const)("refuses once a payment is %s", async (payment) => {
+    const billId = await newBill(`Already ${payment}`);
+    await startSettling(billId, payment);
+
+    expect(await deleteBill({ billId })).toEqual({
+      ok: false,
+      error: "Someone has already paid — this bill can't be deleted.",
+    });
+    expect(await getDb().bill.findUnique({ where: { id: billId } })).not.toBeNull();
+  });
+
+  it("says not found for a bill the user isn't in", async () => {
+    const billId = await newBill("Mint's only");
+
+    auth.currentUserId = BEAM;
+    expect(await deleteBill({ billId })).toEqual({ ok: false, error: "Bill not found" });
+    expect(await getDb().bill.findUnique({ where: { id: billId } })).not.toBeNull();
   });
 });

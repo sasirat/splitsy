@@ -11,3 +11,7 @@ export const createBillInput = z.object({
 });
 
 export type CreateBillInput = z.input<typeof createBillInput>;
+
+export const deleteBillInput = z.object({ billId: z.string().min(1) });
+
+export type DeleteBillInput = z.input<typeof deleteBillInput>;

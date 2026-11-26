@@ -3,7 +3,7 @@ import { billAccessWhere } from "@/server/access";
 import { requireUser } from "@/server/auth";
 import { getDb } from "@/server/db";
 import { myBillPart } from "@/modules/settlement/service";
-import { billTotals } from "./service";
+import { billDeleteBlock, billTotals } from "./service";
 
 const person = { select: { id: true, displayName: true, email: true } } as const;
 
@@ -29,12 +29,15 @@ export async function getBill(billId: string) {
         orderBy: [{ position: "asc" }, { createdAt: "asc" }],
         include: { splits: { include: { user: person } } },
       },
+      settlements: { select: { status: true, paidClaimedAt: true } },
     },
   });
   if (!bill) return null;
-  const { group, ...rest } = bill;
+  const { group, settlements, ...rest } = bill;
   return {
     ...rest,
+    /** Nobody has paid the payer yet, so anyone in the bill may delete it. */
+    canDelete: billDeleteBlock(settlements) === null,
     members: group.members.map((member) => member.user),
     /** The persistent group this bill is in; null for quick bills. */
     namedGroup: group.type === "PERSISTENT" ? { id: group.id, name: group.name } : null,
