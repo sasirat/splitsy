@@ -67,7 +67,7 @@ Core total: ~13–18 focused dev-days.
 - [ ] **S22** 2–3 friends on a real bill; collect feedback
 - [ ] **S23** Fix breakage; empty/error states; a11y pass
   - [x] Edit / delete items (a typo like ฿1200 couldn't be fixed) — anyone in the bill, while it's open; delete asks first
-  - Delete bills — found in the S21 walkthrough
+  - [x] Delete bills — anyone in the bill, until someone has paid the payer (a confirmed payment or an unconfirmed "I've paid" blocks it); a quick bill takes its hidden group with it. Trade-off accepted: a friend who owes can delete a settling bill before paying
   - Reopen a settling bill when someone forgot a dish (settle-up is one-way)
   - [x] a11y: split-sheet checkboxes have no accessible names
   - From the S22 friend test (2026-10-24):
